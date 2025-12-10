@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  preprocess:
+    build: ./services/preprocess
+    volumes:
+      - ./shared/data/raw:/workspace/shared/data/raw:ro
+      - ./shared/data/processed:/workspace/shared/data/processed
+      - ./shared/config:/workspace/shared/config
+      - ./shared/logs:/workspace/shared/logs
+    working_dir: /workspace/app
+    command: ["python", "scripts/run_preprocess.py"]
+
+  delan:
+    build: ./services/delan
+    depends_on:
+      - preprocess
+    volumes:
+      - ./shared/data/processed:/workspace/shared/data/processed:ro
+      - ./shared/models/delan:/workspace/shared/models/delan
+      - ./shared/config:/workspace/shared/config:ro
+      - ./shared/logs:/workspace/shared/logs
+    working_dir: /workspace/app
+    command: ["python", "scripts/run_delan.py"]
+
+  lstm:
+    build: ./services/lstm
+    depends_on:
+      - preprocess
+      - delan
+    volumes:
+      - ./shared/data/processed:/workspace/shared/data/processed:ro
+      - ./shared/models/delan:/workspace/shared/models/delan:ro
+      - ./shared/models/lstm:/workspace/shared/models/lstm
+      - ./shared/config:/workspace/shared/config:ro
+      - ./shared/logs:/workspace/shared/logs
+    working_dir: /workspace/app
+    command: ["python", "scripts/run_lstm.py"]
+
+  evaluation:
+    build: ./services/evaluation
+    depends_on:
+      - preprocess
+      - delan
+      - lstm
+    volumes:
+      - ./shared/data/processed:/workspace/shared/data/processed:ro
+      - ./shared/models/delan:/workspace/shared/models/delan:ro
+      - ./shared/models/lstm:/workspace/shared/models/lstm:ro
+      - ./shared/config:/workspace/shared/config:ro
+      - ./shared/logs:/workspace/shared/logs
+    working_dir: /workspace/app
+    command: ["python", "scripts/run_evaluation.py"]

@@ -1,0 +1,34 @@
+FROM nvidia/cuda:13.0.0-base-ubuntu22.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+SHELL ["/bin/bash", "-lc"]
+
+# Choose CUDA wheel channel for torch:
+#   cu124 is very common/stable
+#   cu130 exists too if you want to try it
+ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu124
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 python3-pip python3-dev python-is-python3 \
+    build-essential git ca-certificates \
+    libgl1 libglib2.0-0 \
+    libxkbcommon0 libxkbcommon-x11-0 \
+    libsm6 libxext6 libxrender1 \
+    libx11-6 libx11-xcb1 \
+    libxi6 libxtst6 \
+    libxcb1 libxcb-render0 libxcb-shm0 libxcb-xfixes0 libxcb-shape0 \
+    libxcb-randr0 libxcb-keysyms1 libxcb-image0 libxcb-icccm4 \
+    libxcb-render-util0 libxcb-xinerama0 libxcb-cursor0 \
+ && rm -rf /var/lib/apt/lists/*
+
+ENV PIP_NO_CACHE_DIR=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+RUN python3 -m pip install --upgrade pip setuptools wheel
+
+RUN python3 -m pip install torch torchvision torchaudio --index-url ${TORCH_INDEX_URL} \
+ && python3 -m pip install -U PyQt5
+
+WORKDIR /workspace
+CMD ["bash"]

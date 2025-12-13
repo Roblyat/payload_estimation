@@ -1,5 +1,3 @@
-version: "3.9"
-
 services:
   preprocess:
     build: ./services/preprocess
@@ -11,23 +9,58 @@ services:
     working_dir: /workspace/app
     command: ["python", "scripts/run_preprocess.py"]
 
-  delan:
-    build: ./services/delan
-    depends_on:
-      - preprocess
+  delan_jax:
+    # depends_on:
+      # - preprocess
+    build:
+      context: ./services/delan
+      dockerfile: Dockerfile.jax
+    gpus: all
+    environment:
+    - DISPLAY=${DISPLAY}
+    - QT_X11_NO_MITSHM=1
+    # - MPLBACKEND=Agg
+    # - QT_QPA_PLATFORM=offscreen
     volumes:
       - ./shared/data/processed:/workspace/shared/data/processed:ro
       - ./shared/models/delan:/workspace/shared/models/delan
       - ./shared/config:/workspace/shared/config:ro
       - ./shared/logs:/workspace/shared/logs
-    working_dir: /workspace/app
-    command: ["python", "scripts/run_delan.py"]
+      - ${DELAN_REPO}:/workspace/delan_repo
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    working_dir: /workspace/delan_repo
+    command: >
+      bash -lc "pip install -e /workspace/delan_repo && tail -f /dev/null"
+
+
+  delan_torch:
+    # depends_on:
+      # - preprocess  
+    build:
+      context: ./services/delan
+      dockerfile: Dockerfile.torch
+    gpus: all
+    environment:
+    - DISPLAY=${DISPLAY}
+    - QT_X11_NO_MITSHM=1
+    - MPLBACKEND=Agg
+    - QT_QPA_PLATFORM=offscreen    
+    volumes:
+      - ./shared/data/processed:/workspace/shared/data/processed:ro
+      - ./shared/models/delan:/workspace/shared/models/delan
+      - ./shared/config:/workspace/shared/config:ro
+      - ./shared/logs:/workspace/shared/logs
+      - ${DELAN_REPO}:/workspace/delan_repo
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    working_dir: /workspace/delan_repo
+    command: >
+      bash -lc "pip install -e /workspace/delan_repo && tail -f /dev/null"
 
   lstm:
     build: ./services/lstm
-    depends_on:
-      - preprocess
-      - delan
+    # depends_on:
+      # - preprocess
+      # - delan
     volumes:
       - ./shared/data/processed:/workspace/shared/data/processed:ro
       - ./shared/models/delan:/workspace/shared/models/delan:ro
@@ -39,10 +72,10 @@ services:
 
   evaluation:
     build: ./services/evaluation
-    depends_on:
-      - preprocess
-      - delan
-      - lstm
+    # depends_on:
+      # - preprocess
+      # - delan
+      # - lstm
     volumes:
       - ./shared/data/processed:/workspace/shared/data/processed:ro
       - ./shared/models/delan:/workspace/shared/models/delan:ro

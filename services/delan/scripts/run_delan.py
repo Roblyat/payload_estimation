@@ -1,11 +1,20 @@
 """
-Placeholder entrypoint for DeLaN training/inference.
-Consumes processed datasets from /workspace/shared/data/processed and writes
-checkpoints to /workspace/shared/models/delan.
+Entrypoint wrapper for the Deep Lagrangian Networks repo.
+The repository is cloned to /workspace/deep_lagrangian_networks and installed
+editable. Extend this script to call the training/eval routines you need and to
+save checkpoints into /workspace/shared/models/delan.
 """
 
+from pathlib import Path
+
+
 def main() -> None:
-    print("DeLaN stub: implement training loop and checkpoint export.")
+    repo = Path("/workspace/deep_lagrangian_networks")
+    print(f"DeLaN container ready. Repo at: {repo}")
+    if not repo.exists():
+        print("ERROR: Repository not found inside container.")
+    else:
+        print("TODO: implement training/eval invocation here.")
 
 
 if __name__ == "__main__":

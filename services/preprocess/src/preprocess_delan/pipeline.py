@@ -1,6 +1,6 @@
 from .io_csv import RawCSVLoader
 from .joints import JointSelector
-from .segment import TimeGapSegmenter
+from .segment import TimeGapSegmenter, FixedLengthSegmenter
 from .pivot import WidePivotBuilder
 from .dataset import TrajectoryDatasetBuilder, NPZDatasetWriter
 from .split import TrajectorySplitter
@@ -10,7 +10,12 @@ class DelanPreprocessPipeline:
         self.cfg = cfg
         self.loader = RawCSVLoader()
         self.selector = JointSelector(cfg.dof_joints, cfg.col_joint)
-        self.segmenter = TimeGapSegmenter(cfg.col_time, cfg.time_gap_seconds)
+
+        if cfg.segment_mode == "fixed_length":
+            self.segmenter = FixedLengthSegmenter(cfg.col_time, cfg.frames_per_trajectory)
+        else:
+            self.segmenter = TimeGapSegmenter(cfg.col_time, cfg.time_gap_seconds)
+            
         self.pivot = WidePivotBuilder(cfg)
         self.builder = TrajectoryDatasetBuilder(cfg, self.pivot)
         self.splitter = TrajectorySplitter(cfg.test_fraction, cfg.random_seed)

@@ -21,6 +21,12 @@ class DelanPreprocessConfig:
     col_acc: str = "Acceleration"
     col_tau: str = "Effort"
 
+    # segmentation
+    segment_mode: str = "fixed_length"   # "time_gap" or "fixed_length"
+    frames_per_trajectory: int = 75      # 75 frames ≈ ~200 traj for your file
+
+    time_gap_seconds: float = 0.25       # still available if you use "time_gap"
+
     # Trajectory inference (fallback if no explicit trajectory id column exists)
     time_gap_seconds: float = 0.25
 

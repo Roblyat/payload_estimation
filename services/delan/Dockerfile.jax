@@ -1,8 +1,6 @@
 FROM nvidia/cuda:13.0.0-base-ubuntu22.04
 
 ARG DEBIAN_FRONTEND=noninteractive
-# Torch wheels channel (cu124 is fine with your newer driver)
-ARG TORCH_INDEX_URL=https://download.pytorch.org/whl/cu124
 
 SHELL ["/bin/bash", "-lc"]
 
@@ -25,16 +23,11 @@ ENV PIP_NO_CACHE_DIR=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
-RUN python -m pip install --upgrade pip setuptools wheel
-
-# plotting (required by the example script)
-RUN python -m pip install -U matplotlib
-
-# Install torch because jax_example_DeLaN.py imports it
-RUN python -m pip install torch torchvision torchaudio --index-url ${TORCH_INDEX_URL}
-
-# JAX GPU + repo deps
-RUN python -m pip install -U "jax[cuda13]" dm-haiku optax PyQt5
-
 WORKDIR /workspace
+
+# Install python deps
+COPY requirements.jax.txt /workspace/requirements.jax.txt
+RUN python -m pip install --upgrade pip setuptools wheel \
+ && python -m pip install -r /workspace/requirements.jax.txt
+
 CMD ["bash"]

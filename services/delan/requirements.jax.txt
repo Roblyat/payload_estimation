@@ -1,0 +1,20 @@
+# Use PyPI as main index; add PyTorch wheel index as extra
+--extra-index-url https://download.pytorch.org/whl/cu124
+
+# plotting
+matplotlib
+
+# torch (needed by replay_memory.py import)
+torch
+torchvision
+torchaudio
+
+# JAX + ecosystem (CUDA 13 build)
+jax[cuda13]
+dm-haiku
+optax
+flax
+chex
+
+# Qt backend for interactive plotting (Qt5Agg)
+PyQt5

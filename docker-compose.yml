@@ -1,13 +1,19 @@
 services:
   preprocess:
     build: ./services/preprocess
+    environment:
+      RAW_CSV: /workspace/shared/data/raw/raw_data.csv
+      OUT_NPZ: /workspace/shared/data/processed/delan_ur5_dataset.npz
     volumes:
-      - ./shared/data/raw:/workspace/shared/data/raw:ro
-      - ./shared/data/processed:/workspace/shared/data/processed
-      - ./shared/config:/workspace/shared/config
-      - ./shared/logs:/workspace/shared/logs
-    working_dir: /workspace/app
-    command: ["python", "scripts/run_preprocess.py"]
+      - ${APE_PREPROCESS}:/workspace/preprocess
+      - ${APE_SHARED}/data/raw:/workspace/shared/data/raw:ro
+      - ${APE_SHARED}/data/processed:/workspace/shared/data/processed
+      - ${APE_SHARED}/config:/workspace/shared/config
+      - ${APE_SHARED}/logs:/workspace/shared/logs
+    working_dir: /workspace/preprocess
+    stdin_open: true
+    tty: true
+    # command: ["python", "scripts/run_preprocess.py"]
 
   delan_jax:
     # depends_on:
@@ -67,8 +73,8 @@ services:
       - ./shared/models/lstm:/workspace/shared/models/lstm
       - ./shared/config:/workspace/shared/config:ro
       - ./shared/logs:/workspace/shared/logs
-    working_dir: /workspace/app
-    command: ["python", "scripts/run_lstm.py"]
+    working_dir: /workspace
+    # command: ["python", "scripts/run_lstm.py"]
 
   evaluation:
     build: ./services/evaluation
@@ -77,10 +83,11 @@ services:
       # - delan
       # - lstm
     volumes:
+      - ${APE_EVALUATION}:/workspace/evaluation
       - ./shared/data/processed:/workspace/shared/data/processed:ro
       - ./shared/models/delan:/workspace/shared/models/delan:ro
       - ./shared/models/lstm:/workspace/shared/models/lstm:ro
       - ./shared/config:/workspace/shared/config:ro
       - ./shared/logs:/workspace/shared/logs
-    working_dir: /workspace/app
-    command: ["python", "scripts/run_evaluation.py"]
+    working_dir: /workspace/evaluation
+    # command: ["python", "scripts/run_evaluation.py"]

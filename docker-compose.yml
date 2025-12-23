@@ -3,7 +3,7 @@ services:
     build: ./services/preprocess
     environment:
       RAW_CSV: /workspace/shared/data/raw/raw_data.csv
-      OUT_NPZ: /workspace/shared/data/processed/delan_ur5_dataset.npz
+      OUT_NPZ: /workspace/shared/data/preprocessed/delan_ur5_dataset.npz
     volumes:
       - ${APE_PREPROCESS}:/workspace/preprocess
       - ${APE_SHARED}/data/raw:/workspace/shared/data/raw:ro
@@ -28,7 +28,8 @@ services:
     # - MPLBACKEND=Agg
     # - QT_QPA_PLATFORM=offscreen
     volumes:
-      - ${APE_SHARED}/data/processed:/workspace/shared/data/processed:ro
+      - ${APE_SHARED}/data/preprocessed:/workspace/shared/data/preprocessed:ro
+      - ${APE_SHARED}/data/processed:/workspace/shared/data/processed
       - ${APE_SHARED}/models/delan:/workspace/shared/models/delan
       - ${APE_SHARED}/config:/workspace/shared/config:ro
       - ${APE_SHARED}/logs:/workspace/shared/logs
@@ -63,10 +64,11 @@ services:
       bash -lc "pip install -e /workspace/delan_repo && tail -f /dev/null"
 
   lstm:
-    build: ./services/lstm
     # depends_on:
       # - preprocess
       # - delan
+    build: ./services/lstm
+    gpus: all
     volumes:
       - ./shared/data/processed:/workspace/shared/data/processed:ro
       - ./shared/models/delan:/workspace/shared/models/delan:ro

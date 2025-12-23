@@ -20,7 +20,7 @@ if __name__ == "__main__":
     cfg = DelanPreprocessConfig()
 
     raw_csv = os.environ.get("RAW_CSV", "/workspace/shared/data/raw/raw_data.csv")
-    out_npz = os.environ.get("OUT_NPZ", "/workspace/shared/data/processed/delan_ur5_dataset.npz")
+    out_npz = os.environ.get("OUT_NPZ", "/workspace/shared/data/preprocessed/delan_ur5_dataset.npz")
 
     pipe = DelanPreprocessPipeline(cfg)
     train, test = pipe.run(raw_csv_path=raw_csv, out_npz_path=out_npz)

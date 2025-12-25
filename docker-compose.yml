@@ -70,12 +70,15 @@ services:
     build: ./services/lstm
     gpus: all
     volumes:
-      - ./shared/data/processed:/workspace/shared/data/processed:ro
-      - ./shared/models/delan:/workspace/shared/models/delan:ro
-      - ./shared/models/lstm:/workspace/shared/models/lstm
-      - ./shared/config:/workspace/shared/config:ro
-      - ./shared/logs:/workspace/shared/logs
-    working_dir: /workspace
+      - ${APE_SHARED}/data/processed:/workspace/shared/data/processed:ro
+      - ${APE_SHARED}/models/delan:/workspace/shared/models/delan:ro
+      - ${APE_SHARED}/models/lstm:/workspace/shared/models/lstm
+      - ${APE_SHARED}/config:/workspace/shared/config:ro
+      - ${APE_SHARED}/logs:/workspace/shared/logs
+      - ${LSTM}:/workspace/lstm
+    working_dir: /workspace/lstm
+    stdin_open: true
+    tty: true
     # command: ["python", "scripts/run_lstm.py"]
 
   evaluation:

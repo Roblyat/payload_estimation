@@ -14,8 +14,36 @@ def rmse(y_true, y_pred):
 
 
 def per_joint_rmse(y_true, y_pred):
-    # returns (6,)
     return np.sqrt(np.mean((y_true - y_pred) ** 2, axis=0))
+
+
+def compute_x_scaler(X_train: np.ndarray, eps: float = 1e-8):
+    # X_train: (N, H, D)
+    flat = X_train.reshape(-1, X_train.shape[-1])  # (N*H, D)
+    mean = flat.mean(axis=0)
+    std = flat.std(axis=0)
+    std = np.where(std < eps, 1.0, std)
+    return mean.astype(np.float32), std.astype(np.float32), float(eps)
+
+
+def apply_x_scaler(X: np.ndarray, mean: np.ndarray, std: np.ndarray):
+    return ((X - mean[None, None, :]) / std[None, None, :]).astype(np.float32)
+
+
+def compute_y_scaler(Y_train: np.ndarray, eps: float = 1e-8):
+    # Y_train: (N, dof)
+    mean = Y_train.mean(axis=0)
+    std = Y_train.std(axis=0)
+    std = np.where(std < eps, 1.0, std)
+    return mean.astype(np.float32), std.astype(np.float32), float(eps)
+
+
+def apply_y_scaler(Y: np.ndarray, mean: np.ndarray, std: np.ndarray):
+    return ((Y - mean[None, :]) / std[None, :]).astype(np.float32)
+
+
+def invert_y_scaler(Y_scaled: np.ndarray, mean: np.ndarray, std: np.ndarray):
+    return (Y_scaled * std[None, :] + mean[None, :]).astype(np.float32)
 
 
 def main():
@@ -29,6 +57,7 @@ def main():
     ap.add_argument("--units", type=int, default=128)
     ap.add_argument("--dropout", type=float, default=0.2)
     ap.add_argument("--no_plots", action="store_true")
+    ap.add_argument("--eps", type=float, default=1e-8)
     args = ap.parse_args()
 
     tf.random.set_seed(args.seed)
@@ -50,19 +79,41 @@ def main():
     print("LSTM Residual Dataset:")
     print(f"  npz = {args.npz}")
     print(f"   H  = {H}")
-    print(f"  din = {feature_dim}  (expected 24)")
-    print(f" dout = {n_dof}        (expected 6)")
+    print(f"  din = {feature_dim}")
+    print(f" dout = {n_dof}")
     print(f"  X_train = {X_train.shape}, Y_train = {Y_train.shape}")
     print(f"  X_test  = {X_test.shape},  Y_test  = {Y_test.shape}")
     print("################################################")
 
-    # ---- Model (GfG-style, but output=6 instead of 1) ----
+    # ---------- Scalers (train-only) ----------
+    x_mean, x_std, x_eps = compute_x_scaler(X_train, eps=args.eps)
+    y_mean, y_std, y_eps = compute_y_scaler(Y_train, eps=args.eps)
+
+    scalers_path = os.path.join(args.out_dir, f"scalers_H{H}.npz")
+    np.savez(
+        scalers_path,
+        x_mean=x_mean, x_std=x_std, x_eps=np.float32(x_eps),
+        y_mean=y_mean, y_std=y_std, y_eps=np.float32(y_eps),
+        H=np.int32(H), feature_dim=np.int32(feature_dim), n_dof=np.int32(n_dof),
+    )
+    print(f"\nSaved scalers: {scalers_path}")
+    print(f"X mean/std shapes: {x_mean.shape}/{x_std.shape}")
+    print(f"Y mean/std shapes: {y_mean.shape}/{y_std.shape}")
+
+    # Apply normalization/scaling
+    X_train_n = apply_x_scaler(X_train, x_mean, x_std)
+    X_test_n  = apply_x_scaler(X_test,  x_mean, x_std)
+
+    Y_train_s = apply_y_scaler(Y_train, y_mean, y_std)
+    Y_test_s  = apply_y_scaler(Y_test,  y_mean, y_std)
+
+    # ---------- Model ----------
     model = Sequential()
     model.add(LSTM(units=args.units, return_sequences=True, input_shape=(H, feature_dim)))
     model.add(Dropout(args.dropout))
     model.add(LSTM(units=args.units))
     model.add(Dropout(args.dropout))
-    model.add(Dense(n_dof))  # predict residual torque vector (6)
+    model.add(Dense(n_dof))  # predict scaled residuals
 
     model.compile(optimizer="adam", loss="mse")
     model.summary()
@@ -74,32 +125,34 @@ def main():
     ]
 
     history = model.fit(
-        X_train, Y_train,
+        X_train_n, Y_train_s,
         epochs=args.epochs,
         batch_size=args.batch,
         validation_split=args.val_split,
-        shuffle=True,          # OK: each sample is already a window
+        shuffle=True,
         callbacks=callbacks,
         verbose=2
     )
 
-    # ---- Evaluate ----
-    Y_pred = model.predict(X_test, batch_size=args.batch, verbose=0).astype(np.float32)
+    # ---------- Evaluate (invert to physical units) ----------
+    Y_pred_s = model.predict(X_test_n, batch_size=args.batch, verbose=0).astype(np.float32)
+    Y_pred = invert_y_scaler(Y_pred_s, y_mean, y_std)
 
     total_rmse = rmse(Y_test, Y_pred)
     joint_rmse = per_joint_rmse(Y_test, Y_pred)
 
     print("\n################################################")
-    print("LSTM Residual Evaluation (test):")
+    print("LSTM Residual Evaluation (test, unscaled units):")
     print(f"Total RMSE: {total_rmse:.4f}")
     print("Per-joint RMSE:", " ".join([f"{x:.4f}" for x in joint_rmse]))
     print("################################################\n")
 
-    # Save predictions for later combination / analysis
+    # Save predictions for later
     np.savez(
         os.path.join(args.out_dir, "predictions_test.npz"),
         Y_test=Y_test,
         Y_pred=Y_pred,
+        Y_pred_scaled=Y_pred_s,
         H=np.int32(H),
         feature_dim=np.int32(feature_dim),
         n_dof=np.int32(n_dof),
@@ -107,13 +160,12 @@ def main():
     print(f"Saved predictions: {os.path.join(args.out_dir, 'predictions_test.npz')}")
     print(f"Saved best model:  {ckpt_path}")
 
-    # ---- Plots ----
+    # ---------- Plots ----------
     if not args.no_plots:
-        # 1) Training curve
         plt.figure(figsize=(10, 4), dpi=120)
         plt.plot(history.history["loss"], label="train")
         plt.plot(history.history["val_loss"], label="val")
-        plt.title("LSTM training loss")
+        plt.title("LSTM training loss (scaled residuals)")
         plt.xlabel("epoch")
         plt.ylabel("MSE")
         plt.grid(True, alpha=0.2)
@@ -123,7 +175,6 @@ def main():
         plt.savefig(out, dpi=150)
         print(f"Saved: {out}")
 
-        # 2) Residual GT vs Pred for each joint on test (first K samples)
         K = min(600, Y_test.shape[0])
         fig = plt.figure(figsize=(14, 8), dpi=120)
         for j in range(n_dof):
@@ -138,7 +189,6 @@ def main():
         out = os.path.join(args.out_dir, "residual_gt_vs_pred.png")
         plt.savefig(out, dpi=150)
         print(f"Saved: {out}")
-
         plt.close("all")
 
 

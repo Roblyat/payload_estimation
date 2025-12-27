@@ -4,6 +4,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
+def apply_x_scaler_feat(feat: np.ndarray, x_mean: np.ndarray, x_std: np.ndarray):
+    # feat: (T, D)
+    return ((feat - x_mean[None, :]) / x_std[None, :]).astype(np.float32)
+
+def invert_y_scaler(y_scaled: np.ndarray, y_mean: np.ndarray, y_std: np.ndarray):
+    return (y_scaled * y_std[None, :] + y_mean[None, :]).astype(np.float32)
 
 def build_windows(feat: np.ndarray, H: int) -> np.ndarray:
     """
@@ -60,6 +66,8 @@ def main():
     ap.add_argument("--max_plot_samples", type=int, default=800)
     ap.add_argument("--save_pred_npz", action="store_true",
                     help="Save per-trajectory predictions to NPZ in out_dir")
+    ap.add_argument("--scalers", required=True, help="scalers_H50.npz from training")
+
     args = ap.parse_args()
 
     os.makedirs(args.out_dir, exist_ok=True)
@@ -92,6 +100,12 @@ def main():
 
     model = tf.keras.models.load_model(args.model)
 
+    sc = np.load(args.scalers)
+    x_mean = sc["x_mean"].astype(np.float32)
+    x_std  = sc["x_std"].astype(np.float32)
+    y_mean = sc["y_mean"].astype(np.float32)
+    y_std  = sc["y_std"].astype(np.float32)
+    
     # Store per-trajectory predicted residuals aligned to original time
     r_hat_traj = []
     tau_rg_traj = []
@@ -119,9 +133,12 @@ def main():
             continue
 
         feat = np.concatenate([q, qd, qdd, tau_hat], axis=1).astype(np.float32)  # (T, 24)
-        X = build_windows(feat, H)  # (T-H+1, H, 24)
+        feat_n = apply_x_scaler_feat(feat, x_mean, x_std)
+        X = build_windows(feat_n, H)  # windows are normalized
 
-        r_hat_valid = model.predict(X, batch_size=args.batch, verbose=0).astype(np.float32)  # (T-H+1, 6)
+        r_hat_valid_scaled = model.predict(X, batch_size=args.batch, verbose=0).astype(np.float32)
+        r_hat_valid = invert_y_scaler(r_hat_valid_scaled, y_mean, y_std)  # back to physical units
+
 
         # Align predicted residuals to full timeline (first H-1 undefined)
         r_hat_full = np.full((T, n_dof), np.nan, dtype=np.float32)

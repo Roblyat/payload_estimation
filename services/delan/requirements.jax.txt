@@ -18,3 +18,5 @@ chex
 
 # Qt backend for interactive plotting (Qt5Agg)
 PyQt5
+
+dill

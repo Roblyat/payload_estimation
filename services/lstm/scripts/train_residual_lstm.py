@@ -58,6 +58,8 @@ def main():
     ap.add_argument("--dropout", type=float, default=0.2)
     ap.add_argument("--no_plots", action="store_true")
     ap.add_argument("--eps", type=float, default=1e-8)
+    ap.add_argument("--model_name", default="best.keras", help="Filename for the best model checkpoint inside out_dir (e.g. best_seed4_H50.keras)"
+)
     args = ap.parse_args()
 
     tf.random.set_seed(args.seed)
@@ -118,7 +120,7 @@ def main():
     model.compile(optimizer="adam", loss="mse")
     model.summary()
 
-    ckpt_path = os.path.join(args.out_dir, "best.keras")
+    ckpt_path = os.path.join(args.out_dir, args.model_name)
     callbacks = [
         EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True),
         ModelCheckpoint(ckpt_path, monitor="val_loss", save_best_only=True),

@@ -1,0 +1,11 @@
+run_name=delan_ur5_struct_seed4
+hp_preset=default
+hyper={'dataset': 'delan_ur5_struct_seed4', 'n_width': 64, 'n_depth': 2, 'n_minibatch': 512, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'tanh', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 2000, 'lagrangian_type': <function structured_lagrangian_fn at 0x75a8b099ce50>}
+npz=/workspace/shared/data/preprocessed/delan_ur5_dataset.npz
+ckpt=/workspace/shared/models/delan/delan_ur5_struct_seed4/delan_ur5_struct_seed4.jax
+seed=4
+model_type=structured
+dt=0.02439441835857372
+n_dof=6
+torque_mse=30.009117126464844
+time_per_sample=2.6572031457340572e-08

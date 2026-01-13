@@ -13,11 +13,12 @@ services:
     working_dir: /workspace/preprocess
     stdin_open: true
     tty: true
-    # command: ["python", "scripts/run_preprocess.py"]
+    # command: >
+      # bash -lc "pip install -e /workspace/preprocess && tail -f /dev/null"
 
   delan_jax:
-    # depends_on:
-      # - preprocess
+    depends_on:
+      - preprocess
     build:
       context: ./services/delan
       dockerfile: Dockerfile.jax
@@ -36,8 +37,10 @@ services:
       - ${DELAN_REPO}:/workspace/delan_repo
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
     working_dir: /workspace/delan_repo
-    command: >
-      bash -lc "pip install -e /workspace/delan_repo && tail -f /dev/null"
+    stdin_open: true
+    tty: true
+    # command: >
+      # bash -lc "pip install -e /workspace/delan_repo && tail -f /dev/null"
 
 
   delan_torch:
@@ -60,13 +63,15 @@ services:
       - ${DELAN_REPO}:/workspace/delan_repo
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
     working_dir: /workspace/delan_repo
-    command: >
-      bash -lc "pip install -e /workspace/delan_repo && tail -f /dev/null"
+    stdin_open: true
+    tty: true
+    # command: >
+    #   bash -lc "pip install -e /workspace/delan_repo && tail -f /dev/null"
 
   lstm:
-    # depends_on:
-      # - preprocess
-      # - delan
+    depends_on:
+      - preprocess
+      - delan_jax
     build: ./services/lstm
     gpus: all
     volumes:
@@ -83,10 +88,10 @@ services:
 
   evaluation:
     build: ./services/evaluation
-    # depends_on:
-      # - preprocess
-      # - delan
-      # - lstm
+    depends_on:
+      - preprocess
+      - delan_jax
+      - lstm
     volumes:
       - ${APE_EVALUATION}:/workspace/evaluation
       - ./shared/data/processed:/workspace/shared/data/processed:ro
@@ -95,4 +100,31 @@ services:
       - ./shared/config:/workspace/shared/config:ro
       - ./shared/logs:/workspace/shared/logs
     working_dir: /workspace/evaluation
+    stdin_open: true
+    tty: true
     # command: ["python", "scripts/run_evaluation.py"]
+
+  runner_gui:
+    depends_on:
+      - preprocess
+      - delan_jax
+      - lstm
+      - evaluation
+    build: ./services/runner_gui
+    environment:
+      - APE_PE=${APE_PE}
+      - APE_SHARED=${APE_SHARED}
+      - APE_PREPROCESS=${APE_PREPROCESS}
+      - APE_EVALUATION=${APE_EVALUATION}
+      - LSTM=${LSTM}
+      - DELAN_REPO=${DELAN_REPO}
+      - DISPLAY=${DISPLAY}
+      - STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
+      - STREAMLIT_SERVER_HEADLESS=true
+    volumes:
+      - ${APE_PE}:/workspace:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${APE_SHARED}:/workspace/shared
+    ports:
+      - "8501:8501"
+    working_dir: /app

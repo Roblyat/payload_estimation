@@ -2,6 +2,9 @@ import os
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
+import json
+import io
+from datetime import datetime
 
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
@@ -87,6 +90,45 @@ def main():
     print(f"  X_test  = {X_test.shape},  Y_test  = {Y_test.shape}")
     print("################################################")
 
+    # ---------- Run metadata / metrics logging ----------
+    run_ts = datetime.now().isoformat(timespec="seconds")
+    metrics_path = os.path.join(args.out_dir, f"metrics_train_test_H{H}.json")
+
+    metrics = {
+        "timestamp": run_ts,
+        "npz": args.npz,
+        "out_dir": args.out_dir,
+        "H": H,
+        "feature_dim": feature_dim,
+        "n_dof": n_dof,
+        "shapes": {
+            "X_train": list(X_train.shape),
+            "Y_train": list(Y_train.shape),
+            "X_test": list(X_test.shape),
+            "Y_test": list(Y_test.shape),
+        },
+        "args": {
+            "epochs": args.epochs,
+            "batch": args.batch,
+            "val_split": args.val_split,
+            "seed": args.seed,
+            "units": args.units,
+            "dropout": args.dropout,
+            "eps": args.eps,
+            "model_name": args.model_name,
+        },
+        "dataset_stats": {
+            "Y_train_mean": Y_train.mean(axis=0).tolist(),
+            "Y_train_std": Y_train.std(axis=0).tolist(),
+            "Y_train_min": Y_train.min(axis=0).tolist(),
+            "Y_train_max": Y_train.max(axis=0).tolist(),
+            "Y_test_mean": Y_test.mean(axis=0).tolist(),
+            "Y_test_std": Y_test.std(axis=0).tolist(),
+            "Y_test_min": Y_test.min(axis=0).tolist(),
+            "Y_test_max": Y_test.max(axis=0).tolist(),
+        },
+    }
+
     # ---------- Scalers (train-only) ----------
     x_mean, x_std, x_eps = compute_x_scaler(X_train, eps=args.eps)
     y_mean, y_std, y_eps = compute_y_scaler(Y_train, eps=args.eps)
@@ -101,6 +143,16 @@ def main():
     print(f"\nSaved scalers: {scalers_path}")
     print(f"X mean/std shapes: {x_mean.shape}/{x_std.shape}")
     print(f"Y mean/std shapes: {y_mean.shape}/{y_std.shape}")
+
+    metrics["scalers"] = {
+        "scalers_path": scalers_path,
+        "x_eps": float(x_eps),
+        "y_eps": float(y_eps),
+        "x_mean_minmax": [float(x_mean.min()), float(x_mean.max())],
+        "x_std_minmax": [float(x_std.min()), float(x_std.max())],
+        "y_mean": y_mean.tolist(),
+        "y_std": y_std.tolist(),
+    }
 
     # Apply normalization/scaling
     X_train_n = apply_x_scaler(X_train, x_mean, x_std)
@@ -118,7 +170,25 @@ def main():
     model.add(Dense(n_dof))  # predict scaled residuals
 
     model.compile(optimizer="adam", loss="mse")
-    model.summary()
+
+    # Capture model summary text for the metrics file
+    buf = io.StringIO()
+
+    # NEW (accept extra kwargs)
+    def _summary_print(s, **kwargs):
+        buf.write(s + "\n")
+
+    model.summary(print_fn=_summary_print)
+
+    model_summary_txt = buf.getvalue()
+    print(model_summary_txt)  # keep showing it in container logs
+
+    metrics["model"] = {
+        "summary": model_summary_txt,
+        "optimizer": "adam",
+        "loss": "mse",
+        "params": int(model.count_params()),
+    }
 
     ckpt_path = os.path.join(args.out_dir, args.model_name)
     callbacks = [
@@ -136,12 +206,60 @@ def main():
         verbose=2
     )
 
+    # ---------- Training history metrics ----------
+    train_loss = history.history.get("loss", [])
+    val_loss = history.history.get("val_loss", [])
+    best_epoch = int(np.argmin(val_loss) + 1) if len(val_loss) > 0 else None
+    best_val = float(np.min(val_loss)) if len(val_loss) > 0 else None
+
+    metrics["train"] = {
+        "epochs_ran": int(len(train_loss)),
+        "best_epoch": best_epoch,
+        "best_val_loss": best_val,
+        "final_train_loss": float(train_loss[-1]) if len(train_loss) > 0 else None,
+        "final_val_loss": float(val_loss[-1]) if len(val_loss) > 0 else None,
+    }
+
+    # Save full history to CSV for plotting/inspection
+    hist_csv = os.path.join(args.out_dir, f"train_history_H{H}.csv")
+    np.savetxt(
+        hist_csv,
+        np.column_stack([
+            np.arange(1, len(train_loss) + 1),
+            np.array(train_loss, dtype=np.float32),
+            np.array(val_loss, dtype=np.float32) if len(val_loss) == len(train_loss) else np.full(len(train_loss), np.nan),
+        ]),
+        delimiter=",",
+        header="epoch,loss,val_loss",
+        comments="",
+    )
+    metrics["train"]["history_csv"] = hist_csv
+
     # ---------- Evaluate (invert to physical units) ----------
     Y_pred_s = model.predict(X_test_n, batch_size=args.batch, verbose=0).astype(np.float32)
     Y_pred = invert_y_scaler(Y_pred_s, y_mean, y_std)
 
     total_rmse = rmse(Y_test, Y_pred)
     joint_rmse = per_joint_rmse(Y_test, Y_pred)
+
+    # ---------- Eval metrics (unscaled) ----------
+    mse_total = float(np.mean((Y_test - Y_pred) ** 2))
+    mse_per_joint = np.mean((Y_test - Y_pred) ** 2, axis=0).astype(np.float32)
+
+    metrics["eval_test"] = {
+        "rmse_total": float(total_rmse),
+        "rmse_per_joint": joint_rmse.astype(np.float32).tolist(),
+        "mse_total": mse_total,
+        "mse_per_joint": mse_per_joint.tolist(),
+        "predictions_npz": os.path.join(args.out_dir, "predictions_test.npz"),
+        "best_model_path": os.path.join(args.out_dir, args.model_name),
+    }
+
+    # Write metrics JSON (single file with everything)
+    with open(metrics_path, "w") as f:
+        json.dump(metrics, f, indent=2)
+    print(f"Saved metrics JSON: {metrics_path}")
+
 
     print("\n################################################")
     print("LSTM Residual Evaluation (test, unscaled units):")

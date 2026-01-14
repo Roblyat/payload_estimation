@@ -84,7 +84,6 @@ services:
     working_dir: /workspace/lstm
     stdin_open: true
     tty: true
-    # command: ["python", "scripts/run_lstm.py"]
 
   evaluation:
     build: ./services/evaluation
@@ -92,17 +91,20 @@ services:
       - preprocess
       - delan_jax
       - lstm
+    gpus: all
+    environment:
+      - MPLBACKEND=Agg
     volumes:
       - ${APE_EVALUATION}:/workspace/evaluation
-      - ./shared/data/processed:/workspace/shared/data/processed:ro
-      - ./shared/models/delan:/workspace/shared/models/delan:ro
-      - ./shared/models/lstm:/workspace/shared/models/lstm:ro
-      - ./shared/config:/workspace/shared/config:ro
-      - ./shared/logs:/workspace/shared/logs
+      - ${APE_SHARED}/data/processed:/workspace/shared/data/processed:ro
+      - ${APE_SHARED}/models/delan:/workspace/shared/models/delan:ro
+      - ${APE_SHARED}/models/lstm:/workspace/shared/models/lstm #my :ro but then need to copy lstm model in combined_evaluation.py -> see comment at bottom
+      - ${APE_SHARED}/evaluation:/workspace/shared/evaluation
+      - ${APE_SHARED}/config:/workspace/shared/config:ro
+      - ${APE_SHARED}/logs:/workspace/shared/logs
     working_dir: /workspace/evaluation
     stdin_open: true
     tty: true
-    # command: ["python", "scripts/run_evaluation.py"]
 
   runner_gui:
     depends_on:
@@ -128,3 +130,14 @@ services:
     ports:
       - "8501:8501"
     working_dir: /app
+
+# in combined_evaluation.py
+# replace: model = tf.keras.models.load_model(args.model)
+# with:
+## Keras may open .keras in r+b; if models dir is mounted :ro, copy to writable out_dir first
+ # local_model_path = os.path.join(args.out_dir, os.path.basename(args.model))
+ # if not os.path.exists(local_model_path):
+ #     shutil.copy2(args.model, local_model_path)
+ # 
+ # model = tf.keras.models.load_model(local_model_path, compile=False)
+ # 

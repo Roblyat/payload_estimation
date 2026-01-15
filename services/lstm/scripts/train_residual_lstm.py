@@ -73,6 +73,9 @@ def main():
     d = np.load(args.npz)
     X_train = d["X_train"].astype(np.float32)  # (N, H, 24)
     Y_train = d["Y_train"].astype(np.float32)  # (N, 6)
+    if X_train.size == 0 or Y_train.size == 0:
+        raise RuntimeError("Empty training set (X_train/Y_train). Your window NPZ has 0 samples.")
+
     X_test  = d["X_test"].astype(np.float32)
     Y_test  = d["Y_test"].astype(np.float32)
 

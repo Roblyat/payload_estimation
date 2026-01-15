@@ -10,6 +10,7 @@ services:
       - ${APE_SHARED}/data/processed:/workspace/shared/data/processed
       - ${APE_SHARED}/config:/workspace/shared/config
       - ${APE_SHARED}/logs:/workspace/shared/logs
+      - ${APE_SHARED}/src:/workspace/shared/src:ro
     working_dir: /workspace/preprocess
     stdin_open: true
     tty: true
@@ -34,6 +35,7 @@ services:
       - ${APE_SHARED}/models/delan:/workspace/shared/models/delan
       - ${APE_SHARED}/config:/workspace/shared/config:ro
       - ${APE_SHARED}/logs:/workspace/shared/logs
+      - ${APE_SHARED}/src:/workspace/shared/src:ro
       - ${DELAN_REPO}:/workspace/delan_repo
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
     working_dir: /workspace/delan_repo
@@ -60,6 +62,7 @@ services:
       - ./shared/models/delan:/workspace/shared/models/delan
       - ./shared/config:/workspace/shared/config:ro
       - ./shared/logs:/workspace/shared/logs
+      - ${APE_SHARED}/src:/workspace/shared/src:ro
       - ${DELAN_REPO}:/workspace/delan_repo
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
     working_dir: /workspace/delan_repo
@@ -80,6 +83,7 @@ services:
       - ${APE_SHARED}/models/lstm:/workspace/shared/models/lstm
       - ${APE_SHARED}/config:/workspace/shared/config:ro
       - ${APE_SHARED}/logs:/workspace/shared/logs
+      - ${APE_SHARED}/src:/workspace/shared/src:ro
       - ${LSTM}:/workspace/lstm
     working_dir: /workspace/lstm
     stdin_open: true
@@ -102,6 +106,7 @@ services:
       - ${APE_SHARED}/evaluation:/workspace/shared/evaluation
       - ${APE_SHARED}/config:/workspace/shared/config:ro
       - ${APE_SHARED}/logs:/workspace/shared/logs
+      - ${APE_SHARED}/src:/workspace/shared/src:ro
     working_dir: /workspace/evaluation
     stdin_open: true
     tty: true

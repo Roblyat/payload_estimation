@@ -1,0 +1,69 @@
+{
+  "timestamp": "2026-01-15T18:50:23",
+  "run_name": "delan_ur5_B__delan_struct_s4_ep500",
+  "model_type": "structured",
+  "hp_preset": "default",
+  "npz": "/workspace/shared/data/preprocessed/delan_ur5_dataset.npz",
+  "model_dir": "/workspace/shared/models/delan/delan_ur5_B__delan_struct_s4_ep500",
+  "ckpt_path": "/workspace/shared/models/delan/delan_ur5_B__delan_struct_s4_ep500/delan_ur5_B__delan_struct_s4_ep500.jax",
+  "seed": 4,
+  "dt": 0.02439441835857372,
+  "n_dof": 6,
+  "hyper": {
+    "dataset": "delan_ur5_B__delan_struct_s4_ep500",
+    "n_width": 64,
+    "n_depth": 2,
+    "n_minibatch": 512,
+    "diagonal_epsilon": 0.1,
+    "diagonal_shift": 2.0,
+    "activation": "tanh",
+    "learning_rate": 0.0001,
+    "weight_decay": 1e-05,
+    "max_epoch": 2000,
+    "lagrangian_type": "structured_lagrangian_fn"
+  },
+  "args": {
+    "render": 0,
+    "eval_every": 200,
+    "eval_n": 0
+  },
+  "dataset": {
+    "train_trajectories": 164,
+    "test_trajectories": 41,
+    "train_samples": 12251,
+    "test_samples": 3075
+  },
+  "train": {
+    "epochs_ran": 500,
+    "history_points": 11,
+    "elbow_points": 3
+  },
+  "eval_test": {
+    "torque_mse": 22.108064651489258,
+    "torque_rmse": 4.701921378701399,
+    "torque_mse_per_joint": [
+      6.829409599304199,
+      121.43087005615234,
+      3.427934169769287,
+      0.5961791276931763,
+      0.3538374900817871,
+      0.01016794890165329
+    ],
+    "torque_rmse_per_joint": [
+      2.613313913345337,
+      11.019567489624023,
+      1.8514680862426758,
+      0.7721263766288757,
+      0.5948424339294434,
+      0.10083624720573425
+    ],
+    "time_per_sample_s": 3.3970731518768926e-08,
+    "hz": 29437105.275389705
+  },
+  "artifacts": {
+    "train_history_csv": "/workspace/shared/models/delan/delan_ur5_B__delan_struct_s4_ep500/delan_ur5_B__delan_struct_s4_ep500__train_history.csv",
+    "loss_curve_png": "/workspace/shared/models/delan/delan_ur5_B__delan_struct_s4_ep500/delan_ur5_B__delan_struct_s4_ep500__loss_curve.png",
+    "loss_components_png": "/workspace/shared/models/delan/delan_ur5_B__delan_struct_s4_ep500/delan_ur5_B__delan_struct_s4_ep500__loss_components.png",
+    "elbow_png": "/workspace/shared/models/delan/delan_ur5_B__delan_struct_s4_ep500/delan_ur5_B__delan_struct_s4_ep500__elbow_train_vs_test.png"
+  }
+}

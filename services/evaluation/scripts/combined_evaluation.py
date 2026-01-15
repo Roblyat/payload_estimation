@@ -4,6 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
 
+import sys
+sys.path.append("/workspace/shared/src")
+from feature_builders import build_features, FEATURE_MODES
+
 def apply_x_scaler_feat(feat: np.ndarray, x_mean: np.ndarray, x_std: np.ndarray):
     # feat: (T, D)
     return ((feat - x_mean[None, :]) / x_std[None, :]).astype(np.float32)
@@ -67,6 +71,8 @@ def main():
     ap.add_argument("--save_pred_npz", action="store_true",
                     help="Save per-trajectory predictions to NPZ in out_dir")
     ap.add_argument("--scalers", required=True, help="scalers_H50.npz from training")
+    ap.add_argument("--features", type=str, default="full", choices=list(FEATURE_MODES),
+        help="Feature mode used for LSTM input windows (must match training).",)
 
     args = ap.parse_args()
 
@@ -85,7 +91,14 @@ def main():
 
     n_traj = len(q_list)
     n_dof = int(np.asarray(q_list[0]).shape[1])
-    feature_dim = 4 * n_dof
+    feature_dim = int(build_features(
+        np.asarray(q_list[0], dtype=np.float32),
+        np.asarray(qd_list[0], dtype=np.float32),
+        np.asarray(qdd_list[0], dtype=np.float32),
+        np.asarray(tau_hat_list[0], dtype=np.float32),
+        mode=args.features
+    ).shape[1])
+
 
     print("################################################")
     print("Evaluate & Combine")
@@ -132,7 +145,7 @@ def main():
             tau_rg_traj.append(np.full((T, n_dof), np.nan, dtype=np.float32))
             continue
 
-        feat = np.concatenate([q, qd, qdd, tau_hat], axis=1).astype(np.float32)  # (T, 24)
+        feat = build_features(q, qd, qdd, tau_hat, mode=args.features)  # (T, D)
         feat_n = apply_x_scaler_feat(feat, x_mean, x_std)
         X = build_windows(feat_n, H)  # windows are normalized
 

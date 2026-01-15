@@ -28,6 +28,13 @@ BASE_PROCESSED = "/workspace/shared/data/processed"
 BASE_MODELS_DELAN = "/workspace/shared/models/delan"
 BASE_MODELS_LSTM = "/workspace/shared/models/lstm"
 BASE_EVALUATION = "/workspace/shared/evaluation"
+FEATURE_MODES = ["full", "tau_hat", "state", "state_tauhat"]
+FEATURE_HELP = {
+    "full": "x_k = [q, qd, qdd, tau_hat] (dim=24)",
+    "tau_hat": "x_k = [tau_hat] (dim=6)",
+    "state": "x_k = [q, qd, qdd] (dim=18)",
+    "state_tauhat": "x_k = [qd, qdd, tau_hat] (dim=18)",
+}
 
 COMPOSE = "docker compose -p payload_estimation --project-directory /workspace --env-file /workspace/.env -f /workspace/docker-compose.yml"
 
@@ -116,7 +123,7 @@ with tab_controls:
     # ----------------------------
     st.header("1) Preprocess")
 
-    p_col1, p_col2, p_col3 = st.columns([2.2, 1.0, 1.2])
+    p_col1, p_col2, p_col3, p_col4 = st.columns([2.0, 0.8, 1.2, 1.2])
 
     with p_col1:
         dataset_name = st.text_input(
@@ -142,15 +149,25 @@ with tab_controls:
         )
 
     with p_col3:
+        feature_mode = st.selectbox(
+            "LSTM features",
+            FEATURE_MODES,
+            index=0,
+            help="Which per-timestep features to use for LSTM windowing + combined evaluation.\n"
+                + "\n".join([f"{k}: {v}" for k, v in FEATURE_HELP.items()]),
+        )
+
+    with p_col4:
         pad_button()
         build_delan_placeholder = st.button("Build DeLaN dataset (pseudo)", use_container_width=True)
+
 
     # Filenames (textbox style: base path in label, filename in input)
     base_id = f"{dataset_name}__{run_tag}"
 
     # File name textboxes (base path shown in label)
     default_delan_npz_name = f"delan_{dataset_name}_dataset.npz"
-    default_windows_npz_name = f"{base_id}__lstm_windows_H{H}.npz"
+    default_windows_npz_name = f"{dataset_name}__{run_tag}__lstm_windows_H{H}__feat_{feature_mode}.npz"
 
     delan_npz_name = st.text_input(
         f"DeLaN dataset ({BASE_PREPROCESSED}/)",
@@ -457,7 +474,7 @@ with tab_controls:
         seed_name   = int(st.session_state.get("lstm_seed", int(seed)))
 
         default_lstm_dir_name = (
-            f"{base_id}__{delan_tag}__lstm_s{seed_name}_H{H}_ep{epochs_name}_b{batch_name}_u{units_name}_do{do_tag}"
+            f"{base_id}__{delan_tag}__feat_{feature_mode}__lstm_s{seed_name}_H{H}_ep{epochs_name}_b{batch_name}_u{units_name}_do{do_tag}"
         )
 
         lstm_dir_name = st.text_input(
@@ -549,9 +566,11 @@ with tab_controls:
                 f"\"python3 scripts/build_lstm_windows.py "
                 f"--in_npz {res_out} "
                 f"--out_npz {win_out} "
-                f"--H {H}"
+                f"--H {H} "
+                f"--features {feature_mode}"
                 f"\""
             )
+
 
     # NEW: separate seed for LSTM (do not reuse DeLaN seed implicitly)
     lstm_seed = st.number_input(
@@ -631,9 +650,11 @@ with tab_controls:
                 f"--out_dir {eval_out} "
                 f"--H {H} "
                 f"--split {split} "
+                f"--features {feature_mode} "
                 f"--save_pred_npz"
                 f"\""
             )
+
 
     with e_col3:
         pass
@@ -649,5 +670,6 @@ with tab_controls:
                 "lstm_model_path": lstm_model_path,
                 "lstm_scalers_path": lstm_scalers_path,
                 "eval_out": eval_out,
+                "feature_mode": feature_mode,
             }
         )

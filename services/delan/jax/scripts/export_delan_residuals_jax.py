@@ -8,6 +8,13 @@ import jax.numpy as jnp
 import haiku as hk
 import functools
 
+import sys
+
+# --- NEW: allow importing deep_lagrangian_networks from the submodule mount ---
+DELAN_REPO_DIR = os.environ.get("DELAN_REPO_DIR", "/workspace/delan_repo")
+if DELAN_REPO_DIR not in sys.path:
+    sys.path.insert(0, DELAN_REPO_DIR)
+
 import deep_lagrangian_networks.jax_DeLaN_model as delan
 from deep_lagrangian_networks.utils import activations
 

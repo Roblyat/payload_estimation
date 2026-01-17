@@ -421,7 +421,7 @@ with tab_controls:
 
             run(
                 f"{COMPOSE} exec -T delan_jax bash -lc "
-                f"\"python3 -m deep_lagrangian_networks.rbyt_train_delan_jax "
+                f"\"python3 /workspace/delan_jax/scripts/rbyt_train_delan_jax.py "
                 f"--npz {npz_in} "
                 f"-t {model_type} "
                 f"-s {seed} "
@@ -432,12 +432,11 @@ with tab_controls:
                 f"\""
             )
 
-
     with d_btn2:
         if st.button("Export residuals", use_container_width=True):
             run(
                 f"{COMPOSE} exec -T delan_jax bash -lc "
-                f"\"python3 -m deep_lagrangian_networks.export_delan_residuals_jax "
+                f"\"python3 /workspace/delan_jax/scripts/export_delan_residuals_jax.py "
                 f"--npz_in {npz_in} "
                 f"--ckpt {ckpt} "
                 f"--out {res_out}"

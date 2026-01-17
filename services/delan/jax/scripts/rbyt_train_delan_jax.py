@@ -25,19 +25,22 @@ def _init_matplotlib(render: bool):
         print(f"[warn] Matplotlib disabled: {e}")
         return None
 
-import deep_lagrangian_networks.jax_DeLaN_model as delan
-from deep_lagrangian_networks.replay_memory import ReplayMemory
-from deep_lagrangian_networks.utils import init_env, activations, load_npz_trajectory_dataset
+import sys, os
 
-import os
-os.environ['XLA_PYTHON_CLIENT_MEM_FRACTION'] = '0.4'
+DELAN_REPO_DIR = os.environ.get("DELAN_REPO_DIR", "/workspace/delan_repo")
+DELAN_COMMON_SRC = "/workspace/delan_src"      # <— NEW mount (services/delan/src)
+DELAN_JAX_SRC = "/workspace/delan_jax/src"     # optional, if you later add jax-only helpers
 
-import sys
-DELAN_SRC = "/workspace/delan_jax/src"
-if DELAN_SRC not in sys.path:
-    sys.path.append(DELAN_SRC)
+for p in [DELAN_COMMON_SRC, DELAN_JAX_SRC, DELAN_REPO_DIR]:
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
 from delan_plots import DelanPlotter
+from load_npz_dataset import load_npz_trajectory_dataset
+
+import deep_lagrangian_networks.jax_DeLaN_model as delan
+from deep_lagrangian_networks.replay_memory import ReplayMemory
+from deep_lagrangian_networks.utils import init_env, activations
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -376,6 +379,10 @@ if __name__ == "__main__":
             print(f"  [eval] test_mse={test_mse:.3e}  (n={qj.shape[0]})")
 
     if save_model:
+        with open(ckpt_path, "wb") as f:
+            pickle.dump({"epoch": epoch_i, "hyper": hyper, "params": params, "seed": seed}, f)
+        print(f"Saved DeLaN checkpoint: {ckpt_path}")
+        
         # ---- Train artifacts (plots + csv) via helper ----
         # Always write CSV if you want (even if save_model==0), otherwise guard it.
         csv_path = os.path.join(model_dir, f"{run_name}__train_history.csv")

@@ -37,6 +37,7 @@ services:
       - ${APE_SHARED}/logs:/workspace/shared/logs
       - ${APE_SHARED}/src:/workspace/shared/src:ro
       - ${DELAN_REPO}:/workspace/delan_repo
+      - ${APE_PE}/services/delan_jax:/workspace/delan_jax
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
     working_dir: /workspace/delan_repo
     stdin_open: true

@@ -106,8 +106,10 @@ def main():
         n_dof=np.int32(n_dof),
         feature_dim=np.int32(feature_dim_val),
         feature_mode=np.str_(args.features),
+        residual_in_npz=np.str_(args.in_npz),
     )
 
+    print(f"Residual input: {args.in_npz}")
     print(f"Saved: {args.out_npz}")
     print(f"H={args.H}, n_dof={n_dof}, feature_dim={feature_dim_val}")
     print(f"X_train: {X_train.shape}  Y_train: {Y_train.shape}")

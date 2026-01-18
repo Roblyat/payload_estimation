@@ -3,6 +3,7 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
+import json
 
 import sys
 sys.path.append("/workspace/shared/src")
@@ -214,7 +215,43 @@ def main():
         f.write("delan_joint_rmse=" + " ".join(map(str, delan_joint.tolist())) + "\n")
         f.write("res_joint_rmse=" + " ".join(map(str, r_joint.tolist())) + "\n")
         f.write("rg_joint_rmse=" + " ".join(map(str, rg_joint.tolist())) + "\n")
+        f.write(f"feature_mode={args.features}\n")
+        f.write(f"residual_npz={args.residual_npz}\n")
+        f.write(f"lstm_model={args.model}\n")
+        f.write(f"lstm_scalers={args.scalers}\n")
+
     print(f"Saved: {metrics_path}")
+
+        # ---- Save metrics JSON (same content, structured) ----
+    metrics_json_path = os.path.join(args.out_dir, f"metrics_{split}_H{H}.json")
+
+    metrics_json = {
+        "split": split,
+        "H": int(H),
+        "n_dof": int(n_dof),
+        "feature_mode": args.features,
+        "paths": {
+            "residual_npz": args.residual_npz,
+            "lstm_model": args.model,
+            "lstm_scalers": args.scalers,
+        },
+        "metrics": {
+            "delan_mse": float(delan_mse),
+            "delan_rmse": float(delan_rmse),
+            "res_mse": float(r_mse),
+            "res_rmse": float(r_rmse),
+            "rg_mse": float(rg_mse),
+            "rg_rmse": float(rg_rmse),
+            "delan_joint_rmse": [float(x) for x in delan_joint.tolist()],
+            "res_joint_rmse": [float(x) for x in r_joint.tolist()],
+            "rg_joint_rmse": [float(x) for x in rg_joint.tolist()],
+        },
+    }
+
+    with open(metrics_json_path, "w") as f:
+        json.dump(metrics_json, f, indent=2)
+
+    print(f"Saved: {metrics_json_path}")
 
     # ---- Optional save predictions ----
     if args.save_pred_npz:

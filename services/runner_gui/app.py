@@ -626,8 +626,9 @@ with tab_controls:
     st.header("4) Evaluate + Combine (DeLaN + LSTM)")
 
     eval_out = f"{BASE_EVALUATION}/{lstm_dir_name}"
+    metrics_out = f"{BASE_EVALUATION}/_metrics_plots"   # NEW: aggregated plots live here
 
-    e_col1, e_col2, e_col3 = st.columns([1.2, 1.2, 6.0])
+    e_col1, e_col2, e_col3 = st.columns([1.2, 1.2, 1.2])
 
     with e_col1:
         split = st.selectbox(
@@ -636,7 +637,7 @@ with tab_controls:
             index=0,
             help="Which split to evaluate on (reads from residual trajectory NPZ).",
         )
-
+        
     with e_col2:
         pad_button()
         if st.button("Evaluate + combine", use_container_width=True):
@@ -654,9 +655,16 @@ with tab_controls:
                 f"\""
             )
 
-
     with e_col3:
-        pass
+        pad_button()
+        if st.button("Metrics plots", use_container_width=True):   # NEW BUTTON
+            run(
+                f"{COMPOSE} exec -T evaluation bash -lc "
+                f"\"python3 scripts/metrics_boxplots.py "
+                f"--eval_root {BASE_EVALUATION} "
+                f"--out_dir {metrics_out} "
+                f"\""
+            )
 
     with st.expander("Resolved paths (debug)"):
         st.write(
@@ -670,5 +678,6 @@ with tab_controls:
                 "lstm_scalers_path": lstm_scalers_path,
                 "eval_out": eval_out,
                 "feature_mode": feature_mode,
+                "metrics_out": metrics_out,   # NEW
             }
         )

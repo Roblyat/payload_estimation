@@ -237,8 +237,11 @@ if __name__ == "__main__":
 
     n_dof = train_qp.shape[-1]
 
+    npz_path = args.npz
+    npz_name = os.path.basename(npz_path)
+
     print("\n\n################################################")
-    print("Dataset:")
+    print(f"Dataset: {npz_name}")
     print(f"  npz = {args.npz}")
     print(f"   dt ≈ {dt}")
     print(f"  dof = {n_dof}")
@@ -251,6 +254,10 @@ if __name__ == "__main__":
     metrics["n_dof"] = int(n_dof)
     metrics["dt"] = float(dt)
     metrics["dataset"] = {
+        "npz": npz_path,
+        "dataset_name": npz_name,
+        "dt": float(dt),
+        "dof": int(n_dof),
         "train_trajectories": int(len(train_labels)),
         "test_trajectories": int(len(test_labels)),
         "train_samples": int(train_qp.shape[0]),

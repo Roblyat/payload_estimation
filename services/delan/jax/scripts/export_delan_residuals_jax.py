@@ -1,5 +1,11 @@
 import argparse
 import os
+import json
+import io
+import time
+import traceback
+import contextlib
+
 import dill as pickle
 import numpy as np
 
@@ -18,6 +24,19 @@ if DELAN_REPO_DIR not in sys.path:
 import deep_lagrangian_networks.jax_DeLaN_model as delan
 from deep_lagrangian_networks.utils import activations
 
+class _Tee(io.TextIOBase):
+    """Write to two streams (console + buffer)."""
+    def __init__(self, a, b):
+        self.a = a
+        self.b = b
+    def write(self, s):
+        self.a.write(s)
+        self.a.flush()
+        self.b.write(s)
+        return len(s)
+    def flush(self):
+        self.a.flush()
+        self.b.flush()
 
 def load_traj_npz(npz_path: str):
     """
@@ -98,78 +117,166 @@ def main():
                     help="XLA memory fraction (default 0.4)")
     args = ap.parse_args()
 
+    # --- NEW: structured output folder next to the requested NPZ ---
+    requested_out = args.out  # keep old CLI behavior as "canonical" path
+    if requested_out.endswith(".npz"):
+        base = os.path.basename(requested_out)[:-4]  # strip .npz
+        parent = os.path.dirname(requested_out)
+        out_dir = os.path.join(parent, base)
+        os.makedirs(out_dir, exist_ok=True)
+
+        out_npz = os.path.join(out_dir, f"{base}.npz")
+        out_json = os.path.join(out_dir, f"{base}.json")
+    else:
+        # If user passed a directory, we still create files inside it.
+        out_dir = requested_out
+        os.makedirs(out_dir, exist_ok=True)
+        base = "residual_export"
+        out_npz = os.path.join(out_dir, f"{base}.npz")
+        out_json = os.path.join(out_dir, f"{base}.json")
+
     os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"] = str(args.mem_frac)
 
-    print("Loading dataset:", args.npz_in)
-    data = load_traj_npz(args.npz_in)
+    # --- NEW: capture console output for JSON audit ---
+    t0 = time.time()
+    stdout_buf = io.StringIO()
+    stderr_buf = io.StringIO()
+    tee_out = _Tee(sys.stdout, stdout_buf)
+    tee_err = _Tee(sys.stderr, stderr_buf)
 
-    print("Loading checkpoint:", args.ckpt)
-    with open(args.ckpt, "rb") as f:
-        saved = pickle.load(f)
-
-    hyper = saved["hyper"]
-    params = saved["params"]
-    seed = saved.get("seed", None)
-
-    # infer dof from first train trajectory
-    n_dof = int(np.asarray(data["train_q"][0]).shape[1])
-    print(f"Detected n_dof={n_dof} (seed={seed})")
-
-    # build model
-    lagrangian_fn, dynamics_model = build_delan_model(hyper, n_dof=n_dof)
-
-    # warmup compile with 1 sample
-    q0   = np.asarray(data["train_q"][0], dtype=np.float32)[:1]
-    qd0  = np.asarray(data["train_qd"][0], dtype=np.float32)[:1]
-    qdd0 = np.asarray(data["train_qdd"][0], dtype=np.float32)[:1]
-    _ = predict_tau_traj(dynamics_model, params, q0, qd0, qdd0)
-
-    out = {
-        "train_labels": np.asarray(data["train_labels"], dtype=object),
-        "test_labels":  np.asarray(data["test_labels"], dtype=object),
+    meta = {
+        "status": "running",
+        "timestamp_unix": t0,
+        "npz_in": args.npz_in,
+        "ckpt": args.ckpt,
+        "requested_out": requested_out,
+        "out_dir": out_dir,
+        "out_npz": out_npz,
+        "out_json": out_json,
+        "mem_frac": args.mem_frac,
     }
 
-    for split in ["train", "test"]:
-        tau_hat_list = []
-        r_tau_list = []
+    try:
+        with contextlib.redirect_stdout(tee_out), contextlib.redirect_stderr(tee_err):
+            print("Loading dataset:", args.npz_in)
+            data = load_traj_npz(args.npz_in)
 
-        q_list   = data[f"{split}_q"]
-        qd_list  = data[f"{split}_qd"]
-        qdd_list = data[f"{split}_qdd"]
-        tau_list = data[f"{split}_tau"]
+            print("Loading checkpoint:", args.ckpt)
+            with open(args.ckpt, "rb") as f:
+                saved = pickle.load(f)
 
-        print(f"\nExporting split={split}: {len(q_list)} trajectories")
-        for i in range(len(q_list)):
-            q_i   = np.asarray(q_list[i], dtype=np.float32)
-            qd_i  = np.asarray(qd_list[i], dtype=np.float32)
-            qdd_i = np.asarray(qdd_list[i], dtype=np.float32)
-            tau_i = np.asarray(tau_list[i], dtype=np.float32)
+            hyper = saved.get("hyper", {})
+            params = saved.get("params", None)
+            seed = saved.get("seed", None)
 
-            tau_hat_i = predict_tau_traj(dynamics_model, params, q_i, qd_i, qdd_i)
-            r_tau_i = tau_i - tau_hat_i
+            # infer dof from first train trajectory
+            n_dof = int(np.asarray(data["train_q"][0]).shape[1])
+            print(f"Detected n_dof={n_dof} (seed={seed})")
 
-            tau_hat_list.append(np.asarray(tau_hat_i, dtype=np.float32))
-            r_tau_list.append(np.asarray(r_tau_i, dtype=np.float32))
+            # build model
+            lagrangian_fn, dynamics_model = build_delan_model(hyper, n_dof=n_dof)
 
-            if (i + 1) % 25 == 0 or (i + 1) == len(q_list):
-                print(f"  done {i+1}/{len(q_list)}", flush=True)
+            # warmup compile with 1 sample
+            q0   = np.asarray(data["train_q"][0], dtype=np.float32)[:1]
+            qd0  = np.asarray(data["train_qd"][0], dtype=np.float32)[:1]
+            qdd0 = np.asarray(data["train_qdd"][0], dtype=np.float32)[:1]
+            _ = predict_tau_traj(dynamics_model, params, q0, qd0, qdd0)
 
-        # store original trajectory-wise signals too (for later windowing)
-        out[f"{split}_t"]   = np.asarray(data[f"{split}_t"], dtype=object)
-        out[f"{split}_q"]   = np.asarray(data[f"{split}_q"], dtype=object)
-        out[f"{split}_qd"]  = np.asarray(data[f"{split}_qd"], dtype=object)
-        out[f"{split}_qdd"] = np.asarray(data[f"{split}_qdd"], dtype=object)
-        out[f"{split}_tau"] = np.asarray(data[f"{split}_tau"], dtype=object)
+            out = {
+                "train_labels": np.asarray(data["train_labels"], dtype=object),
+                "test_labels":  np.asarray(data["test_labels"], dtype=object),
+            }
 
-        out[f"{split}_tau_hat"] = np.asarray(tau_hat_list, dtype=object)
-        out[f"{split}_r_tau"]   = np.asarray(r_tau_list, dtype=object)
+            for split in ["train", "test"]:
+                tau_hat_list = []
+                r_tau_list = []
 
-    os.makedirs(os.path.dirname(args.out), exist_ok=True)
-    np.savez(args.out, **out)
+                q_list   = data[f"{split}_q"]
+                qd_list  = data[f"{split}_qd"]
+                qdd_list = data[f"{split}_qdd"]
+                tau_list = data[f"{split}_tau"]
 
-    print("\nSaved residual trajectory dataset:", args.out)
-    print("Keys:", sorted(out.keys()))
+                print(f"\nExporting split={split}: {len(q_list)} trajectories")
+                for i in range(len(q_list)):
+                    q_i   = np.asarray(q_list[i], dtype=np.float32)
+                    qd_i  = np.asarray(qd_list[i], dtype=np.float32)
+                    qdd_i = np.asarray(qdd_list[i], dtype=np.float32)
+                    tau_i = np.asarray(tau_list[i], dtype=np.float32)
 
+                    tau_hat_i = predict_tau_traj(dynamics_model, params, q_i, qd_i, qdd_i)
+                    r_tau_i = tau_i - tau_hat_i
+
+                    tau_hat_list.append(np.asarray(tau_hat_i, dtype=np.float32))
+                    r_tau_list.append(np.asarray(r_tau_i, dtype=np.float32))
+
+                    if (i + 1) % 25 == 0 or (i + 1) == len(q_list):
+                        print(f"  done {i+1}/{len(q_list)}", flush=True)
+
+                # store original trajectory-wise signals too (for later windowing)
+                out[f"{split}_t"]   = np.asarray(data[f"{split}_t"], dtype=object)
+                out[f"{split}_q"]   = np.asarray(data[f"{split}_q"], dtype=object)
+                out[f"{split}_qd"]  = np.asarray(data[f"{split}_qd"], dtype=object)
+                out[f"{split}_qdd"] = np.asarray(data[f"{split}_qdd"], dtype=object)
+                out[f"{split}_tau"] = np.asarray(data[f"{split}_tau"], dtype=object)
+
+                out[f"{split}_tau_hat"] = np.asarray(tau_hat_list, dtype=object)
+                out[f"{split}_r_tau"]   = np.asarray(r_tau_list, dtype=object)
+
+            # write main NPZ into folder
+            np.savez(out_npz, **out)
+
+            print("\nSaved residual trajectory dataset:", out_npz)
+            print("Keys:", sorted(out.keys()))
+
+            print("\nSaved residual trajectory dataset:", out_npz)
+            print("Keys:", sorted(out.keys()))
+
+            # store netword type
+            hyper_json = dict(hyper) if isinstance(hyper, dict) else {}
+            lt = hyper_json.get("lagrangian_type", None)
+            if callable(lt) and hasattr(lt, "__name__"):
+                hyper_json["lagrangian_type"] = lt.__name__
+            else:
+                hyper_json["lagrangian_type"] = str(lt)
+
+            # meta for JSON
+            meta.update({
+                "status": "ok",
+                "dataset_npz_basename": os.path.basename(args.npz_in),
+                "checkpoint_basename": os.path.basename(args.ckpt),
+                "seed": seed,
+                "n_dof": n_dof,
+                "hyper": hyper_json,
+                "train_n_traj": len(data["train_q"]),
+                "test_n_traj": len(data["test_q"]),
+                "keys": sorted(list(out.keys())),
+                "elapsed_s": float(time.time() - t0),
+            })
+
+        # write JSON (outside redirect so file write errors show normally)
+        meta["stdout"] = stdout_buf.getvalue()
+        meta["stderr"] = stderr_buf.getvalue()
+        with open(out_json, "w") as f:
+            json.dump(meta, f, indent=2)
+        print(f"Saved export JSON: {out_json}")
+
+    except Exception:
+        meta["status"] = "error"
+        meta["elapsed_s"] = float(time.time() - t0)
+        meta["stdout"] = stdout_buf.getvalue()
+        meta["stderr"] = stderr_buf.getvalue()
+        meta["traceback"] = traceback.format_exc()
+
+        # best-effort JSON write
+        try:
+            os.makedirs(out_dir, exist_ok=True)
+            with open(out_json, "w") as f:
+                json.dump(meta, f, indent=2)
+            print(f"[error] Saved export JSON (error state): {out_json}")
+        except Exception:
+            pass
+
+        raise
 
 if __name__ == "__main__":
     main()

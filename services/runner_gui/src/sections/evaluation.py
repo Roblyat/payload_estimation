@@ -45,12 +45,32 @@ def render_evaluation(st, cfg, paths, run, pad_button, log_view):
 
     with e_col3:
         pad_button()
-        if st.button("Metrics plots", use_container_width=True):   # NEW BUTTON
+        if st.button("Eval metrics plots", use_container_width=True, key="btn_eval_metrics_plots"):
             run(
                 f"{cfg.COMPOSE} exec -T evaluation bash -lc "
-                f"\"python3 scripts/metrics_boxplots.py "
+                f"\"python3 scripts/eval_metrics_boxplots.py "
                 f"--eval_root {paths.evaluation} "
                 f"--out_dir {metrics_out} "
+                f"\""
+            )
+
+        pad_button()
+        if st.button("DeLaN metrics plots", use_container_width=True, key="btn_delan_metrics_plots"):
+            run(
+                f"{cfg.COMPOSE} exec -T evaluation bash -lc "
+                f"\"python3 scripts/delan_metrics_boxplots.py "
+                f"--delan_root {paths.models_delan} "
+                f"--out_dir {paths.models_delan}/_plots "
+                f"\""
+            )
+
+        pad_button()
+        if st.button("LSTM metrics plots", use_container_width=True, key="btn_lstm_metrics_plots"):
+            run(
+                f"{cfg.COMPOSE} exec -T evaluation bash -lc "
+                f"\"python3 scripts/lstm_metrics_boxplots.py "
+                f"--lstm_root {paths.models_lstm} "
+                f"--out_dir {paths.models_lstm}/_plots "
                 f"\""
             )
 

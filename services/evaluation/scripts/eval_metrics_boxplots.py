@@ -198,6 +198,20 @@ def main():
 
     df = pd.DataFrame(rows)
 
+    # ----------------------------
+    # Derived interpretability metrics
+    # ----------------------------
+    # absolute improvement: how much LSTM+DeLaN improves over DeLaN alone
+    df["gain"] = df["delan_rmse"] - df["rg_rmse"]
+
+    # relative improvement: <1 means improved (since rg_rmse < delan_rmse)
+    df["gain_ratio"] = df["rg_rmse"] / df["delan_rmse"]
+
+    # per-joint absolute improvement
+    for j in range(6):
+        df[f"joint_gain_{j}"] = df[f"delan_joint_rmse_{j}"] - df[f"rg_joint_rmse_{j}"]
+        df[f"joint_gain_ratio_{j}"] = df[f"rg_joint_rmse_{j}"] / df[f"delan_joint_rmse_{j}"]
+
     os.makedirs(args.out_dir, exist_ok=True)
     csv_path = os.path.join(args.out_dir, "summary_metrics.csv")
     df.to_csv(csv_path, index=False)
@@ -261,6 +275,52 @@ def main():
             f"Joint {j}: DeLaN RMSE vs final torque RMSE"
         )
 
+    # ----------------------------
+    # More informative correlations
+    # ----------------------------
+    save_scatter(
+        df, "delan_rmse", "gain",
+        os.path.join(args.out_dir, "scatter_delan_rmse_vs_gain.png"),
+        "Does worse DeLaN create more room for improvement? (delan_rmse vs gain)"
+    )
+
+    save_scatter(
+        df, "delan_rmse", "gain_ratio",
+        os.path.join(args.out_dir, "scatter_delan_rmse_vs_gain_ratio.png"),
+        "Does DeLaN quality correlate with relative improvement? (delan_rmse vs gain_ratio)"
+    )
+
+    for j in range(6):
+        save_scatter(
+            df, f"delan_joint_rmse_{j}", f"joint_gain_{j}",
+            os.path.join(args.out_dir, f"scatter_delan_joint_rmse_{j}_vs_joint_gain_{j}.png"),
+            f"Joint {j}: DeLaN RMSE vs absolute improvement (gain)"
+        )
+
+    # ----------------------------
+    # Improvement over DeLaN
+    # ----------------------------
+    save_boxplot(
+        df, "feature_mode", "gain",
+        os.path.join(args.out_dir, "box_gain_by_feature_mode.png"),
+        "Improvement gain = delan_rmse - rg_rmse (higher is better) grouped by feature_mode"
+    )
+
+    save_boxplot(
+        df, "feature_mode", "gain_ratio",
+        os.path.join(args.out_dir, "box_gain_ratio_by_feature_mode.png"),
+        "Relative gain_ratio = rg_rmse / delan_rmse (lower is better) grouped by feature_mode"
+    )
+
+    # ----------------------------
+    # Per-joint improvement / if needed single 3x2 grid image by adding save_joint_grid_boxplots(...)-helper
+    # ----------------------------
+    for j in range(6):
+        save_boxplot(
+            df, "feature_mode", f"joint_gain_{j}",
+            os.path.join(args.out_dir, f"box_joint_gain_{j}_by_feature_mode.png"),
+            f"Joint {j} gain = delan_joint_rmse - rg_joint_rmse (higher is better) by feature_mode"
+    )
 
 if __name__ == "__main__":
     main()

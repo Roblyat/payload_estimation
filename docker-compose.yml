@@ -131,6 +131,7 @@ services:
       - STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
       - STREAMLIT_SERVER_HEADLESS=true
     volumes:
+      - ${APE_PE}/services/runner_gui:/app
       - ${APE_PE}:/workspace:ro
       - /var/run/docker.sock:/var/run/docker.sock
       - ${APE_SHARED}:/workspace/shared

@@ -15,8 +15,14 @@ import os
 import argparse
 import numpy as np
 
+import json, time, traceback
+from pathlib import Path
+
 import sys
-sys.path.append("/workspace/shared/src")
+if "/workspace/shared/src" not in sys.path:
+    sys.path.insert(0, "/workspace/shared/src")
+
+from path_helpers import resolve_npz_path, normalize_out_npz
 from feature_builders import build_features, FEATURE_CHOICES, FEATURE_MODES, feature_dim
 
 def build_windows_for_split(q_list, qd_list, qdd_list, tau_hat_list, r_tau_list, H: int, feature_mode: str):
@@ -69,52 +75,87 @@ def main():
     print(f"  H           = {args.H}")
     print(f"  feature_mode= {args.features}")
 
-    d = np.load(args.in_npz, allow_pickle=True)
+    in_npz = resolve_npz_path(args.in_npz)
+    out_npz = normalize_out_npz(args.out_npz)
 
-    # Train split
-    X_train, Y_train = build_windows_for_split(
-        d["train_q"], d["train_qd"], d["train_qdd"], d["train_tau_hat"], d["train_r_tau"], args.H, args.features
-    )
-    if X_train.shape[0] == 0:
-        raise RuntimeError(
-            f"No windows created. Likely H={args.H} is too large for all trajectories. "
-            f"Try a smaller H (e.g. 50)."
-    )
+    out_dir = os.path.dirname(out_npz)
+    stem = Path(out_npz).stem
+    out_json = os.path.join(out_dir, f"{stem}.json")
 
-    # Test split
-    X_test, Y_test = build_windows_for_split(
-        d["test_q"], d["test_qd"], d["test_qdd"], d["test_tau_hat"], d["test_r_tau"], args.H, args.features
-    )
+    meta = {
+        "status": "started",
+        "timestamp_unix": time.time(),
+        "in_npz_arg": args.in_npz,
+        "in_npz": in_npz,
+        "out_npz_arg": args.out_npz,
+        "out_npz": out_npz,
+        "out_json": out_json,
+        "H": int(args.H),
+        "feature_mode": args.features,
+    }
 
-    # Metadata (robust even if train split empty)
-    if len(d["train_q"]) > 0:
-        n_dof = int(np.asarray(d["train_q"][0]).shape[1])
-    else:
-        n_dof = int(np.asarray(d["test_q"][0]).shape[1])
+    try:
+        if not os.path.exists(in_npz):
+            raise FileNotFoundError(f"Input NPZ not found: {in_npz} (arg was {args.in_npz})")
 
-    # Compute feature_dim from the chosen mode
-    feature_dim_val = int(feature_dim(n_dof, args.features))
+        d = np.load(in_npz, allow_pickle=True)
 
-    os.makedirs(os.path.dirname(args.out_npz), exist_ok=True)
-    np.savez(
-        args.out_npz,
-        X_train=X_train,
-        Y_train=Y_train,
-        X_test=X_test,
-        Y_test=Y_test,
-        H=np.int32(args.H),
-        n_dof=np.int32(n_dof),
-        feature_dim=np.int32(feature_dim_val),
-        feature_mode=np.str_(args.features),
-        residual_in_npz=np.str_(args.in_npz),
-    )
+        X_train, Y_train = build_windows_for_split(
+            d["train_q"], d["train_qd"], d["train_qdd"], d["train_tau_hat"], d["train_r_tau"],
+            args.H, args.features
+        )
+        X_test, Y_test = build_windows_for_split(
+            d["test_q"], d["test_qd"], d["test_qdd"], d["test_tau_hat"], d["test_r_tau"],
+            args.H, args.features
+        )
 
-    print(f"Residual input: {args.in_npz}")
-    print(f"Saved: {args.out_npz}")
-    print(f"H={args.H}, n_dof={n_dof}, feature_dim={feature_dim_val}")
-    print(f"X_train: {X_train.shape}  Y_train: {Y_train.shape}")
-    print(f"X_test : {X_test.shape}  Y_test : {Y_test.shape}")
-    print(f"feature_mode={args.features}")
+        n_dof = int(np.asarray(d["train_q"][0]).shape[1]) if len(d["train_q"]) > 0 else int(np.asarray(d["test_q"][0]).shape[1])
+        feature_dim = int(X_train.shape[-1]) if X_train.ndim == 3 else 0
+
+        os.makedirs(out_dir, exist_ok=True)
+        np.savez(
+            out_npz,
+            X_train=X_train,
+            Y_train=Y_train,
+            X_test=X_test,
+            Y_test=Y_test,
+            H=np.int32(args.H),
+            n_dof=np.int32(n_dof),
+            feature_dim=np.int32(feature_dim),
+            feature_mode=np.array(args.features, dtype=object),
+        )
+
+        meta.update({
+            "status": "ok",
+            "n_dof": int(n_dof),
+            "feature_dim": int(feature_dim),
+            "X_train_shape": list(X_train.shape),
+            "Y_train_shape": list(Y_train.shape),
+            "X_test_shape": list(X_test.shape),
+            "Y_test_shape": list(Y_test.shape),
+            "keys": list(d.files),
+        })
+
+        with open(out_json, "w") as f:
+            json.dump(meta, f, indent=2)
+
+        print(f"Saved: {out_npz}")
+        print(f"Saved: {out_json}")
+        print(f"H={args.H}, n_dof={n_dof}, feature_dim={feature_dim}")
+        print(f"X_train: {X_train.shape}  Y_train: {Y_train.shape}")
+        print(f"X_test : {X_test.shape}  Y_test : {Y_test.shape}")
+        print(f"feature_mode={args.features}")
+
+    except Exception as e:
+        meta.update({
+            "status": "error",
+            "error": str(e),
+            "traceback": traceback.format_exc(),
+        })
+        os.makedirs(out_dir, exist_ok=True)
+        with open(out_json, "w") as f:
+            json.dump(meta, f, indent=2)
+        raise
 
 if __name__ == "__main__":
     main()

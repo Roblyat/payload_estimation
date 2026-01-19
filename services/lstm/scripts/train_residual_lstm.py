@@ -11,6 +11,49 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
 from tensorflow.keras.callbacks import EarlyStopping, ModelCheckpoint
 
+import sys
+from pathlib import Path
+
+# allow importing shared helpers (mounted read-only in containers)
+if "/workspace/shared/src" not in sys.path:
+    sys.path.insert(0, "/workspace/shared/src")
+
+from path_helpers import artifact_folder, artifact_file, resolve_npz_path
+
+def resolve_windows_npz(p: str) -> str:
+    """
+    Accepts:
+      - /.../processed/<stem>.npz                    (legacy flat)
+      - /.../processed/<stem>/<stem>.npz            (new)
+      - /.../processed/<stem>                       (folder or stem path)
+    Returns an existing .npz path or raises FileNotFoundError.
+    """
+    p0 = Path(p)
+
+    # If user passed a directory: <dir>/<dir>.npz
+    if p0.is_dir():
+        candidate = p0 / f"{p0.name}.npz"
+        if candidate.exists():
+            return str(candidate)
+        raise FileNotFoundError(f"Given directory, but missing NPZ: {candidate}")
+
+    # If user passed an existing file, use it
+    if p0.exists():
+        return str(p0)
+
+    # If user passed "<stem>.npz" but file doesn't exist, try "<stem>/<stem>.npz"
+    if p0.suffix == ".npz":
+        stem = p0.stem
+        candidate = p0.parent / stem / f"{stem}.npz"
+        if candidate.exists():
+            return str(candidate)
+
+    # If user passed "<stem>" (no suffix), try "<stem>/<stem>.npz"
+    candidate = p0.parent / p0.name / f"{p0.name}.npz"
+    if candidate.exists():
+        return str(candidate)
+
+    raise FileNotFoundError(f"Could not resolve windows NPZ from: {p}")
 
 def rmse(y_true, y_pred):
     return float(np.sqrt(np.mean((y_true - y_pred) ** 2)))
@@ -52,7 +95,9 @@ def invert_y_scaler(Y_scaled: np.ndarray, mean: np.ndarray, std: np.ndarray):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--npz", required=True, help="ur5_lstm_windows_H50.npz")
-    ap.add_argument("--out_dir", default="/workspace/shared/models/lstm/residual_lstm_H50")
+    ap.add_argument("--out_root", default="/workspace/shared/models/lstm", help="Root folder for LSTM runs (default: /workspace/shared/models/lstm)")
+    ap.add_argument("--run_stem", default="", help="Run folder name (stem). If empty, derives from npz stem.")
+    ap.add_argument("--out_dir", default="", help="(legacy) If set, use this output directory verbatim.")
     ap.add_argument("--epochs", type=int, default=60)
     ap.add_argument("--batch", type=int, default=64)
     ap.add_argument("--val_split", type=float, default=0.1)
@@ -68,9 +113,24 @@ def main():
     tf.random.set_seed(args.seed)
     np.random.seed(args.seed)
 
-    os.makedirs(args.out_dir, exist_ok=True)
+    # ---------- Resolve output directory ----------
+    npz_path = Path(args.npz)
 
+    # If user passed legacy --out_dir, use it verbatim.
+    if args.out_dir:
+        out_dir = args.out_dir
+    else:
+        # derive run_stem if not provided
+        run_stem = args.run_stem.strip()
+        if not run_stem:
+            run_stem = npz_path.stem  # e.g. ur5__X__lstm_windows_H50__feat_full
+        out_dir = artifact_folder(args.out_root, run_stem)
+
+    os.makedirs(out_dir, exist_ok=True)
+
+    args.npz = resolve_npz_path(args.npz)
     d = np.load(args.npz)
+
     X_train = d["X_train"].astype(np.float32)  # (N, H, 24)
     Y_train = d["Y_train"].astype(np.float32)  # (N, 6)
     if X_train.size == 0 or Y_train.size == 0:
@@ -95,12 +155,14 @@ def main():
 
     # ---------- Run metadata / metrics logging ----------
     run_ts = datetime.now().isoformat(timespec="seconds")
-    metrics_path = os.path.join(args.out_dir, f"metrics_train_test_H{H}.json")
+    metrics_path = os.path.join(out_dir, f"metrics_train_test_H{H}.json")
 
     metrics = {
         "timestamp": run_ts,
         "npz": args.npz,
-        "out_dir": args.out_dir,
+        "out_dir": out_dir,
+        "out_root": args.out_root,
+        "run_stem": Path(out_dir).name,
         "H": H,
         "feature_dim": feature_dim,
         "n_dof": n_dof,
@@ -136,7 +198,7 @@ def main():
     x_mean, x_std, x_eps = compute_x_scaler(X_train, eps=args.eps)
     y_mean, y_std, y_eps = compute_y_scaler(Y_train, eps=args.eps)
 
-    scalers_path = os.path.join(args.out_dir, f"scalers_H{H}.npz")
+    scalers_path = os.path.join(out_dir, f"scalers_H{H}.npz")
     np.savez(
         scalers_path,
         x_mean=x_mean, x_std=x_std, x_eps=np.float32(x_eps),
@@ -193,7 +255,11 @@ def main():
         "params": int(model.count_params()),
     }
 
-    ckpt_path = os.path.join(args.out_dir, args.model_name)
+    # If user kept default model_name and we're in "run folder mode", name it after the folder
+    if args.model_name == "best.keras":
+        args.model_name = f"{Path(out_dir).name}.keras"
+
+    ckpt_path = os.path.join(out_dir, args.model_name)
     callbacks = [
         EarlyStopping(monitor="val_loss", patience=10, restore_best_weights=True),
         ModelCheckpoint(ckpt_path, monitor="val_loss", save_best_only=True),
@@ -224,7 +290,7 @@ def main():
     }
 
     # Save full history to CSV for plotting/inspection
-    hist_csv = os.path.join(args.out_dir, f"train_history_H{H}.csv")
+    hist_csv = os.path.join(out_dir, f"train_history_H{H}.csv")
     np.savetxt(
         hist_csv,
         np.column_stack([
@@ -254,8 +320,8 @@ def main():
         "rmse_per_joint": joint_rmse.astype(np.float32).tolist(),
         "mse_total": mse_total,
         "mse_per_joint": mse_per_joint.tolist(),
-        "predictions_npz": os.path.join(args.out_dir, "predictions_test.npz"),
-        "best_model_path": os.path.join(args.out_dir, args.model_name),
+        "predictions_npz": os.path.join(out_dir, "predictions_test.npz"),
+        "best_model_path": os.path.join(out_dir, args.model_name),
     }
 
     # Write metrics JSON (single file with everything)
@@ -272,7 +338,7 @@ def main():
 
     # Save predictions for later
     np.savez(
-        os.path.join(args.out_dir, "predictions_test.npz"),
+        os.path.join(out_dir, "predictions_test.npz"),
         Y_test=Y_test,
         Y_pred=Y_pred,
         Y_pred_scaled=Y_pred_s,
@@ -280,7 +346,7 @@ def main():
         feature_dim=np.int32(feature_dim),
         n_dof=np.int32(n_dof),
     )
-    print(f"Saved predictions: {os.path.join(args.out_dir, 'predictions_test.npz')}")
+    print(f"Saved predictions: {os.path.join(out_dir, 'predictions_test.npz')}")
     print(f"Saved best model:  {ckpt_path}")
 
     # ---------- Plots ----------
@@ -293,7 +359,7 @@ def main():
         plt.ylabel("MSE")
         plt.grid(True, alpha=0.2)
         plt.legend()
-        out = os.path.join(args.out_dir, "loss_curve.png")
+        out = os.path.join(out_dir, "loss_curve.png")
         plt.tight_layout()
         plt.savefig(out, dpi=150)
         print(f"Saved: {out}")
@@ -309,7 +375,7 @@ def main():
             if j == 0:
                 ax.legend()
         plt.tight_layout()
-        out = os.path.join(args.out_dir, "residual_gt_vs_pred.png")
+        out = os.path.join(out_dir, "residual_gt_vs_pred.png")
         plt.savefig(out, dpi=150)
         print(f"Saved: {out}")
         plt.close("all")

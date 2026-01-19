@@ -9,6 +9,8 @@ import sys
 sys.path.append("/workspace/shared/src")
 from feature_builders import build_features, FEATURE_MODES
 
+from path_helpers import resolve_npz_path
+
 def apply_x_scaler_feat(feat: np.ndarray, x_mean: np.ndarray, x_std: np.ndarray):
     # feat: (T, D)
     return ((feat - x_mean[None, :]) / x_std[None, :]).astype(np.float32)
@@ -79,7 +81,10 @@ def main():
 
     os.makedirs(args.out_dir, exist_ok=True)
 
-    d = np.load(args.residual_npz, allow_pickle=True)
+    args.residual_npz = resolve_npz_path(args.residual_npz)
+    residual_npz = resolve_npz_path(args.residual_npz)
+    d = np.load(residual_npz, allow_pickle=True)
+
     split = args.split
     H = args.H
 

@@ -1,0 +1,49 @@
+{
+  "status": "ok",
+  "timestamp_unix": 1768948841.215516,
+  "in_npz_arg": "/workspace/shared/data/processed/ur5__A__residual__delan_torch_struct_s4_ep200/ur5__A__residual__delan_torch_struct_s4_ep200.npz",
+  "in_npz": "/workspace/shared/data/processed/ur5__A__residual__delan_torch_struct_s4_ep200/ur5__A__residual__delan_torch_struct_s4_ep200.npz",
+  "out_npz_arg": "/workspace/shared/data/processed/ur5__A__lstm_windows_H50__feat_full__delan_torch.npz",
+  "out_npz": "/workspace/shared/data/processed/ur5__A__lstm_windows_H50__feat_full__delan_torch/ur5__A__lstm_windows_H50__feat_full__delan_torch.npz",
+  "out_json": "/workspace/shared/data/processed/ur5__A__lstm_windows_H50__feat_full__delan_torch/ur5__A__lstm_windows_H50__feat_full__delan_torch.json",
+  "H": 50,
+  "feature_mode": "full",
+  "n_dof": 6,
+  "feature_dim": 24,
+  "X_train_shape": [
+    4238,
+    50,
+    24
+  ],
+  "Y_train_shape": [
+    4238,
+    6
+  ],
+  "X_test_shape": [
+    1066,
+    50,
+    24
+  ],
+  "Y_test_shape": [
+    1066,
+    6
+  ],
+  "keys": [
+    "train_labels",
+    "test_labels",
+    "train_t",
+    "train_q",
+    "train_qd",
+    "train_qdd",
+    "train_tau",
+    "train_tau_hat",
+    "train_r_tau",
+    "test_t",
+    "test_q",
+    "test_qd",
+    "test_qdd",
+    "test_tau",
+    "test_tau_hat",
+    "test_r_tau"
+  ]
+}

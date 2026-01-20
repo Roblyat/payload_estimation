@@ -1,0 +1,15 @@
+run_name=ur5__softplus_1024__delan_torch_struct_s4_ep2000
+hp_preset=default
+hyper={'dataset': 'ur5__softplus_1024__delan_torch_struct_s4_ep2000', 'n_width': 64, 'n_depth': 2, 'n_minibatch': 1024, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'softplus', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 2000, 'lagrangian_type': 'structured'}
+npz=/workspace/shared/data/preprocessed/delan_ur5_dataset.npz
+ckpt=/workspace/shared/models/delan/ur5__softplus_1024__delan_torch_struct_s4_ep2000/ur5__softplus_1024__delan_torch_struct_s4_ep2000.torch
+seed=4
+model_type=structured
+dt=0.02439441835857372
+n_dof=6
+torque_mse=160.53219604492188
+torque_rmse=12.670130072139033
+torque_mse_per_joint=16.027341842651367 906.4915161132812 25.041860580444336 8.78330135345459 6.806975364685059 0.042271938174963
+torque_rmse_per_joint=4.003416061401367 30.10799789428711 5.004184246063232 2.9636635780334473 2.609018087387085 0.20560140907764435
+time_per_sample_s=6.86614634090565e-07
+hz=1456421.0407844281

@@ -1,7 +1,14 @@
+# Use PyPI as main index; add PyTorch wheel index as extra
 --extra-index-url https://download.pytorch.org/whl/cu124
+
+# find jax cuda wheels
+-f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
 
 matplotlib
 torch
 torchvision
 torchaudio
 PyQt5
+jax[cuda12]
+dill
+dm-haiku

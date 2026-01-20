@@ -1,6 +1,9 @@
 # Use PyPI as main index; add PyTorch wheel index as extra
 --extra-index-url https://download.pytorch.org/whl/cu124
 
+# find jax cuda wheels
+-f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+
 # plotting
 matplotlib
 
@@ -10,7 +13,7 @@ torchvision
 torchaudio
 
 # JAX + ecosystem (CUDA 13 build)
-jax[cuda13]
+jax[cuda12]
 dm-haiku
 optax
 flax

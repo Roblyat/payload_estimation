@@ -1,0 +1,15 @@
+split=test
+H=50
+delan_mse=169.76828002929688
+delan_rmse=13.029515266418457
+res_mse=2.8809895515441895
+res_rmse=1.6973477602005005
+rg_mse=2.8809895515441895
+rg_rmse=1.6973477602005005
+delan_joint_rmse=3.7599270343780518 30.267337799072266 8.524514198303223 3.039679765701294 2.5321316719055176 0.20665988326072693
+res_joint_rmse=1.9059698581695557 3.3799145221710205 1.2692691087722778 0.509129524230957 0.5866290926933289 0.12251300364732742
+rg_joint_rmse=1.9059698581695557 3.3799145221710205 1.2692691087722778 0.509129524230957 0.5866290926933289 0.12251299619674683
+feature_mode=full
+residual_npz=/workspace/shared/data/processed/ur5__A__residual__delan_torch_struct_s4_ep200/ur5__A__residual__delan_torch_struct_s4_ep200.npz
+lstm_model=/workspace/shared/models/lstm/ur5__A__delan_torch_struct_s4_ep200__feat_full__lstm_s4_H50_ep60_b64_u128_do0p2/ur5__A__delan_torch_struct_s4_ep200__feat_full__lstm_s4_H50_ep60_b64_u128_do0p2.keras
+lstm_scalers=/workspace/shared/models/lstm/ur5__A__delan_torch_struct_s4_ep200__feat_full__lstm_s4_H50_ep60_b64_u128_do0p2/scalers_H50.npz

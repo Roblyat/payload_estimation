@@ -12,6 +12,15 @@ class AppConfig:
     BASE_MODELS_LSTM: str = "/workspace/shared/models/lstm"
     BASE_EVALUATION: str = "/workspace/shared/evaluation"
 
+    # DeLaN backend options
+    DELAN_BACKENDS: tuple[str, ...] = ("jax", "torch")
+
+    DELAN_SERVICE: dict[str, str] = None
+    DELAN_TRAIN_SCRIPT: dict[str, str] = None
+    DELAN_EXPORT_SCRIPT: dict[str, str] = None
+    DELAN_CKPT_EXT: dict[str, str] = None
+
+
     # Shared Compose invocation used by GUI
     COMPOSE: str = (
         "docker compose -p payload_estimation "
@@ -33,5 +42,38 @@ class AppConfig:
                 "tau_hat": "x_k = [tau_hat] (dim=6)",
                 "state": "x_k = [q, qd, qdd] (dim=18)",
                 "state_tauhat": "x_k = [qd, qdd, tau_hat] (dim=18)",
+            },
+        )
+
+        object.__setattr__(
+            self,
+            "DELAN_SERVICE",
+            {
+                "jax": "delan_jax",
+                "torch": "delan_torch",
+            },
+        )
+        object.__setattr__(
+            self,
+            "DELAN_TRAIN_SCRIPT",
+            {
+                "jax": "/workspace/delan_jax/scripts/rbyt_train_delan_jax.py",
+                "torch": "/workspace/delan_torch/scripts/rbyt_train_delan_torch.py",
+            },
+        )
+        object.__setattr__(
+            self,
+            "DELAN_EXPORT_SCRIPT",
+            {
+                "jax": "/workspace/delan_jax/scripts/export_delan_residuals_jax.py",
+                "torch": "/workspace/delan_torch/scripts/export_delan_residuals_torch.py",
+            },
+        )
+        object.__setattr__(
+            self,
+            "DELAN_CKPT_EXT",
+            {
+                "jax": "jax",
+                "torch": "torch",
             },
         )

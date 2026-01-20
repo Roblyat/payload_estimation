@@ -1,28 +1,35 @@
 import argparse
-import os
-import json
+import contextlib
+import functools
 import io
+import json
+import os
+import sys
 import time
 import traceback
-import contextlib
 
 import dill as pickle
-import numpy as np
-
+import haiku as hk
 import jax
 import jax.numpy as jnp
-import haiku as hk
-import functools
+import numpy as np
 
-import sys
 
-# --- NEW: allow importing deep_lagrangian_networks from the submodule mount ---
+def _add_path(path: str) -> None:
+    if path and path not in sys.path:
+        sys.path.insert(0, path)
+
+
 DELAN_REPO_DIR = os.environ.get("DELAN_REPO_DIR", "/workspace/delan_repo")
-if DELAN_REPO_DIR not in sys.path:
-    sys.path.insert(0, DELAN_REPO_DIR)
+DELAN_COMMON_SRC = "/workspace/delan_src"
+DELAN_JAX_SRC = "/workspace/delan_jax/src"
+
+for p in [DELAN_COMMON_SRC, DELAN_JAX_SRC, DELAN_REPO_DIR]:
+    _add_path(p)
 
 import deep_lagrangian_networks.jax_DeLaN_model as delan
 from deep_lagrangian_networks.utils import activations
+from delan_residuals import DelanResidualComputer, build_residual_output_paths, load_traj_npz
 
 class _Tee(io.TextIOBase):
     """Write to two streams (console + buffer)."""
@@ -37,32 +44,6 @@ class _Tee(io.TextIOBase):
     def flush(self):
         self.a.flush()
         self.b.flush()
-
-def load_traj_npz(npz_path: str):
-    """
-    Load trajectory-wise DeLaN dataset written by your preprocess pipeline.
-
-    Expected keys:
-      train_labels, train_t, train_q, train_qd, train_qdd, train_tau
-      test_labels,  test_t,  test_q,  test_qd,  test_qdd,  test_tau
-
-    Returns dict with lists of trajectories.
-    """
-    d = np.load(npz_path, allow_pickle=True)
-
-    out = {}
-    out["train_labels"] = list(d["train_labels"])
-    out["test_labels"] = list(d["test_labels"])
-
-    for split in ["train", "test"]:
-        out[f"{split}_t"]   = list(d[f"{split}_t"])
-        out[f"{split}_q"]   = list(d[f"{split}_q"])
-        out[f"{split}_qd"]  = list(d[f"{split}_qd"])
-        out[f"{split}_qdd"] = list(d[f"{split}_qdd"])
-        out[f"{split}_tau"] = list(d[f"{split}_tau"])
-
-    return out
-
 
 def build_delan_model(hyper: dict, n_dof: int):
     """
@@ -117,23 +98,12 @@ def main():
                     help="XLA memory fraction (default 0.4)")
     args = ap.parse_args()
 
-    # --- NEW: structured output folder next to the requested NPZ ---
     requested_out = args.out  # keep old CLI behavior as "canonical" path
-    if requested_out.endswith(".npz"):
-        base = os.path.basename(requested_out)[:-4]  # strip .npz
-        parent = os.path.dirname(requested_out)
-        out_dir = os.path.join(parent, base)
-        os.makedirs(out_dir, exist_ok=True)
-
-        out_npz = os.path.join(out_dir, f"{base}.npz")
-        out_json = os.path.join(out_dir, f"{base}.json")
-    else:
-        # If user passed a directory, we still create files inside it.
-        out_dir = requested_out
-        os.makedirs(out_dir, exist_ok=True)
-        base = "residual_export"
-        out_npz = os.path.join(out_dir, f"{base}.npz")
-        out_json = os.path.join(out_dir, f"{base}.json")
+    paths = build_residual_output_paths(requested_out)
+    out_dir = paths.out_dir
+    out_npz = paths.out_npz
+    out_json = paths.out_json
+    os.makedirs(out_dir, exist_ok=True)
 
     os.environ["XLA_PYTHON_CLIENT_MEM_FRACTION"] = str(args.mem_frac)
 
@@ -182,51 +152,13 @@ def main():
             qdd0 = np.asarray(data["train_qdd"][0], dtype=np.float32)[:1]
             _ = predict_tau_traj(dynamics_model, params, q0, qd0, qdd0)
 
-            out = {
-                "train_labels": np.asarray(data["train_labels"], dtype=object),
-                "test_labels":  np.asarray(data["test_labels"], dtype=object),
-            }
-
-            for split in ["train", "test"]:
-                tau_hat_list = []
-                r_tau_list = []
-
-                q_list   = data[f"{split}_q"]
-                qd_list  = data[f"{split}_qd"]
-                qdd_list = data[f"{split}_qdd"]
-                tau_list = data[f"{split}_tau"]
-
-                print(f"\nExporting split={split}: {len(q_list)} trajectories")
-                for i in range(len(q_list)):
-                    q_i   = np.asarray(q_list[i], dtype=np.float32)
-                    qd_i  = np.asarray(qd_list[i], dtype=np.float32)
-                    qdd_i = np.asarray(qdd_list[i], dtype=np.float32)
-                    tau_i = np.asarray(tau_list[i], dtype=np.float32)
-
-                    tau_hat_i = predict_tau_traj(dynamics_model, params, q_i, qd_i, qdd_i)
-                    r_tau_i = tau_i - tau_hat_i
-
-                    tau_hat_list.append(np.asarray(tau_hat_i, dtype=np.float32))
-                    r_tau_list.append(np.asarray(r_tau_i, dtype=np.float32))
-
-                    if (i + 1) % 25 == 0 or (i + 1) == len(q_list):
-                        print(f"  done {i+1}/{len(q_list)}", flush=True)
-
-                # store original trajectory-wise signals too (for later windowing)
-                out[f"{split}_t"]   = np.asarray(data[f"{split}_t"], dtype=object)
-                out[f"{split}_q"]   = np.asarray(data[f"{split}_q"], dtype=object)
-                out[f"{split}_qd"]  = np.asarray(data[f"{split}_qd"], dtype=object)
-                out[f"{split}_qdd"] = np.asarray(data[f"{split}_qdd"], dtype=object)
-                out[f"{split}_tau"] = np.asarray(data[f"{split}_tau"], dtype=object)
-
-                out[f"{split}_tau_hat"] = np.asarray(tau_hat_list, dtype=object)
-                out[f"{split}_r_tau"]   = np.asarray(r_tau_list, dtype=object)
+            computer = DelanResidualComputer(
+                lambda q_i, qd_i, qdd_i: predict_tau_traj(dynamics_model, params, q_i, qd_i, qdd_i)
+            )
+            out, n_dof = computer.compute(data)
 
             # write main NPZ into folder
             np.savez(out_npz, **out)
-
-            print("\nSaved residual trajectory dataset:", out_npz)
-            print("Keys:", sorted(out.keys()))
 
             print("\nSaved residual trajectory dataset:", out_npz)
             print("Keys:", sorted(out.keys()))

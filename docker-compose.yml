@@ -43,12 +43,10 @@ services:
     working_dir: /workspace/delan_repo
     stdin_open: true
     tty: true
-    # command: >
-      # bash -lc "pip install -e /workspace/delan_repo && tail -f /dev/null"
 
   delan_torch:
-    # depends_on:
-      # - preprocess  
+    depends_on:
+      - preprocess  
     build:
       context: ./services/delan
       dockerfile: Dockerfile.torch
@@ -59,18 +57,19 @@ services:
     - MPLBACKEND=Agg
     - QT_QPA_PLATFORM=offscreen    
     volumes:
-      - ./shared/data/processed:/workspace/shared/data/processed:ro
-      - ./shared/models/delan:/workspace/shared/models/delan
-      - ./shared/config:/workspace/shared/config:ro
-      - ./shared/logs:/workspace/shared/logs
+      - ${APE_SHARED}/data/preprocessed:/workspace/shared/data/preprocessed:ro
+      - ${APE_SHARED}/data/processed:/workspace/shared/data/processed
+      - ${APE_SHARED}/models/delan:/workspace/shared/models/delan
+      - ${APE_SHARED}/config:/workspace/shared/config:ro
+      - ${APE_SHARED}/logs:/workspace/shared/logs
       - ${APE_SHARED}/src:/workspace/shared/src:ro
-      - ${DELAN_REPO}:/workspace/delan_repo
+      - ${APE_DELAN}:/workspace/delan_repo
+      - ${APE_PE}/services/delan/torch:/workspace/delan_torch
+      - ${APE_PE}/services/delan/src:/workspace/delan_src:ro
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
     working_dir: /workspace/delan_repo
     stdin_open: true
     tty: true
-    # command: >
-    #   bash -lc "pip install -e /workspace/delan_repo && tail -f /dev/null"
 
   lstm:
     depends_on:

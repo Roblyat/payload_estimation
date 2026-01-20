@@ -31,7 +31,10 @@ resolve_services() {
     preprocess|pre)
       echo "preprocess"
       ;;
-    delan|delan_jax)
+    dlan_jax|delan_jax)
+      echo "delan_jax"
+      ;;
+    dlan_torch|delan_torch)
       echo "delan_jax"
       ;;
     lstm)
@@ -63,10 +66,11 @@ stream_logs() {
 start_stack() {
   docker compose up -d preprocess
   docker compose up -d delan_jax
+  docker compose up -d delan_torch
   docker compose up -d lstm
   docker compose up -d evaluation
   docker compose up -d runner_gui
-  echo "Stack is up: preprocess -> delan_jax -> lstm -> evaluation -> runner_gui"
+  echo "Stack is up: preprocess -> delan_jax -> delan_torch -> lstm -> evaluation -> runner_gui"
   echo "GUI: http://localhost:8501"
 }
 

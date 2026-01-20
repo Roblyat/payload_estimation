@@ -40,6 +40,12 @@ def _parse_lstm_folder(name: str) -> Dict[str, Any]:
 
     return out
 
+def _infer_backend_from_name(name: str) -> str:
+    if "delan_jax_" in name:
+        return "jax"
+    if "delan_torch_" in name:
+        return "torch"
+    return "unknown"
 
 def _boxplot(groups: Dict[str, List[float]], title: str, ylabel: str, out_png: str) -> None:
     labels = sorted(groups.keys())
@@ -93,7 +99,9 @@ def _scatter(xs, ys, xlabel: str, ylabel: str, title: str, out_png: str) -> None
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--lstm_root", default="/workspace/shared/models/lstm", help="Root folder containing lstm runs")
-    ap.add_argument("--out_dir", default="/workspace/shared/models/lstm/_plots", help="Where to save plots")
+    ap.add_argument("--out_dir", default="/workspace/shared/models/lstm/_metrics_plots", help="Where to save plots")
+    ap.add_argument("--backend", choices=["all", "jax", "torch"], default="all")
+
     args = ap.parse_args()
 
     _safe_mkdir(args.out_dir)
@@ -122,9 +130,12 @@ def main() -> None:
         args_d = d.get("args", {})
         train_d = d.get("train", {})
 
+        backend = _infer_backend_from_name(folder)
+
         row = {
             "folder": folder,
             "run_dir": run_dir,
+            "backend": backend,
             "metrics_path": mp,
             "feature_mode": meta.get("feature_mode"),
             "H": int(d.get("H", meta.get("H") or 0)),
@@ -147,6 +158,9 @@ def main() -> None:
 
         rows.append(row)
 
+    if args.backend != "all":
+        rows = [r for r in rows if r.get("backend") == args.backend]
+
     # infer dof
     n_dof = None
     for r in rows:
@@ -168,6 +182,19 @@ def main() -> None:
         out_png=os.path.join(args.out_dir, "lstm_residual_rmse_by_feature_mode.png"),
     )
 
+    # 1a) Residual RMSE grouped by feature_mode|backend (jax vs torch side-by-side)
+    g1b: Dict[str, List[float]] = {}
+    for r in rows:
+        fm = r.get("feature_mode") or "unknown"
+        key = f"{fm}|{r.get('backend','unknown')}"
+        g1b.setdefault(key, []).append(r["rmse_total"])
+    _boxplot(
+        g1b,
+        title="LSTM residual RMSE (test) grouped by feature_mode|backend",
+        ylabel="rmse_total (residual torque units)",
+        out_png=os.path.join(args.out_dir, "lstm_residual_rmse_by_feature_mode_backend.png"),
+    )
+
     # 1b) Residual RMSE grouped by H (optional helpful)
     gH: Dict[str, List[float]] = {}
     for r in rows:
@@ -179,6 +206,18 @@ def main() -> None:
             ylabel="rmse_total",
             out_png=os.path.join(args.out_dir, "lstm_residual_rmse_by_H.png"),
         )
+
+    # 1b2) Residual RMSE grouped by backend only
+    gb: Dict[str, List[float]] = {}
+    for r in rows:
+        gb.setdefault(r.get("backend","unknown"), []).append(r["rmse_total"])
+    if len(gb) >= 2:
+        _boxplot(
+            gb,
+            title="LSTM residual RMSE (test) grouped by backend",
+            ylabel="rmse_total",
+            out_png=os.path.join(args.out_dir, "lstm_residual_rmse_by_backend.png"),
+        )   
 
     # 2) Per-joint residual RMSE grid grouped by feature_mode
     groups_per_joint: Dict[str, List[List[float]]] = {}

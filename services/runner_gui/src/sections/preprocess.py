@@ -47,8 +47,10 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
     base_id = f"{dataset_name}__{run_tag}"
 
     # File name textboxes (base path shown in label)
+    delan_backend = st.session_state.get("delan_backend", "jax")
+
     default_delan_npz_name = f"delan_{dataset_name}_dataset.npz"
-    default_windows_npz_name = f"{dataset_name}__{run_tag}__lstm_windows_H{H}__feat_{feature_mode}.npz"
+    default_windows_npz_name = f"{base_id}__lstm_windows_H{H}__feat_{feature_mode}__delan_{delan_backend}.npz"
 
     delan_npz_name = st.text_input(
         f"DeLaN dataset ({paths.preprocessed}/)",

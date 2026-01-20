@@ -16,13 +16,14 @@ def render_lstm(st, cfg, paths, run, pad_button, log_view):
 
     H             = int(st.session_state.get("H", 50))
     feature_mode  = st.session_state.get("feature_mode", "full")
+    delan_backend = st.session_state.get("delan_backend", "jax")
 
     # From DeLaN section (should be set when you trained/exported)
     delan_tag     = st.session_state.get("delan_tag", "")
     res_out = resolve_npz_path(st.session_state.get("residual_npz", ""))
 
     # Default window filename if preprocess section didn't already set it
-    default_windows_npz_name = f"{base_id}__lstm_windows_H{H}__feat_{feature_mode}.npz"
+    default_windows_npz_name = f"{base_id}__lstm_windows_H{H}__feat_{feature_mode}__delan_{delan_backend}.npz"
 
     # Use preprocess values if present
     windows_name = st.session_state.get("windows_npz_name", default_windows_npz_name)

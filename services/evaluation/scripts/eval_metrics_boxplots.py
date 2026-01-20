@@ -107,45 +107,67 @@ def parse_run_dir_name(run_dir: str) -> Dict[str, Optional[str]]:
         "run_dir": name,
     }
 
-
-def save_boxplot(df: pd.DataFrame, group_col: str, value_col: str, out_path: str, title: str):
-    g = df[[group_col, value_col]].dropna()
-    if g.empty:
-        print(f"[warn] Empty data for boxplot {value_col} by {group_col}")
-        return
-
-    order = sorted(g[group_col].unique().tolist())
-    data = [g.loc[g[group_col] == k, value_col].values for k in order]
+# ----------------------------
+# Plot helpers
+# ----------------------------
+def save_boxplot(
+    df: pd.DataFrame,
+    group_col: str | None = None,
+    value_col: str | None = None,
+    out_path: str = "",
+    title: str = "",
+    # aliases (so older/newer call styles both work)
+    x_col: str | None = None,
+    y_col: str | None = None,
+    xlabel: str | None = None,
+    ylabel: str | None = None,
+):
+    # allow either (group_col/value_col) or (x_col/y_col)
+    group_col = group_col or x_col
+    value_col = value_col or y_col
+    if group_col is None or value_col is None:
+        raise ValueError("save_boxplot needs (group_col,value_col) or (x_col,y_col)")
 
     plt.figure(figsize=(10, 4), dpi=140)
-    plt.boxplot(data, labels=order, showfliers=True)
+    df.boxplot(column=value_col, by=group_col, grid=False, rot=25)
     plt.title(title)
-    plt.ylabel(value_col)
-    plt.grid(True, alpha=0.2)
+    plt.suptitle("")  # remove pandas' automatic title
+    plt.xlabel(xlabel or group_col)
+    plt.ylabel(ylabel or value_col)
     plt.tight_layout()
-    os.makedirs(os.path.dirname(out_path), exist_ok=True)
-    plt.savefig(out_path, dpi=180)
+    plt.savefig(out_path, dpi=200)
     plt.close()
     print(f"Saved: {out_path}")
 
 
-def save_scatter(df: pd.DataFrame, x: str, y: str, out_path: str, title: str):
-    g = df[[x, y]].dropna()
-    if g.empty:
-        print(f"[warn] Empty data for scatter {y} vs {x}")
-        return
+def save_scatter(
+    df: pd.DataFrame,
+    x: str | None = None,
+    y: str | None = None,
+    out_path: str = "",
+    title: str = "",
+    # aliases
+    x_col: str | None = None,
+    y_col: str | None = None,
+    xlabel: str | None = None,
+    ylabel: str | None = None,
+):
+    x = x or x_col
+    y = y or y_col
+    if x is None or y is None:
+        raise ValueError("save_scatter needs (x,y) or (x_col,y_col)")
 
-    plt.figure(figsize=(5.5, 5.0), dpi=140)
-    plt.scatter(g[x].values, g[y].values, s=18)
+    plt.figure(figsize=(6, 4), dpi=140)
+    plt.scatter(df[x], df[y], s=18, alpha=0.8)
     plt.title(title)
-    plt.xlabel(x)
-    plt.ylabel(y)
+    plt.xlabel(xlabel or x)
+    plt.ylabel(ylabel or y)
     plt.grid(True, alpha=0.2)
     plt.tight_layout()
-    os.makedirs(os.path.dirname(out_path), exist_ok=True)
-    plt.savefig(out_path, dpi=180)
+    plt.savefig(out_path, dpi=200)
     plt.close()
     print(f"Saved: {out_path}")
+
 
 
 def main():
@@ -156,6 +178,8 @@ def main():
                     help="Where to save plots + summary CSV.")
     ap.add_argument("--pattern", default="*/metrics_*_H*.txt",
                     help="Glob pattern under eval_root.")
+    ap.add_argument("--backend", choices=["all", "jax", "torch"], default="all")
+    
     args = ap.parse_args()
 
     paths = sorted(glob.glob(os.path.join(args.eval_root, args.pattern)))
@@ -198,14 +222,52 @@ def main():
 
     df = pd.DataFrame(rows)
 
-    # ----------------------------
-    # Derived interpretability metrics
-    # ----------------------------
-    # absolute improvement: how much LSTM+DeLaN improves over DeLaN alone
-    df["gain"] = df["delan_rmse"] - df["rg_rmse"]
+    os.makedirs(args.out_dir, exist_ok=True)
 
-    # relative improvement: <1 means improved (since rg_rmse < delan_rmse)
-    df["gain_ratio"] = df["rg_rmse"] / df["delan_rmse"]
+    # backend from delan_id OR run_dir (robust: handles "jax_*", "delan_jax_*", or strings containing it)
+    def _infer_backend(delan_id: object, run_dir: object) -> str:
+        s = f"{delan_id or ''} {run_dir or ''}"
+        if ("delan_jax_" in s) or ("jax_" in s):
+            return "jax"
+        if ("delan_torch_" in s) or ("torch_" in s):
+            return "torch"
+        return "unknown"
+
+    df["backend"] = df.apply(lambda r: _infer_backend(r.get("delan_id"), r.get("run_dir")), axis=1)
+
+    if args.backend != "all":
+        df = df[df["backend"] == args.backend].copy()
+
+    df["gain"] = df["delan_rmse"] - df["rg_rmse"]
+    df["gain_ratio"] = df["rg_rmse"] / df["delan_rmse"].replace(0, np.nan)
+    df["feature_backend"] = df["feature_mode"].astype(str) + "|" + df["backend"].astype(str)
+
+    save_boxplot(
+        df, x_col="feature_backend", y_col="gain",
+        out_path=os.path.join(args.out_dir, "gain_by_feature_backend.png"),
+        title="Gain (delan_rmse - rg_rmse) by feature_mode|backend",
+        xlabel="feature_mode|backend", ylabel="gain"
+    )
+
+    save_boxplot(
+        df, x_col="feature_backend", y_col="gain_ratio",
+        out_path=os.path.join(args.out_dir, "gain_ratio_by_feature_backend.png"),
+        title="Gain ratio (rg_rmse / delan_rmse) by feature_mode|backend",
+        xlabel="feature_mode|backend", ylabel="gain_ratio"
+    )
+
+    # scatter per backend (keeps your existing scatter helper)
+    for b in sorted(df["backend"].unique()):
+        sub = df[df["backend"] == b]
+        if len(sub) < 2:
+            continue
+        save_scatter(
+            sub, x_col="delan_rmse", y_col="gain_ratio",
+            out_path=os.path.join(args.out_dir, f"scatter_delan_rmse_vs_gain_ratio__{b}.png"),
+            title=f"delan_rmse vs gain_ratio ({b})",
+            xlabel="delan_rmse", ylabel="gain_ratio"
+        )
+
 
     # per-joint absolute improvement
     for j in range(6):

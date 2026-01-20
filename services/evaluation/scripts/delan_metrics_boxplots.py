@@ -18,17 +18,28 @@ def _safe_mkdir(p: str) -> None:
 
 
 def _parse_delan_tag(tag: str) -> Dict[str, Any]:
-    # tag like: delan_struct_s4_ep200 or delan_black_s4_ep500
+    # tag like: delan_jax_struct_s4_ep200 or delan_torch_black_s4_ep500
     out: Dict[str, Any] = {"delan_tag": tag}
+
+    m = re.search(r"delan_(jax|torch)_(struct|black)_s(\d+)_ep(\d+)", tag)
+    if m:
+        out["backend"] = m.group(1)
+        out["model_short"] = m.group(2)
+        out["seed"] = int(m.group(3))
+        out["epochs"] = int(m.group(4))
+        return out
+
+    # fallback: old tags without backend
     m = re.search(r"delan_(struct|black)_s(\d+)_ep(\d+)", tag)
     if m:
+        out["backend"] = "unknown"
         out["model_short"] = m.group(1)
         out["seed"] = int(m.group(2))
         out["epochs"] = int(m.group(3))
     else:
+        out["backend"] = "unknown"
         out["model_short"] = "unknown"
     return out
-
 
 def _boxplot(groups: Dict[str, List[float]], title: str, ylabel: str, out_png: str) -> None:
     labels = sorted(groups.keys())
@@ -82,7 +93,9 @@ def _scatter(xs, ys, xlabel: str, ylabel: str, title: str, out_png: str) -> None
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--delan_root", default="/workspace/shared/models/delan", help="Root folder containing delan/*/metrics.json")
-    ap.add_argument("--out_dir", default="/workspace/shared/models/delan/_plots", help="Where to save plots")
+    ap.add_argument("--out_dir", default="/workspace/shared/models/delan/_metrics_plots", help="Where to save plots")
+    ap.add_argument("--backend", choices=["all", "jax", "torch"], default="all")
+
     args = ap.parse_args()
 
     _safe_mkdir(args.out_dir)
@@ -107,6 +120,7 @@ def main() -> None:
         parts = run_name.split("__")
         delan_tag = parts[-1] if len(parts) >= 2 else "unknown"
         tag_info = _parse_delan_tag(delan_tag)
+        backend = tag_info.get("backend", "unknown")
 
         eval_test = d.get("eval_test", {})
         torque_rmse = float(eval_test.get("torque_rmse", np.nan))
@@ -120,6 +134,7 @@ def main() -> None:
             "run_name": run_name,
             "run_dir": run_dir,
             "delan_tag": tag_info.get("delan_tag", delan_tag),
+            "backend": backend,
             "model_short": tag_info.get("model_short", "unknown"),
             "seed": tag_info.get("seed", None),
             "epochs": tag_info.get("epochs", None),
@@ -139,6 +154,10 @@ def main() -> None:
         row["hyper"] = d.get("hyper", {})
         row["dataset"] = d.get("dataset", {})
         rows.append(row)
+
+    
+    if args.backend != "all":
+        rows = [r for r in rows if r.get("backend") == args.backend]
 
     # infer dof
     n_dof = None
@@ -160,6 +179,30 @@ def main() -> None:
         ylabel="torque_rmse",
         out_png=os.path.join(args.out_dir, "delan_torque_rmse_by_model_type.png"),
     )
+
+    # 1b) Torque RMSE grouped by model_short|backend  (jax vs torch side-by-side)
+    groups_mb: Dict[str, List[float]] = {}
+    for r in rows:
+        key = f"{r['model_short']}|{r['backend']}"
+        groups_mb.setdefault(key, []).append(r["torque_rmse"])
+    _boxplot(
+        groups_mb,
+        title="DeLaN torque RMSE (test) grouped by model_short|backend",
+        ylabel="torque_rmse",
+        out_png=os.path.join(args.out_dir, "delan_torque_rmse_by_model_short_backend.png"),
+    )
+
+    # 1c) Torque RMSE grouped by backend only
+    groups_b: Dict[str, List[float]] = {}
+    for r in rows:
+        groups_b.setdefault(r["backend"], []).append(r["torque_rmse"])
+    if len(groups_b) >= 2:
+        _boxplot(
+            groups_b,
+            title="DeLaN torque RMSE (test) grouped by backend",
+            ylabel="torque_rmse",
+            out_png=os.path.join(args.out_dir, "delan_torque_rmse_by_backend.png"),
+        )
 
     # 2) Torque RMSE boxplot grouped by delan_tag (seed/epochs)
     groups = {}

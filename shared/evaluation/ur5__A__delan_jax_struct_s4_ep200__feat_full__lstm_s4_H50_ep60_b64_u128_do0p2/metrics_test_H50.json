@@ -1,0 +1,43 @@
+{
+  "split": "test",
+  "H": 50,
+  "n_dof": 6,
+  "feature_mode": "full",
+  "paths": {
+    "residual_npz": "/workspace/shared/data/processed/ur5__A__residual__delan_jax_struct_s4_ep200/ur5__A__residual__delan_jax_struct_s4_ep200.npz",
+    "lstm_model": "/workspace/shared/models/lstm/ur5__A__delan_jax_struct_s4_ep200__feat_full__lstm_s4_H50_ep60_b64_u128_do0p2/ur5__A__delan_jax_struct_s4_ep200__feat_full__lstm_s4_H50_ep60_b64_u128_do0p2.keras",
+    "lstm_scalers": "/workspace/shared/models/lstm/ur5__A__delan_jax_struct_s4_ep200__feat_full__lstm_s4_H50_ep60_b64_u128_do0p2/scalers_H50.npz"
+  },
+  "metrics": {
+    "delan_mse": 5.173201560974121,
+    "delan_rmse": 2.2744672298431396,
+    "res_mse": 1.5242472887039185,
+    "res_rmse": 1.2346041202545166,
+    "rg_mse": 1.5242472887039185,
+    "rg_rmse": 1.2346041202545166,
+    "delan_joint_rmse": [
+      1.2972291707992554,
+      5.2675676345825195,
+      1.1247258186340332,
+      0.4938233196735382,
+      0.30676254630088806,
+      0.07847809046506882
+    ],
+    "res_joint_rmse": [
+      0.9944859743118286,
+      2.6055727005004883,
+      1.0020281076431274,
+      0.5438070893287659,
+      0.2523629367351532,
+      0.06321412324905396
+    ],
+    "rg_joint_rmse": [
+      0.9944859743118286,
+      2.6055729389190674,
+      1.0020281076431274,
+      0.5438070893287659,
+      0.2523629367351532,
+      0.06321412324905396
+    ]
+  }
+}

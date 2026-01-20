@@ -10,6 +10,20 @@ def render_delan(st, cfg, paths, run, pad_button, log_view):
     feature_mode = st.session_state.get("feature_mode", "full")
     base_id      = st.session_state.get("base_id", f"{dataset_name}__{run_tag}")
 
+    # --- DeLaN backend (jax vs torch) ---
+    delan_backend = st.selectbox(
+        "DeLaN backend",
+        cfg.DELAN_BACKENDS,
+        index=0,  # default "jax"
+        help="Choose which DeLaN implementation to train/export with.",
+        key="delan_backend",
+    )
+
+    delan_service = cfg.DELAN_SERVICE[delan_backend]
+    train_script = cfg.DELAN_TRAIN_SCRIPT[delan_backend]
+    export_script = cfg.DELAN_EXPORT_SCRIPT[delan_backend]
+    ckpt_ext = cfg.DELAN_CKPT_EXT[delan_backend]
+
     # resolved inputs from preprocess (with safe fallbacks)
     npz_in = st.session_state.get(
         "npz_in",
@@ -193,19 +207,20 @@ def render_delan(st, cfg, paths, run, pad_button, log_view):
 
     model_short = "struct" if structured else "black"
 
-    # NEW: delan_tag has ONLY config (no dataset/run tag), so it won't double in residual/lstm names
-    delan_tag = f"delan_{model_short}_s{seed}_ep{delan_epochs_eff}"
+    delan_tag = f"delan_{delan_backend}_{model_short}_s{seed}_ep{delan_epochs_eff}"
 
     st.session_state["delan_seed"] = int(seed)
     st.session_state["delan_tag"] = delan_tag
 
     # delan_id is ONLY for the delan run folder / checkpoint naming
-    delan_id = f"delan_{dataset_name}_{run_tag}__{delan_tag}"
+    # NEW: model folder includes backend so stage-1 runs never collide
+    delan_id = f"{dataset_name}__{run_tag}__{delan_tag}"
 
     delan_run_dir = f"{paths.models_delan}/{delan_id}"
 
-    default_ckpt_name = f"{delan_id}.jax"
-    default_residual_name = f"{base_id}__residual_{delan_tag}.npz"
+    default_ckpt_name = f"{delan_id}.{ckpt_ext}"
+    
+    default_residual_name = f"{base_id}__residual__{delan_tag}.npz"
 
     delan_ckpt_name = st.text_input(
         f"DeLaN checkpoint ({delan_run_dir}/)",
@@ -214,9 +229,13 @@ def render_delan(st, cfg, paths, run, pad_button, log_view):
     )
     ckpt = f"{delan_run_dir}/{delan_ckpt_name}"
 
-    st.session_state["delan_id"] = delan_id
     st.session_state["delan_run_dir"] = delan_run_dir
-    st.session_state["delan_ckpt"] = ckpt
+
+    # backend-specific ckpt key
+    ckpt_state_key = f"delan_ckpt_{delan_backend}"
+    st.session_state["delan_id"] = delan_id
+    st.session_state["delan_tag"] = delan_tag
+    st.session_state[ckpt_state_key] = ckpt
 
     residual_name = st.text_input(
         f"Residual trajectories ({paths.processed}/)",
@@ -252,8 +271,8 @@ def render_delan(st, cfg, paths, run, pad_button, log_view):
                 hp_flags += f" --{cli_k} '{v}'" if isinstance(v, str) else f" --{cli_k} {v}"
 
             run(
-                f"{cfg.COMPOSE} exec -T delan_jax bash -lc "
-                f"\"python3 /workspace/delan_jax/scripts/rbyt_train_delan_jax.py "
+                f"{cfg.COMPOSE} exec -T {delan_service} bash -lc "
+                f"\"python3 {train_script} "
                 f"--npz {npz_in} "
                 f"-t {model_type} "
                 f"-s {seed} "
@@ -267,8 +286,8 @@ def render_delan(st, cfg, paths, run, pad_button, log_view):
     with d_btn2:
         if st.button("Export residuals", use_container_width=True):
             run(
-                f"{cfg.COMPOSE} exec -T delan_jax bash -lc "
-                f"\"python3 /workspace/delan_jax/scripts/export_delan_residuals_jax.py "
+                f"{cfg.COMPOSE} exec -T {delan_service} bash -lc "
+                f"\"python3 {export_script} "
                 f"--npz_in {npz_in} "
                 f"--ckpt {ckpt} "
                 f"--out {res_out}"

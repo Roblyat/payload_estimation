@@ -25,7 +25,7 @@ def render_evaluation(st, cfg, paths, run, pad_button, log_view):
             index=0,
             help="Which split to evaluate on (reads from residual trajectory NPZ).",
         )
-        
+
     with e_col2:
         pad_button()
         if st.button("Evaluate + combine", use_container_width=True):
@@ -60,7 +60,7 @@ def render_evaluation(st, cfg, paths, run, pad_button, log_view):
                 f"{cfg.COMPOSE} exec -T evaluation bash -lc "
                 f"\"python3 scripts/delan_metrics_boxplots.py "
                 f"--delan_root {paths.models_delan} "
-                f"--out_dir {paths.models_delan}/_plots "
+                f"--out_dir {paths.models_delan}/_metrics_plots "
                 f"\""
             )
 
@@ -70,7 +70,7 @@ def render_evaluation(st, cfg, paths, run, pad_button, log_view):
                 f"{cfg.COMPOSE} exec -T evaluation bash -lc "
                 f"\"python3 scripts/lstm_metrics_boxplots.py "
                 f"--lstm_root {paths.models_lstm} "
-                f"--out_dir {paths.models_lstm}/_plots "
+                f"--out_dir {paths.models_lstm}/_metrics_plots "
                 f"\""
             )
 

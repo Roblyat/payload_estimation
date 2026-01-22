@@ -87,6 +87,7 @@ class TorchDelanTrainer:
             "render": int(args.r[0]),
             "eval_every": int(args.eval_every),
             "eval_n": int(args.eval_n),
+            "loss_norm": args.loss_norm,
         }
         self.train_run = DelanTrainRun(
             run_paths=self.run_paths,
@@ -221,11 +222,17 @@ class TorchDelanTrainer:
         mem = PyTorchReplayMemory(train_qp.shape[0], self.hyper["n_minibatch"], mem_dim, self.cuda)
         mem.add_samples([train_qp, train_qv, train_qa, train_tau])
 
-        norm_tau = torch.from_numpy(np.var(train_tau, axis=0)).float().to(delan_model.device)
-        norm_qdd = torch.from_numpy(np.var(train_qa, axis=0)).float().to(delan_model.device)
+        use_norm = args.loss_norm == "per_joint"
+        if use_norm:
+            norm_tau = torch.from_numpy(np.var(train_tau, axis=0)).float().to(delan_model.device)
+            norm_qdd = torch.from_numpy(np.var(train_qa, axis=0)).float().to(delan_model.device)
+        else:
+            norm_tau = None
+            norm_qdd = None
 
         print("################################################")
         print(f"Training DeLaN | run={self.run_name} | type={self.model_choice} | dof={n_dof}")
+        print(f"Loss normalization = {args.loss_norm}")
         print("################################################")
 
         t0_start = time.perf_counter()
@@ -243,8 +250,12 @@ class TorchDelanTrainer:
                 tau_hat, dEdt_hat = delan_model(q, qd, qdd)
                 qdd_pred = delan_model.for_dyn(q, qd, tau)
 
-                tau_error = torch.sum((tau - tau_hat) ** 2 / norm_tau, dim=1)
-                qdd_error = torch.sum((qdd - qdd_pred) ** 2 / norm_qdd, dim=1)
+                if use_norm:
+                    tau_error = torch.sum((tau - tau_hat) ** 2 / norm_tau, dim=1)
+                    qdd_error = torch.sum((qdd - qdd_pred) ** 2 / norm_qdd, dim=1)
+                else:
+                    tau_error = torch.sum((tau - tau_hat) ** 2, dim=1)
+                    qdd_error = torch.sum((qdd - qdd_pred) ** 2, dim=1)
                 dEdt_true = torch.sum(qd * tau, dim=1)
                 dEdt_error = (dEdt_hat - dEdt_true) ** 2
 
@@ -446,6 +457,13 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         type=int,
         default=0,
         help="If >0, evaluate only on first eval_n test samples for speed. 0 = full test set.",
+    )
+    parser.add_argument(
+        "--loss_norm",
+        type=str,
+        default="per_joint",
+        choices=["per_joint", "torch_example"],
+        help="Loss normalization: per_joint uses variance normalization; torch_example uses raw squared error.",
     )
     return parser
 

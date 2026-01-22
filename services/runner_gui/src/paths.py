@@ -14,6 +14,9 @@ class Paths:
 
     # passthroughs so sections can do paths.preprocessed, paths.processed, ...
     @property
+    def raw(self) -> str:
+        return self.base.raw
+    @property
     def preprocessed(self) -> str:
         return self.base.preprocessed
 
@@ -36,6 +39,7 @@ class Paths:
 
 def make_paths(cfg) -> Paths:
     bp = BasePaths(
+        # raw=cfg.BASE_RAW,
         preprocessed=cfg.BASE_PREPROCESSED,
         processed=cfg.BASE_PROCESSED,
         models_delan=cfg.BASE_MODELS_DELAN,

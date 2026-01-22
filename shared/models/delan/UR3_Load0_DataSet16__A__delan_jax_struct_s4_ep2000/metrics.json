@@ -1,0 +1,74 @@
+{
+  "timestamp": "2026-01-22T01:12:30",
+  "run_name": "UR3_Load0_DataSet16__A__delan_jax_struct_s4_ep2000",
+  "model_type": "structured",
+  "hp_preset": "default",
+  "npz": "/workspace/shared/data/preprocessed/delan_UR3_Load0_DataSet16_dataset.npz",
+  "model_dir": "/workspace/shared/models/delan/UR3_Load0_DataSet16__A__delan_jax_struct_s4_ep2000",
+  "ckpt_path": "/workspace/shared/models/delan/UR3_Load0_DataSet16__A__delan_jax_struct_s4_ep2000/UR3_Load0_DataSet16__A__delan_jax_struct_s4_ep2000.jax",
+  "seed": 4,
+  "dt": 0.020128842198877187,
+  "n_dof": 6,
+  "hyper": {
+    "dataset": "UR3_Load0_DataSet16__A__delan_jax_struct_s4_ep2000",
+    "n_width": 64,
+    "n_depth": 2,
+    "n_minibatch": 512,
+    "diagonal_epsilon": 0.1,
+    "diagonal_shift": 2.0,
+    "activation": "tanh",
+    "learning_rate": 0.0001,
+    "weight_decay": 1e-05,
+    "max_epoch": 2000,
+    "lagrangian_type": "structured_lagrangian_fn"
+  },
+  "args": {
+    "render": 0,
+    "eval_every": 200,
+    "eval_n": 0
+  },
+  "dataset": {
+    "npz": "/workspace/shared/data/preprocessed/delan_UR3_Load0_DataSet16_dataset.npz",
+    "dataset_name": "delan_UR3_Load0_DataSet16_dataset.npz",
+    "dt": 0.020128842198877187,
+    "dof": 6,
+    "train_trajectories": 8,
+    "test_trajectories": 1,
+    "train_samples": 16000,
+    "test_samples": 2000
+  },
+  "train": {
+    "epochs_ran": 2000,
+    "history_points": 41,
+    "elbow_points": 11
+  },
+  "eval_test": {
+    "torque_mse": 0.10844118893146515,
+    "torque_rmse": 0.32930409795729104,
+    "torque_mse_per_joint": [
+      0.009298739954829216,
+      0.5074101686477661,
+      0.1229473352432251,
+      0.004331301432102919,
+      0.004671639762818813,
+      0.001988384174183011
+    ],
+    "torque_rmse_per_joint": [
+      0.0964299738407135,
+      0.7123273015022278,
+      0.3506384789943695,
+      0.0658126249909401,
+      0.06834939122200012,
+      0.04459130018949509
+    ],
+    "time_per_sample_s": 1.5552399963780772e-07,
+    "hz": 6429875.789774256
+  },
+  "artifacts": {
+    "train_history_csv": "/workspace/shared/models/delan/UR3_Load0_DataSet16__A__delan_jax_struct_s4_ep2000/UR3_Load0_DataSet16__A__delan_jax_struct_s4_ep2000__train_history.csv",
+    "loss_curve_png": "/workspace/shared/models/delan/UR3_Load0_DataSet16__A__delan_jax_struct_s4_ep2000/UR3_Load0_DataSet16__A__delan_jax_struct_s4_ep2000__loss_curve.png",
+    "loss_components_png": "/workspace/shared/models/delan/UR3_Load0_DataSet16__A__delan_jax_struct_s4_ep2000/UR3_Load0_DataSet16__A__delan_jax_struct_s4_ep2000__loss_components.png",
+    "elbow_png": "/workspace/shared/models/delan/UR3_Load0_DataSet16__A__delan_jax_struct_s4_ep2000/UR3_Load0_DataSet16__A__delan_jax_struct_s4_ep2000__elbow_train_vs_test.png",
+    "torque_plot_png": "/workspace/shared/models/delan/UR3_Load0_DataSet16__A__delan_jax_struct_s4_ep2000/UR3_Load0_DataSet16__A__delan_jax_struct_s4_ep2000__DeLaN_Torque.png"
+  }
+}

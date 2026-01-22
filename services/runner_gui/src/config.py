@@ -6,6 +6,7 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class AppConfig:
     # Base directories (container paths)
+    # BASE_RAW: str = "/workspace/shared/data/raw"
     BASE_PREPROCESSED: str = "/workspace/shared/data/preprocessed"
     BASE_PROCESSED: str = "/workspace/shared/data/processed"
     BASE_MODELS_DELAN: str = "/workspace/shared/models/delan"
@@ -33,7 +34,21 @@ class AppConfig:
 
     FEATURE_HELP: dict[str, str] = None  # filled in __post_init__
 
+    COLUMN_FORMATS: tuple[str, ...] = ("long", "wide")
+
+    INPUT_FORMATS: tuple[str, ...] = ("csv", "LeRobot")
+
     def __post_init__(self):
+        object.__setattr__(
+            self,
+            "COLUMN_FORMATS",
+            ("long", "wide"),
+        )
+        object.__setattr__(
+            self,
+            "INPUT_FORMATS",
+            ("csv", "LeRobot"),
+        )
         object.__setattr__(
             self,
             "FEATURE_HELP",

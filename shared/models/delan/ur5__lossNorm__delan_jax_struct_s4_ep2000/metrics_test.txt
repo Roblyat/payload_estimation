@@ -1,0 +1,15 @@
+run_name=ur5__lossNorm__delan_jax_struct_s4_ep2000
+hp_preset=default
+hyper={'dataset': 'ur5__lossNorm__delan_jax_struct_s4_ep2000', 'n_width': 64, 'n_depth': 2, 'n_minibatch': 512, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'tanh', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 2000, 'lagrangian_type': <function structured_lagrangian_fn at 0x7ae4419f01f0>}
+npz=/workspace/shared/data/preprocessed/delan_ur5_dataset.npz
+ckpt=/workspace/shared/models/delan/ur5__lossNorm__delan_jax_struct_s4_ep2000/ur5__lossNorm__delan_jax_struct_s4_ep2000.jax
+seed=4
+model_type=structured
+dt=0.02439441835857372
+n_dof=6
+torque_mse=5.0086236000061035
+torque_rmse=2.237995442355972
+torque_mse_per_joint=1.190943956375122 27.140602111816406 1.4805725812911987 0.17915163934230804 0.05693837255239487 0.003513441886752844
+torque_rmse_per_joint=1.091303825378418 5.209664344787598 1.2167878150939941 0.4232630729675293 0.23861762881278992 0.05927429348230362
+time_per_sample_s=9.802601686338099e-08
+hz=10201373.39043064

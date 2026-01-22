@@ -13,6 +13,18 @@ class DelanPreprocessConfig:
         "ur5_wrist_3_joint",
     )
 
+    # input format
+    # - "long": rows are (Time, Joint Name, Position, Velocity, Acceleration, Effort)
+    # - "wide": rows are frames with q1..q6, dq1..dq6, Iq1..Iq6, etc. (converted to long internally)
+    
+    input_format: str = "long"  # "long" or "wide"
+    
+    derive_qdd_from_dq: bool = True
+
+    # (wide only) optional trajectory/frame id column in the wide CSV.
+    # If present, it will be converted to "trajectory_id" and used directly (no re-segmentation).
+    wide_traj_id_col: str = "ID"
+
     # CSV column names
     col_time: str = "Time"
     col_joint: str = "Joint Name"
@@ -24,8 +36,6 @@ class DelanPreprocessConfig:
     # segmentation
     segment_mode: str = "fixed_length"   # "time_gap" or "fixed_length"
     frames_per_trajectory: int = 75      # 75 frames ≈ ~200 traj for your file
-
-    time_gap_seconds: float = 0.25       # still available if you use "time_gap"
 
     # Trajectory inference (fallback if no explicit trajectory id column exists)
     time_gap_seconds: float = 0.25

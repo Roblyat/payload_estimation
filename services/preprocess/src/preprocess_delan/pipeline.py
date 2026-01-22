@@ -5,6 +5,8 @@ from .pivot import WidePivotBuilder
 from .dataset import TrajectoryDatasetBuilder, NPZDatasetWriter
 from .split import TrajectorySplitter
 
+import pandas as pd
+
 class DelanPreprocessPipeline:
     def __init__(self, cfg):
         self.cfg = cfg
@@ -22,9 +24,12 @@ class DelanPreprocessPipeline:
         self.writer = NPZDatasetWriter()
 
     def run(self, raw_csv_path: str, out_npz_path: str):
-        df = self.loader.load(raw_csv_path)
+        df = self.loader.load(raw_csv_path, self.cfg)
         df = self.selector.filter(df)
-        df = self.segmenter.add_trajectory_id(df)
+        # If loader already provided trajectory_id (e.g., wide dataset with ID column),
+        # do NOT overwrite it with heuristic segmentation.
+        if "trajectory_id" not in df.columns:
+            df = self.segmenter.add_trajectory_id(df)
         trajs = self.builder.build(df)
         train, test = self.splitter.split(trajs)
         self.writer.write(out_npz_path, train, test)

@@ -6,6 +6,7 @@ import os
 
 @dataclass(frozen=True)
 class BasePaths:
+    raw: str
     preprocessed: str
     processed: str
     models_delan: str

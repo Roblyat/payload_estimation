@@ -1,0 +1,15 @@
+run_name=UR3_Load0_DataSet16__A__delan_jax_struct_s4_ep2000
+hp_preset=default
+hyper={'dataset': 'UR3_Load0_DataSet16__A__delan_jax_struct_s4_ep2000', 'n_width': 64, 'n_depth': 2, 'n_minibatch': 512, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'tanh', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 2000, 'lagrangian_type': <function structured_lagrangian_fn at 0x7d52201741f0>}
+npz=/workspace/shared/data/preprocessed/delan_UR3_Load0_DataSet16_dataset.npz
+ckpt=/workspace/shared/models/delan/UR3_Load0_DataSet16__A__delan_jax_struct_s4_ep2000/UR3_Load0_DataSet16__A__delan_jax_struct_s4_ep2000.jax
+seed=4
+model_type=structured
+dt=0.020128842198877187
+n_dof=6
+torque_mse=0.10844118893146515
+torque_rmse=0.32930409795729104
+torque_mse_per_joint=0.009298739954829216 0.5074101686477661 0.1229473352432251 0.004331301432102919 0.004671639762818813 0.001988384174183011
+torque_rmse_per_joint=0.0964299738407135 0.7123273015022278 0.3506384789943695 0.0658126249909401 0.06834939122200012 0.04459130018949509
+time_per_sample_s=1.5552399963780772e-07
+hz=6429875.789774256

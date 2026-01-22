@@ -8,6 +8,7 @@ services:
       - ${APE_PREPROCESS}:/workspace/preprocess
       - ${APE_SHARED}/data/raw:/workspace/shared/data/raw:ro
       - ${APE_SHARED}/data/processed:/workspace/shared/data/processed
+      - ${APE_SHARED}/data/preprocessed:/workspace/shared/data/preprocessed
       - ${APE_SHARED}/config:/workspace/shared/config
       - ${APE_SHARED}/logs:/workspace/shared/logs
       - ${APE_SHARED}/src:/workspace/shared/src:ro

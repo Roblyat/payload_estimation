@@ -1,0 +1,15 @@
+run_name=ur5__lossNorm__delan_torch_struct_s4_ep2000
+hp_preset=default
+hyper={'dataset': 'ur5__lossNorm__delan_torch_struct_s4_ep2000', 'n_width': 64, 'n_depth': 2, 'n_minibatch': 512, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'softplus', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 2000, 'lagrangian_type': 'structured'}
+npz=/workspace/shared/data/preprocessed/delan_ur5_dataset.npz
+ckpt=/workspace/shared/models/delan/ur5__lossNorm__delan_torch_struct_s4_ep2000/ur5__lossNorm__delan_torch_struct_s4_ep2000.torch
+seed=4
+model_type=structured
+dt=0.02439441835857372
+n_dof=6
+torque_mse=88.12358093261719
+torque_rmse=9.387416094571348
+torque_mse_per_joint=15.937187194824219 480.82122802734375 17.871633529663086 8.242692947387695 5.820364475250244 0.04784437641501427
+torque_rmse_per_joint=3.992140769958496 21.927637100219727 4.227485656738281 2.871009111404419 2.4125430583953857 0.21873357892036438
+time_per_sample_s=8.893980478065285e-07
+hz=1124355.9646507464

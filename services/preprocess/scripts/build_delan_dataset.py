@@ -40,6 +40,13 @@ if __name__ == "__main__":
     ap.add_argument("--out_npz", type=str,
         default=os.environ.get("OUT_NPZ", "/workspace/shared/data/preprocessed/delan_ur5_dataset.npz"),
         help="Path to output NPZ dataset file.")
+    
+    ap.add_argument("--trajectory_amount", type=int, default=0,
+                    help="If >0: randomly sample this many trajectories (seeded) before splitting.")
+    ap.add_argument("--test_fraction", type=float, default=0.2,
+                    help="Fraction of trajectories used for test split.")
+    ap.add_argument("--seed", type=int, default=0,
+                    help="Random seed for trajectory sampling and splitting.")
 
     args = ap.parse_args()
 
@@ -49,10 +56,21 @@ if __name__ == "__main__":
     cfg = DelanPreprocessConfig(
         input_format=col_format,
         derive_qdd_from_dq=derive_qdd,
+        test_fraction=args.test_fraction,
+        random_seed=args.seed,
+        trajectory_amount=(None if args.trajectory_amount <= 0 else args.trajectory_amount),
     )
 
     raw_csv = args.raw_csv 
     out_npz = args.out_npz
+
+    # If out_npz is a directory, auto-name the file inside it
+    if os.path.isdir(out_npz):
+        ds_stem = Path(raw_csv).stem
+        out_npz = os.path.join(out_npz, f"delan_{ds_stem}_dataset.npz")
+    if not out_npz.endswith(".npz"):
+        out_npz += ".npz"
+    os.makedirs(os.path.dirname(out_npz), exist_ok=True)
 
     # If user passes a directory, write a dataset-named file inside it.
     if os.path.isdir(out_npz):

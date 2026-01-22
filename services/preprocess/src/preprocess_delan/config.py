@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Sequence
+from typing import Optional
 
 @dataclass(frozen=True)
 class DelanPreprocessConfig:
@@ -43,3 +44,7 @@ class DelanPreprocessConfig:
     # Split
     test_fraction: float = 0.2
     random_seed: int = 0
+
+    # Optional: limit number of trajectories used to build the dataset.
+    # If None or <=0: use all trajectories.
+    trajectory_amount: Optional[int] = None

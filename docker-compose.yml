@@ -6,7 +6,7 @@ services:
       OUT_NPZ: /workspace/shared/data/preprocessed/delan_ur5_dataset.npz
     volumes:
       - ${APE_PREPROCESS}:/workspace/preprocess
-      - ${APE_SHARED}/data/raw:/workspace/shared/data/raw:ro
+      - ${APE_SHARED}/data/raw:/workspace/shared/data/raw
       - ${APE_SHARED}/data/processed:/workspace/shared/data/processed
       - ${APE_SHARED}/data/preprocessed:/workspace/shared/data/preprocessed
       - ${APE_SHARED}/config:/workspace/shared/config

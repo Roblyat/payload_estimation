@@ -1,0 +1,113 @@
+#################################################################################
+### Sweep started: 20260122_055923                                            ###
+### dataset=delan_UR3_Load0_combined_26 run_tag=A                             ###
+### raw_csv=/workspace/shared/data/raw/delan_UR3_Load0_combined_26.csv        ###
+### col_format=wide derive_qdd=True                                           ###
+### traj_amounts=[25, 50, 75, 100, 150] test_fracs=[0.2, 0.3] seeds=[0, 1, 2] ###
+### H=[25, 50] feature_modes=['full', 'tau_hat', 'state', 'state_tauhat']     ###
+### DeLaN: backend=jax type=structured hp_preset=fast_debug                   ###
+#################################################################################
+
+########################################
+### SUBSWEEP: K=25 test_fraction=0.2 ###
+########################################
+
+[OK] K=25 tf=0.2 seed=0  log=logs_sweeps/run_K25_tf0p2_seed0_20260122_055923.log
+
+[OK] K=25 tf=0.2 seed=1  log=logs_sweeps/run_K25_tf0p2_seed1_20260122_055923.log
+
+[OK] K=25 tf=0.2 seed=2  log=logs_sweeps/run_K25_tf0p2_seed2_20260122_055923.log
+
+########################################
+### SUBSWEEP: K=25 test_fraction=0.3 ###
+########################################
+
+[OK] K=25 tf=0.3 seed=0  log=logs_sweeps/run_K25_tf0p3_seed0_20260122_055923.log
+
+[OK] K=25 tf=0.3 seed=1  log=logs_sweeps/run_K25_tf0p3_seed1_20260122_055923.log
+
+[OK] K=25 tf=0.3 seed=2  log=logs_sweeps/run_K25_tf0p3_seed2_20260122_055923.log
+
+########################################
+### SUBSWEEP: K=50 test_fraction=0.2 ###
+########################################
+
+[OK] K=50 tf=0.2 seed=0  log=logs_sweeps/run_K50_tf0p2_seed0_20260122_055923.log
+
+[OK] K=50 tf=0.2 seed=1  log=logs_sweeps/run_K50_tf0p2_seed1_20260122_055923.log
+
+[OK] K=50 tf=0.2 seed=2  log=logs_sweeps/run_K50_tf0p2_seed2_20260122_055923.log
+
+########################################
+### SUBSWEEP: K=50 test_fraction=0.3 ###
+########################################
+
+[OK] K=50 tf=0.3 seed=0  log=logs_sweeps/run_K50_tf0p3_seed0_20260122_055923.log
+
+[OK] K=50 tf=0.3 seed=1  log=logs_sweeps/run_K50_tf0p3_seed1_20260122_055923.log
+
+[OK] K=50 tf=0.3 seed=2  log=logs_sweeps/run_K50_tf0p3_seed2_20260122_055923.log
+
+########################################
+### SUBSWEEP: K=75 test_fraction=0.2 ###
+########################################
+
+[OK] K=75 tf=0.2 seed=0  log=logs_sweeps/run_K75_tf0p2_seed0_20260122_055923.log
+
+[OK] K=75 tf=0.2 seed=1  log=logs_sweeps/run_K75_tf0p2_seed1_20260122_055923.log
+
+[OK] K=75 tf=0.2 seed=2  log=logs_sweeps/run_K75_tf0p2_seed2_20260122_055923.log
+
+########################################
+### SUBSWEEP: K=75 test_fraction=0.3 ###
+########################################
+
+[OK] K=75 tf=0.3 seed=0  log=logs_sweeps/run_K75_tf0p3_seed0_20260122_055923.log
+
+[OK] K=75 tf=0.3 seed=1  log=logs_sweeps/run_K75_tf0p3_seed1_20260122_055923.log
+
+[OK] K=75 tf=0.3 seed=2  log=logs_sweeps/run_K75_tf0p3_seed2_20260122_055923.log
+
+#########################################
+### SUBSWEEP: K=100 test_fraction=0.2 ###
+#########################################
+
+[OK] K=100 tf=0.2 seed=0  log=logs_sweeps/run_K100_tf0p2_seed0_20260122_055923.log
+
+[OK] K=100 tf=0.2 seed=1  log=logs_sweeps/run_K100_tf0p2_seed1_20260122_055923.log
+
+[OK] K=100 tf=0.2 seed=2  log=logs_sweeps/run_K100_tf0p2_seed2_20260122_055923.log
+
+#########################################
+### SUBSWEEP: K=100 test_fraction=0.3 ###
+#########################################
+
+[OK] K=100 tf=0.3 seed=0  log=logs_sweeps/run_K100_tf0p3_seed0_20260122_055923.log
+
+[OK] K=100 tf=0.3 seed=1  log=logs_sweeps/run_K100_tf0p3_seed1_20260122_055923.log
+
+[OK] K=100 tf=0.3 seed=2  log=logs_sweeps/run_K100_tf0p3_seed2_20260122_055923.log
+
+#########################################
+### SUBSWEEP: K=150 test_fraction=0.2 ###
+#########################################
+
+[OK] K=150 tf=0.2 seed=0  log=logs_sweeps/run_K150_tf0p2_seed0_20260122_055923.log
+
+[OK] K=150 tf=0.2 seed=1  log=logs_sweeps/run_K150_tf0p2_seed1_20260122_055923.log
+
+[OK] K=150 tf=0.2 seed=2  log=logs_sweeps/run_K150_tf0p2_seed2_20260122_055923.log
+
+#########################################
+### SUBSWEEP: K=150 test_fraction=0.3 ###
+#########################################
+
+[OK] K=150 tf=0.3 seed=0  log=logs_sweeps/run_K150_tf0p3_seed0_20260122_055923.log
+
+[OK] K=150 tf=0.3 seed=1  log=logs_sweeps/run_K150_tf0p3_seed1_20260122_055923.log
+
+[OK] K=150 tf=0.3 seed=2  log=logs_sweeps/run_K150_tf0p3_seed2_20260122_055923.log
+
+#########################
+### Sweep finished OK ###
+#########################

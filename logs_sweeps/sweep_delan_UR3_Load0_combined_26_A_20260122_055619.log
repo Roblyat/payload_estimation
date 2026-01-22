@@ -1,0 +1,13 @@
+#################################################################################
+### Sweep started: 20260122_055619                                            ###
+### dataset=delan_UR3_Load0_combined_26 run_tag=A                             ###
+### raw_csv=/workspace/shared/data/raw/delan_UR3_Load0_combined_26.csv        ###
+### col_format=wide derive_qdd=True                                           ###
+### traj_amounts=[25, 50, 75, 100, 150] test_fracs=[0.2, 0.3] seeds=[0, 1, 2] ###
+### H=[25, 50] feature_modes=['full', 'tau_hat', 'state', 'state_tauhat']     ###
+### DeLaN: backend=jax type=structured hp_preset=fast_debug                   ###
+#################################################################################
+
+########################################
+### SUBSWEEP: K=25 test_fraction=0.2 ###
+########################################

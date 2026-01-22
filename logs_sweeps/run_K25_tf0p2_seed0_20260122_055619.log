@@ -1,0 +1,219 @@
+################################################################################################################
+### RUN: K=25 test_fraction=0.2 seed=0                                                                       ###
+### npz_in=/workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K25_tf0p2_seed0_dataset.npz ###
+################################################################################################################
+
+#####################
+### 1) PREPROCESS ###
+#####################
+
+=====================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T preprocess bash -lc 'python3 scripts/build_delan_dataset.py --qdd True --col_format wide --trajectory_amount 25 --test_fraction 0.2 --seed 0 --raw_csv /workspace/shared/data/raw/delan_UR3_Load0_combined_26.csv --out_npz /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K25_tf0p2_seed0_dataset.npz' ===
+=====================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Saved: /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K25_tf0p2_seed0_dataset.npz
+Trajectories: train=20 test=5
+Exists: True
+
+###################################################################################################################################################################
+### DELAN VARIANT: delan_seed=0                                                                                                                                 ###
+### ckpt=/workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150.jax ###
+### res_out=/workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K25_tf0p2__residual__delan_jax_struct_s0_ep150.npz                                 ###
+###################################################################################################################################################################
+
+######################
+### 2) DELAN TRAIN ###
+######################
+
+===============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T delan_jax bash -lc 'python3 /workspace/delan_jax/scripts/rbyt_train_delan_jax.py --npz /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K25_tf0p2_seed0_dataset.npz -t structured -s 0 -r 0 --hp_preset fast_debug --epochs 150 --save_path /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150.jax' ===
+===============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Final hyper: {'dataset': 'delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150', 'n_width': 64, 'n_depth': 2, 'n_minibatch': 256, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'tanh', 'learning_rate': 0.0003, 'weight_decay': 1e-05, 'max_epoch': 150, 'lagrangian_type': <function structured_lagrangian_fn at 0x79c57df5c1f0>}
+
+
+################################################
+DeLaN run: delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150
+  model_dir = /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150
+  ckpt_path = /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150.jax
+  type = structured
+  hp_preset = fast_debug
+################################################
+
+
+################################################
+Dataset: delan_delan_UR3_Load0_combined_26_K25_tf0p2_seed0_dataset.npz
+  npz = /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K25_tf0p2_seed0_dataset.npz
+   dt ≈ 0.022376492089782287
+  dof = 6
+  Train trajectories = 20
+  Test trajectories  = 5
+  Train samples = 15530
+  Test samples  = 2004
+################################################
+
+2026-01-22 04:56:25.284458: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+################################################
+Training DeLaN | run=delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150 | type=structured | dof=6
+################################################
+2026-01-22 04:56:28.508600: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-22 04:56:28.508638: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-22 04:56:28.508644: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-22 04:56:28.508672: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-22 04:56:28.508677: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-22 04:56:28.508692: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-22 04:56:28.508733: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-22 04:56:28.508739: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-22 04:56:28.508754: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-22 04:56:28.508759: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+Epoch 00001: Time=   5.2s, Loss=2.06e+01, Inv=2.06e+01, For=2.81e+02, Power=3.75e+00
+2026-01-22 04:56:33.608148: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+  [eval] test_mse=6.000e+00  (n=2004)
+Epoch 00050: Time=   8.7s, Loss=2.32e+00, Inv=2.32e+00, For=1.21e+02, Power=1.08e+00
+Epoch 00100: Time=  10.9s, Loss=1.78e+00, Inv=1.78e+00, For=1.44e+02, Power=9.16e-01
+Epoch 00150: Time=  13.3s, Loss=1.57e+00, Inv=1.57e+00, For=1.75e+02, Power=8.59e-01
+Saved DeLaN checkpoint: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150.jax
+Saved training history: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150__train_history.csv
+
+################################################
+Evaluating DeLaN | run=delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150
+Torque MSE  = 1.492e+00
+Torque RMSE = 1.221e+00
+Per-joint MSE : 2.089e+00 1.037e+00 7.958e-01 4.736e-01 3.220e+00 1.337e+00
+Per-joint RMSE: 1.445e+00 1.018e+00 8.921e-01 6.882e-01 1.795e+00 1.156e+00
+Comp Time per Sample = 1.628e-07s / 6143507.9Hz
+Saved metrics TXT: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150/metrics_test.txt
+Saved metrics JSON: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150/metrics.json
+
+
+###########################
+### 3) EXPORT RESIDUALS ###
+###########################
+
+=================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T delan_jax bash -lc 'python3 /workspace/delan_jax/scripts/export_delan_residuals_jax.py --npz_in /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K25_tf0p2_seed0_dataset.npz --ckpt /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150.jax --out /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K25_tf0p2__residual__delan_jax_struct_s0_ep150.npz' ===
+=================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Loading dataset: /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K25_tf0p2_seed0_dataset.npz
+Loading checkpoint: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep150.jax
+Detected n_dof=6 (seed=0)
+2026-01-22 04:56:44.016903: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+
+Exporting split=train: 20 trajectories
+2026-01-22 04:56:45.350240: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-22 04:56:46.650993: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-22 04:56:46.651008: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-22 04:56:48.174044: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-22 04:56:48.174056: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+  done 20/20
+
+Exporting split=test: 5 trajectories
+2026-01-22 04:56:49.774362: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+  done 5/5
+
+Saved residual trajectory dataset: /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K25_tf0p2__residual__delan_jax_struct_s0_ep150/delan_UR3_Load0_combined_26__A__K25_tf0p2__residual__delan_jax_struct_s0_ep150.npz
+Keys: ['test_labels', 'test_q', 'test_qd', 'test_qdd', 'test_r_tau', 'test_t', 'test_tau', 'test_tau_hat', 'train_labels', 'train_q', 'train_qd', 'train_qdd', 'train_r_tau', 'train_t', 'train_tau', 'train_tau_hat']
+Saved export JSON: /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K25_tf0p2__residual__delan_jax_struct_s0_ep150/delan_UR3_Load0_combined_26__A__K25_tf0p2__residual__delan_jax_struct_s0_ep150.json
+
+
+#############################
+### BLOCK: H=25 feat=full ###
+#############################
+
+#############################
+### 4) BUILD LSTM WINDOWS ###
+#############################
+
+=======================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T preprocess bash -lc 'python3 scripts/build_lstm_windows.py --in_npz /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K25_tf0p2__residual__delan_jax_struct_s0_ep150.npz --out_npz /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K25_tf0p2__lstm_windows_H25__feat_full__delan_jax_struct_s0_ep150.npz --H 25 --features full' ===
+=======================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Building LSTM windows
+  in_npz      = /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K25_tf0p2__residual__delan_jax_struct_s0_ep150.npz
+  out_npz     = /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K25_tf0p2__lstm_windows_H25__feat_full__delan_jax_struct_s0_ep150.npz
+  H           = 25
+  feature_mode= full
+Saved: /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K25_tf0p2__lstm_windows_H25__feat_full__delan_jax_struct_s0_ep150/delan_UR3_Load0_combined_26__A__K25_tf0p2__lstm_windows_H25__feat_full__delan_jax_struct_s0_ep150.npz
+Saved: /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K25_tf0p2__lstm_windows_H25__feat_full__delan_jax_struct_s0_ep150/delan_UR3_Load0_combined_26__A__K25_tf0p2__lstm_windows_H25__feat_full__delan_jax_struct_s0_ep150.json
+H=25, n_dof=6, feature_dim=24
+X_train: (15260, 25, 24)  Y_train: (15260, 6)
+X_test : (1926, 25, 24)  Y_test : (1926, 6)
+feature_mode=full
+
+
+#####################
+### 5) TRAIN LSTM ###
+#####################
+
+===============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T lstm bash -lc 'python3 -c '"'"'import runpy
+import keras.callbacks as cb
+_Orig = cb.ModelCheckpoint
+
+class PatchedModelCheckpoint(_Orig):
+    def __init__(self, filepath, *args, **kwargs):
+        if isinstance(filepath, str) and (not filepath.endswith('"'"'"'"'"'"'"'"'.keras'"'"'"'"'"'"'"'"')) and (not filepath.endswith('"'"'"'"'"'"'"'"'.h5'"'"'"'"'"'"'"'"')):
+            filepath = filepath + '"'"'"'"'"'"'"'"'.keras'"'"'"'"'"'"'"'"'
+        super().__init__(filepath, *args, **kwargs)
+
+cb.ModelCheckpoint = PatchedModelCheckpoint
+runpy.run_path('"'"'"'"'"'"'"'"'scripts/train_residual_lstm.py'"'"'"'"'"'"'"'"', run_name='"'"'"'"'"'"'"'"'__main__'"'"'"'"'"'"'"'"')
+'"'"' --npz /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K25_tf0p2__lstm_windows_H25__feat_full__delan_jax_struct_s0_ep150.npz --out_dir /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K25_tf0p2__delan_jax_struct_s0_ep150__feat_full__lstm_s0_H25_ep30_b256_u128_do0p1 --model_name residual_lstm --epochs 30 --batch 256 --val_split 0.2 --seed 4 --units 128 --dropout 0.1 --eps 1e-08 --no_plots' ===
+===============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+2026-01-22 04:56:51.893595: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-01-22 04:56:51.918483: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI AVX512_BF16 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+################################################
+LSTM Residual Dataset:
+  npz = /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K25_tf0p2__lstm_windows_H25__feat_full__delan_jax_struct_s0_ep150/delan_UR3_Load0_combined_26__A__K25_tf0p2__lstm_windows_H25__feat_full__delan_jax_struct_s0_ep150.npz
+   H  = 25
+  din = 24
+ dout = 6
+  X_train = (15260, 25, 24), Y_train = (15260, 6)
+  X_test  = (1926, 25, 24),  Y_test  = (1926, 6)
+################################################
+
+Saved scalers: /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K25_tf0p2__delan_jax_struct_s0_ep150__feat_full__lstm_s0_H25_ep30_b256_u128_do0p1/scalers_H25.npz
+X mean/std shapes: (24,)/(24,)
+Y mean/std shapes: (6,)/(6,)
+2026-01-22 04:56:52.958677: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-22 04:56:52.963503: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-22 04:56:52.964410: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-22 04:56:52.966270: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-22 04:56:52.967173: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-22 04:56:52.968022: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-22 04:56:53.052043: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-22 04:56:53.052929: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-22 04:56:53.053745: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-22 04:56:53.054520: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1928] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 8707 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 4070 Ti, pci bus id: 0000:01:00.0, compute capability: 8.9
+/usr/local/lib/python3.11/dist-packages/keras/src/layers/rnn/rnn.py:205: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+  super().__init__(**kwargs)
+Model: "sequential"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Layer (type)                    ┃ Output Shape           ┃       Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ lstm (LSTM)                     │ (None, 25, 128)        │        78,336 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dropout (Dropout)               │ (None, 25, 128)        │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ lstm_1 (LSTM)                   │ (None, 128)            │       131,584 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dropout_1 (Dropout)             │ (None, 128)            │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense (Dense)                   │ (None, 6)              │           774 │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+ Total params: 210,694 (823.02 KB)
+ Trainable params: 210,694 (823.02 KB)
+ Non-trainable params: 0 (0.00 B)
+
+
+Traceback (most recent call last):
+  File "<string>", line 12, in <module>
+  File "<frozen runpy>", line 291, in run_path
+  File "<frozen runpy>", line 98, in _run_module_code
+  File "<frozen runpy>", line 88, in _run_code
+  File "scripts/train_residual_lstm.py", line 385, in <module>
+    main()
+  File "scripts/train_residual_lstm.py", line 265, in main
+    ModelCheckpoint(ckpt_path, monitor="val_loss", save_best_only=True),
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/keras/src/callbacks/model_checkpoint.py", line 191, in __init__
+    raise ValueError(
+ValueError: The filepath provided must end in `.keras` (Keras model format). Received: filepath=/workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K25_tf0p2__delan_jax_struct_s0_ep150__feat_full__lstm_s0_H25_ep30_b256_u128_do0p1/residual_lstm
+

@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+
+#usage: python3 scripts/run_full_sweep.py
+
 import os
 import shlex
 import subprocess
@@ -9,11 +12,12 @@ from pathlib import Path
 # USER SETTINGS (edit if needed)
 # ----------------------------
 
+REPO_ROOT = Path(__file__).resolve().parents[1]  # repo root (…/payload_estimation)
 COMPOSE = (
-    "docker compose -p payload_estimation "
-    "--project-directory /workspace "
-    "--env-file /workspace/.env "
-    "-f /workspace/docker-compose.yml"
+    f"docker compose -p payload_estimation "
+    f"--project-directory {REPO_ROOT} "
+    f"--env-file {REPO_ROOT}/.env "
+    f"-f {REPO_ROOT}/docker-compose.yml"
 )
 
 # Services
@@ -81,6 +85,41 @@ SCRIPT_EVAL = "scripts/combined_evaluation.py"
 # ----------------------------
 # Helper functions
 # ----------------------------
+def lstm_train_cmd_patched(npz: str, out_dir: str, model_name: str,
+                           epochs: int, batch: int, val_split: float, seed: int,
+                           units: int, dropout: float, eps: float, no_plots: bool) -> str:
+    no_plots_flag = "--no_plots" if no_plots else ""
+
+    py = (
+        "import runpy\n"
+        "import keras.callbacks as cb\n"
+        "_Orig = cb.ModelCheckpoint\n"
+        "\n"
+        "class PatchedModelCheckpoint(_Orig):\n"
+        "    def __init__(self, filepath, *args, **kwargs):\n"
+        "        if isinstance(filepath, str) and (not filepath.endswith('.keras')) and (not filepath.endswith('.h5')):\n"
+        "            filepath = filepath + '.keras'\n"
+        "        super().__init__(filepath, *args, **kwargs)\n"
+        "\n"
+        "cb.ModelCheckpoint = PatchedModelCheckpoint\n"
+        "runpy.run_path('scripts/train_residual_lstm.py', run_name='__main__')\n"
+    )
+
+    return (
+        f"python3 -c {shlex.quote(py)} "
+        f"--npz {npz} "
+        f"--out_dir {out_dir} "
+        f"--model_name {model_name} "
+        f"--epochs {epochs} "
+        f"--batch {batch} "
+        f"--val_split {val_split} "
+        f"--seed {seed} "
+        f"--units {units} "
+        f"--dropout {dropout} "
+        f"--eps {eps} "
+        f"{no_plots_flag}"
+    )
+
 
 def delan_epochs_for(K: int) -> int:
     # conservative scaling: small K trains faster, big K trains longer
@@ -165,25 +204,12 @@ def main():
                     delan_npz_name = f"delan_{DATASET_NAME}_K{K}_tf{safe_tag(tf)}_seed{seed}_dataset.npz"
                     npz_in = f"{PREPROCESSED_DIR}/{delan_npz_name}"
 
-                    # delan tag/id
-                    model_short = "struct"
-                    delan_tag = f"delan_jax_{model_short}_s{delan_seed}_ep{delan_epochs}"
-                    delan_id = f"{DATASET_NAME}__{RUN_TAG}__{delan_tag}"
-                    delan_run_dir = f"{MODELS_DELAN_DIR}/{delan_id}"
-                    ckpt = f"{delan_run_dir}/{delan_id}.jax"
-
-                    # residual output (unique per K/tf/seed)
-                    residual_name = f"{base_id}__K{K}_tf{safe_tag(tf)}__residual__{delan_tag}.npz"
-                    res_out = f"{PROCESSED_DIR}/{residual_name}"
-
                     # per-run log
                     run_log_path = logs_dir / f"run_K{K}_tf{safe_tag(tf)}_seed{seed}_{ts}.log"
                     with run_log_path.open("w", encoding="utf-8") as run_log:
                         run_log.write(banner([
                             f"RUN: K={K} test_fraction={tf} seed={seed}",
                             f"npz_in={npz_in}",
-                            f"ckpt={ckpt}",
-                            f"res_out={res_out}",
                         ], char="#") + "\n")
 
                         # ---------- 1) Preprocess ----------
@@ -203,6 +229,23 @@ def main():
 
                         # ---------- 2) DeLaN Train ----------
                         for delan_seed in DELAN_SEEDS:
+                            # delan tag/id (depends on delan_seed)
+                            model_short = "struct"
+                            delan_tag = f"delan_jax_{model_short}_s{delan_seed}_ep{delan_epochs}"
+                            delan_id = f"{DATASET_NAME}__{RUN_TAG}__{delan_tag}"
+                            delan_run_dir = f"{MODELS_DELAN_DIR}/{delan_id}"
+                            ckpt = f"{delan_run_dir}/{delan_id}.jax"
+
+                            # residual output (depends on delan_tag / delan_seed)
+                            residual_name = f"{base_id}__K{K}_tf{safe_tag(tf)}__residual__{delan_tag}.npz"
+                            res_out = f"{PROCESSED_DIR}/{residual_name}"
+
+                            run_log.write(banner([
+                                f"DELAN VARIANT: delan_seed={delan_seed}",
+                                f"ckpt={ckpt}",
+                                f"res_out={res_out}",
+                            ], char="#") + "\n")
+
                             run_log.write("\n" + banner(["2) DELAN TRAIN"], char="#") + "\n")
                             hp_flags = (DELAN_HP_FLAGS + " ") if DELAN_HP_FLAGS.strip() else ""
                             cmd = compose_exec(
@@ -213,7 +256,7 @@ def main():
                                 f"-s {delan_seed} "
                                 f"-r 0 "
                                 f"--hp_preset {DELAN_HP_PRESET} "
-                                f"--max_epoch {delan_epochs} "
+                                f"--epochs {delan_epochs} "
                                 f"{hp_flags}"
                                 f"--save_path {ckpt}"
                             )
@@ -239,7 +282,7 @@ def main():
 
                                     windows_npz_name = (
                                         f"{base_id}__K{K}_tf{safe_tag(tf)}__lstm_windows_H{H}"
-                                        f"__feat_{feat}__delan_jax_seed{seed}.npz"
+                                        f"__feat_{feat}__{delan_tag}.npz"
                                     )
                                     win_out = f"{PROCESSED_DIR}/{windows_npz_name}"
 
@@ -250,9 +293,9 @@ def main():
                                         f"_ep{lstm_epochs}_b{LSTM_BATCH}_u{LSTM_UNITS}_do{safe_tag(LSTM_DROPOUT)}"
                                     )
                                     lstm_out = f"{MODELS_LSTM_DIR}/{lstm_dir_name}"
-                                    lstm_model_name = "residual_lstm"
-                                    lstm_model_path = f"{lstm_out}/{lstm_model_name}.pt"
-                                    lstm_scalers_path = f"{lstm_out}/scalers.npz"
+                                    lstm_model_name = lstm_model_name = "residual_lstm.keras"
+                                    lstm_model_path = f"{lstm_out}/{lstm_model_name}"        # already includes .keras
+                                    lstm_scalers_path = f"{lstm_out}/scalers_H{H}.npz"
 
                                     eval_out = f"{EVAL_DIR}/{lstm_dir_name}"
 
@@ -271,21 +314,22 @@ def main():
                                     # 5) Train LSTM
                                     run_log.write("\n" + banner(["5) TRAIN LSTM"], char="#") + "\n")
                                     no_plots_flag = "--no_plots" if LSTM_NO_PLOTS else ""
-                                    cmd = compose_exec(
-                                        SVC_LSTM,
-                                        f"python3 {SCRIPT_TRAIN_LSTM} "
-                                        f"--npz {win_out} "
-                                        f"--out_dir {lstm_out} "
-                                        f"--model_name {lstm_model_name} "
-                                        f"--epochs {lstm_epochs} "
-                                        f"--batch {LSTM_BATCH} "
-                                        f"--val_split {LSTM_VAL_SPLIT} "
-                                        f"--seed {seed} "
-                                        f"--units {LSTM_UNITS} "
-                                        f"--dropout {LSTM_DROPOUT} "
-                                        f"--eps {LSTM_EPS} "
-                                        f"{no_plots_flag}"
+                                    inner = lstm_train_cmd_patched(
+                                        npz=win_out,
+                                        out_dir=lstm_out,
+                                        model_name=lstm_model_name,
+                                        epochs=lstm_epochs,
+                                        batch=LSTM_BATCH,
+                                        val_split=LSTM_VAL_SPLIT,
+                                        seed=4,
+                                        units=LSTM_UNITS,
+                                        dropout=LSTM_DROPOUT,
+                                        eps=LSTM_EPS,
+                                        no_plots=LSTM_NO_PLOTS,
                                     )
+
+                                    cmd = compose_exec(SVC_LSTM, inner)
+
                                     run_cmd(cmd, run_log)
 
                                     # 6) Combined evaluation

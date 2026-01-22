@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+
+# usage: python3 tests/build_ur3_load0_26_combined.py
+
 import os
 import re
 import sys

@@ -50,15 +50,8 @@ class RawCSVLoader:
         q = dfw[q_cols].to_numpy(dtype=float)      # (N, 6)
         dq = dfw[dq_cols].to_numpy(dtype=float)    # (N, 6)
         iq = dfw[iq_cols].to_numpy(dtype=float)    # (N, 6)
-        # Derive acceleration qdd if requested
-        if getattr(cfg, "derive_qdd_from_dq", True) and len(t) >= 2:
-            # Use time-based gradient if time is strictly increasing; else fallback to uniform step
-            if np.all(np.diff(t) > 0):
-                qdd = np.stack([np.gradient(dq[:, j], t) for j in range(dq.shape[1])], axis=1)
-            else:
-                qdd = np.stack([np.gradient(dq[:, j]) for j in range(dq.shape[1])], axis=1)
-        else:
-            qdd = np.zeros_like(dq)
+        # Acceleration will be derived (or filtered) later in the pipeline
+        qdd = np.zeros_like(dq)
         # Convert wide frames to long rows: one row per (time, joint)
         long_parts = []
         for j, joint_name in enumerate(cfg.dof_joints):

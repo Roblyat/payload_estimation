@@ -50,6 +50,32 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
             value=True,
             help="If Acceleration column is not provided in the raw CSV, derive it from Velocity via numerical differentiation.",
         )
+        filter_accel = st.checkbox(
+            "Filter q/qd/tau",
+            value=False,
+            help="Apply a Butterworth low-pass filter to q, qd, and tau (and optionally qdd).",
+        )
+        filter_cutoff_hz = st.number_input(
+            "Filter cutoff (Hz)",
+            min_value=0.1,
+            max_value=200.0,
+            value=20.0,
+            step=1.0,
+            help="Low-pass cutoff frequency for filtering.",
+        )
+        filter_order = st.number_input(
+            "Filter order",
+            min_value=1,
+            max_value=10,
+            value=4,
+            step=1,
+            help="Butterworth filter order.",
+        )
+        filter_qdd = st.checkbox(
+            "Filter qdd",
+            value=True,
+            help="Apply the same low-pass filter to qdd after derivation.",
+        )
         H = st.number_input(
             "History length H",
             min_value=1,
@@ -93,6 +119,10 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
                 f"--col_format {col_format} "
                 f"--test_fraction {test_fraction} "
                 f"--val_fraction {val_fraction} "
+                f"--filter_accel {filter_accel} "
+                f"--filter_cutoff_hz {filter_cutoff_hz} "
+                f"--filter_order {filter_order} "
+                f"--filter_qdd {filter_qdd} "
                 f"--raw_csv {raw_data_path}/{dataset_name}.{in_format} "
                 f"--out_npz {paths.preprocessed}/{out_npz_name} "
                 f"\""
@@ -129,6 +159,10 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
     st.session_state["feature_mode"] = feature_mode
     st.session_state["test_fraction"] = float(test_fraction)
     st.session_state["val_fraction"] = float(val_fraction)
+    st.session_state["filter_accel"] = bool(filter_accel)
+    st.session_state["filter_cutoff_hz"] = float(filter_cutoff_hz)
+    st.session_state["filter_order"] = int(filter_order)
+    st.session_state["filter_qdd"] = bool(filter_qdd)
     st.session_state["base_id"] = f"{dataset_name}__{run_tag}"
     st.session_state["npz_in"] = npz_in
     st.session_state["win_out"] = win_out

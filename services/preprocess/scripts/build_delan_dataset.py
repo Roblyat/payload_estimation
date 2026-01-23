@@ -49,6 +49,14 @@ if __name__ == "__main__":
                     help="Fraction of trajectories used for validation split.")
     ap.add_argument("--seed", type=int, default=0,
                     help="Random seed for trajectory sampling and splitting.")
+    ap.add_argument("--filter_accel", type=str2bool, default=False,
+                    help="Apply low-pass filtering to q/qd/tau and optionally qdd.")
+    ap.add_argument("--filter_cutoff_hz", type=float, default=20.0,
+                    help="Low-pass cutoff frequency (Hz).")
+    ap.add_argument("--filter_order", type=int, default=4,
+                    help="Butterworth filter order.")
+    ap.add_argument("--filter_qdd", type=str2bool, default=True,
+                    help="Also low-pass filter qdd after derivation.")
 
     args = ap.parse_args()
 
@@ -62,6 +70,10 @@ if __name__ == "__main__":
         val_fraction=args.val_fraction,
         random_seed=args.seed,
         trajectory_amount=(None if args.trajectory_amount <= 0 else args.trajectory_amount),
+        filter_accel=args.filter_accel,
+        filter_cutoff_hz=args.filter_cutoff_hz,
+        filter_order=args.filter_order,
+        filter_qdd=args.filter_qdd,
     )
 
     raw_csv = args.raw_csv 

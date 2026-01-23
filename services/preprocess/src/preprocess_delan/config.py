@@ -46,6 +46,12 @@ class DelanPreprocessConfig:
     val_fraction: float = 0.1
     random_seed: int = 0
 
+    # Filtering
+    filter_accel: bool = False
+    filter_cutoff_hz: float = 20.0
+    filter_order: int = 4
+    filter_qdd: bool = True
+
     # Optional: limit number of trajectories used to build the dataset.
     # If None or <=0: use all trajectories.
     trajectory_amount: Optional[int] = None

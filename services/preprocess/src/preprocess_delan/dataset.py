@@ -1,15 +1,18 @@
 import numpy as np
 from .types import Trajectory
+from .filtering import DelanSignalFilter
 
 class TrajectoryDatasetBuilder:
     def __init__(self, cfg, pivot_builder):
         self.cfg = cfg
         self.pivot_builder = pivot_builder
+        self.filter = DelanSignalFilter(cfg)
 
     def build(self, df) -> list[Trajectory]:
         trajs: list[Trajectory] = []
         for traj_id, df_traj in df.groupby("trajectory_id"):
             t, q, qd, qdd, tau = self.pivot_builder.build_for_trajectory(df_traj)
+            t, q, qd, qdd, tau = self.filter.process_trajectory(t, q, qd, qdd, tau)
             label = f"traj_{int(traj_id):04d}"
             trajs.append(Trajectory(label=label, t=t, q=q, qd=qd, qdd=qdd, tau=tau))
         return trajs

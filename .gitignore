@@ -24,3 +24,7 @@ shared/models/lstm/*
 !shared/models/lstm/_metrics_plots/
 shared/models/lstm/_metrics_plots/*
 !shared/models/lstm/_metrics_plots/.gitkeep
+
+# Python cache
+__pycache__/
+*.pyc

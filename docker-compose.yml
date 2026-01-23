@@ -2,6 +2,7 @@ services:
   preprocess:
     build: ./services/preprocess
     environment:
+      PYTHONDONTWRITEBYTECODE: "1"
       RAW_CSV: /workspace/shared/data/raw/raw_data.csv
       OUT_NPZ: /workspace/shared/data/preprocessed/delan_ur5_dataset.npz
     volumes:
@@ -26,6 +27,7 @@ services:
       dockerfile: Dockerfile.jax
     gpus: all
     environment:
+    - PYTHONDONTWRITEBYTECODE=1
     - DISPLAY=${DISPLAY}
     - QT_X11_NO_MITSHM=1
     # - MPLBACKEND=Agg
@@ -53,6 +55,7 @@ services:
       dockerfile: Dockerfile.torch
     gpus: all
     environment:
+    - PYTHONDONTWRITEBYTECODE=1
     - DISPLAY=${DISPLAY}
     - QT_X11_NO_MITSHM=1
     - MPLBACKEND=Agg
@@ -78,6 +81,8 @@ services:
       - delan_jax
     build: ./services/lstm
     gpus: all
+    environment:
+      PYTHONDONTWRITEBYTECODE: "1"
     volumes:
       - ${APE_SHARED}/data/processed:/workspace/shared/data/processed:ro
       - ${APE_SHARED}/models/delan:/workspace/shared/models/delan:ro
@@ -98,6 +103,7 @@ services:
       - lstm
     gpus: all
     environment:
+      - PYTHONDONTWRITEBYTECODE=1
       - MPLBACKEND=Agg
     volumes:
       - ${APE_EVALUATION}:/workspace/evaluation
@@ -129,6 +135,7 @@ services:
       - DISPLAY=${DISPLAY}
       - STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
       - STREAMLIT_SERVER_HEADLESS=true
+      - PYTHONDONTWRITEBYTECODE=1
     volumes:
       - ${APE_PE}/services/runner_gui:/app
       - ${APE_PE}:/workspace:ro

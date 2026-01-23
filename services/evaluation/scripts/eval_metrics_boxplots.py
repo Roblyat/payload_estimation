@@ -25,7 +25,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-FEATURE_RE = re.compile(r"__feat_([^_]+)__")
+FEATURE_RE = re.compile(r"__feat_([^_]+(?:_[^_]+)*)__")
 DELAN_RE = re.compile(r"__delan_([^_]+(?:_[^_]+)*)__feat_")  # greedy-ish between markers
 LSTM_RE = re.compile(r"__lstm_(.+)$")
 H_FROM_FILENAME_RE = re.compile(r"_H(\d+)\.txt$")
@@ -41,13 +41,75 @@ def _common_prefix_token(labels: list[str]) -> str:
 def _strip_prefix(labels: list[str], pref: str) -> list[str]:
     if not pref:
         return labels
-    return [s[len(pref):] if s.startswith(pref) else s for s in labels]
+    alts = _prefix_variants(pref)
+    out: list[str] = []
+    for s in labels:
+        stripped = s
+        for a in alts:
+            if stripped.startswith(a):
+                stripped = stripped[len(a):]
+                break
+        out.append(stripped)
+    return out
+
+def _prefix_variants(pref: str) -> list[str]:
+    variants = [pref]
+    if pref.startswith("delan_"):
+        variants.append(pref[len("delan_"):])
+    else:
+        variants.append(f"delan_{pref}")
+    return variants
+
+def _label_has_prefix(label: str, pref: str) -> bool:
+    if label.startswith(pref):
+        return True
+    if pref.startswith("delan_"):
+        return label.startswith(pref[len("delan_"):])
+    return label.startswith(f"delan_{pref}")
 
 def _force_prefix(labels: list[str], prefixes: list[str]) -> str:
     for p in prefixes:
-        if labels and all(s.startswith(p) for s in labels):
+        if labels and all(_label_has_prefix(s, p) for s in labels):
             return p
     return ""
+
+def _strip_any_prefixes(labels: list[str], prefixes: list[str]) -> tuple[list[str], list[str]]:
+    if not prefixes:
+        return labels, []
+    removed: list[str] = []
+    out: list[str] = []
+    for s in labels:
+        stripped = s
+        used = None
+        for p in prefixes:
+            for v in _prefix_variants(p):
+                if stripped.startswith(v):
+                    stripped = stripped[len(v):]
+                    used = p
+                    break
+            if used:
+                break
+        if used:
+            removed.append(used)
+        out.append(stripped)
+    seen = set()
+    dedup = []
+    for p in removed:
+        if p not in seen:
+            seen.add(p)
+            dedup.append(p)
+    return out, dedup
+
+def _title_suffix_from_prefixes(prefixes: list[str]) -> str:
+    cleaned: list[str] = []
+    for p in prefixes:
+        if not p or p == "delan_":
+            continue
+        if p.startswith("delan_"):
+            p = p[len("delan_"):]
+        if p not in cleaned:
+            cleaned.append(p)
+    return ", ".join(cleaned)
 
 def _boxplot_groups(
     groups: dict[str, list[float]],
@@ -57,6 +119,7 @@ def _boxplot_groups(
     out_png: str,
     strip_common_prefix: bool = False,
     split_two_rows: bool = False,
+    strip_prefixes: list[str] | None = None,
 ):
     labels = sorted(groups.keys())
     vals = [groups[k] for k in labels]
@@ -67,10 +130,11 @@ def _boxplot_groups(
         if forced:
             pref = forced
     labels_disp = _strip_prefix(labels, pref)
-    title_pref = pref
-    if title_pref.startswith("delan_"):
-        title_pref = title_pref[len("delan_"):]
-    title_disp = f"{title} | {title_pref}" if title_pref else title
+    labels_disp, removed = _strip_any_prefixes(labels_disp, strip_prefixes or [])
+    title_disp = title
+    title_suffix = _title_suffix_from_prefixes([pref] + removed)
+    if title_suffix:
+        title_disp = f"{title} | {title_suffix}"
 
     if split_two_rows and len(labels_disp) > 1:
         n = len(labels_disp)
@@ -208,7 +272,19 @@ def save_boxplot(
         raise ValueError("save_boxplot needs (group_col,value_col) or (x_col,y_col)")
 
     plt.figure(figsize=(10, 4), dpi=140)
-    df.boxplot(column=value_col, by=group_col, grid=False, rot=25)
+    # Match style with custom matplotlib boxplots (black boxes, orange median, green mean)
+    df.boxplot(
+        column=value_col,
+        by=group_col,
+        grid=False,
+        rot=25,
+        showmeans=True,
+        boxprops={"color": "black"},
+        whiskerprops={"color": "black"},
+        capprops={"color": "black"},
+        medianprops={"color": "C1"},
+        meanprops={"marker": "^", "markerfacecolor": "C2", "markeredgecolor": "C2"},
+    )
     plt.title(title)
     plt.suptitle("")  # remove pandas' automatic title
     plt.xlabel(xlabel or group_col)
@@ -408,6 +484,7 @@ def main():
         out_png=os.path.join(args.out_dir, "box_delan_rmse_by_delan_id.png"),
         strip_common_prefix=True,
         split_two_rows=True,
+        strip_prefixes=["jax_struct_", "torch_struct_"],
     )
 
     # ----------------------------

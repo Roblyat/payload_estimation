@@ -17,22 +17,42 @@ def _safe_mkdir(p: str) -> None:
 
 
 def _parse_lstm_folder(name: str) -> Dict[str, Any]:
-    # Example:
+    # Examples:
     # ur5__B__delan_struct_s4_ep500__feat_full__lstm_s4_H60_ep60_b64_u128_do0p2
+    # delan_UR3_Load0_combined_26__A__K100_tf0p2__delan_jax_struct_s0_ep300__feat_full__lstm_s0_H25_ep80_b256_u128_do0p1
     parts = name.split("__")
-    out: Dict[str, Any] = {"folder": name}
-    if len(parts) >= 5:
-        out["dataset"] = parts[0]
-        out["run_tag"] = parts[1]
+    out: Dict[str, Any] = {
+        "folder": name,
+        "dataset": parts[0] if parts else None,
+        "run_tag": parts[1] if len(parts) >= 2 else None,
+        "delan_tag": None,
+        "feature_mode": None,
+        "lstm_tag": None,
+    }
+
+    for p in parts:
+        if p.startswith("feat_"):
+            out["feature_mode"] = p.replace("feat_", "")
+            continue
+        if p.startswith("lstm_"):
+            out["lstm_tag"] = p.replace("lstm_", "")
+            continue
+        if re.match(r"^delan_(jax|torch)_(struct|black)_", p) or re.match(r"^delan_(struct|black)_", p):
+            out["delan_tag"] = p
+
+    # Fallback for older naming conventions
+    if out["delan_tag"] is None and len(parts) >= 3:
         out["delan_tag"] = parts[2]
-        out["feature_mode"] = parts[3].replace("feat_", "")
-        out["lstm_tag"] = parts[4].replace("lstm_", "")
-    else:
-        out["dataset"] = None
-        out["run_tag"] = None
-        out["delan_tag"] = None
-        out["feature_mode"] = None
-        out["lstm_tag"] = None
+    if out["feature_mode"] is None:
+        for p in parts:
+            if p.startswith("feat_"):
+                out["feature_mode"] = p.replace("feat_", "")
+                break
+    if out["lstm_tag"] is None:
+        for p in parts:
+            if p.startswith("lstm_"):
+                out["lstm_tag"] = p.replace("lstm_", "")
+                break
 
     # Extract H from lstm_tag
     mH = re.search(r"_H(\d+)", out.get("lstm_tag") or "")
@@ -57,6 +77,37 @@ def _common_prefix_token(labels: List[str]) -> str:
         pref = pref[: pref.rfind("_") + 1]
     # only keep if it actually helps
     return pref if len(pref) >= 4 else ""
+
+def _label_has_prefix(label: str, pref: str) -> bool:
+    if label.startswith(pref):
+        return True
+    if pref.startswith("delan_"):
+        return label.startswith(pref[len("delan_"):])
+    return label.startswith(f"delan_{pref}")
+
+def _force_prefix(labels: List[str], prefixes: List[str]) -> str:
+    for p in prefixes:
+        if labels and all(_label_has_prefix(l, p) for l in labels):
+            return p
+    return ""
+
+def _strip_prefix_variants(labels: List[str], pref: str) -> List[str]:
+    if not pref:
+        return labels
+    alts = [pref]
+    if pref.startswith("delan_"):
+        alts.append(pref[len("delan_"):])
+    else:
+        alts.append(f"delan_{pref}")
+    out: List[str] = []
+    for s in labels:
+        stripped = s
+        for a in alts:
+            if stripped.startswith(a):
+                stripped = stripped[len(a):]
+                break
+        out.append(stripped)
+    return out
 
 def _split_labels(labels: List[str]) -> Tuple[List[str], List[str]]:
     mid = (len(labels) + 1) // 2
@@ -83,16 +134,20 @@ def _boxplot(
     strip_common_prefix: bool = False,
     split_two_rows: bool = False,
     prefix_hint: str | None = None,
+    force_prefixes: List[str] | None = None,
+    title_prefix_override: str | None = None,
 ) -> None:
     labels = sorted(groups.keys())
 
     pref = _common_prefix_token(labels) if strip_common_prefix else ""
     if prefix_hint and all(l.startswith(prefix_hint) for l in labels):
         pref = prefix_hint
-    disp = [l[len(pref):] if (pref and l.startswith(pref)) else l for l in labels]
-    full_title = title
-    if pref and pref not in title:
-        full_title = f"{title} | {pref}"
+    forced = _force_prefix(labels, force_prefixes or [])
+    if forced:
+        pref = forced
+    disp = _strip_prefix_variants(labels, pref)
+    title_pref = title_prefix_override if (pref and title_prefix_override) else pref
+    full_title = title if (not title_pref or title_pref in title) else f"{title} | {title_pref}"
 
     if split_two_rows and len(labels) > 1:
         top_lbl, bot_lbl = _split_labels(labels)
@@ -139,16 +194,20 @@ def _per_joint_boxplot(
     *,
     strip_common_prefix: bool = False,
     prefix_hint: str | None = None,
+    force_prefixes: List[str] | None = None,
+    title_prefix_override: str | None = None,
 ) -> None:
     labels = sorted(groups_per_joint.keys())
 
     pref = _common_prefix_token(labels) if strip_common_prefix else ""
     if prefix_hint and all(l.startswith(prefix_hint) for l in labels):
         pref = prefix_hint
-    disp = [l[len(pref):] if (pref and l.startswith(pref)) else l for l in labels]
-    full_title = title
-    if pref and pref not in title:
-        full_title = f"{title} | {pref}"
+    forced = _force_prefix(labels, force_prefixes or [])
+    if forced:
+        pref = forced
+    disp = _strip_prefix_variants(labels, pref)
+    title_pref = title_prefix_override if (pref and title_prefix_override) else pref
+    full_title = title if (not title_pref or title_pref in title) else f"{title} | {title_pref}"
 
     # 6x1 vertical layout
     fig = plt.figure(figsize=(max(12, 1.2 * len(labels)), 2.3 * n_dof), dpi=140)
@@ -275,6 +334,8 @@ def main() -> None:
         split_two_rows=True,
         strip_common_prefix=True,
         prefix_hint=delan_pref,
+        force_prefixes=["jax_struct_"],
+        title_prefix_override="delan_jax_struct_",
     )
 
 
@@ -293,6 +354,8 @@ def main() -> None:
         split_two_rows=True,
         strip_common_prefix=True,
         prefix_hint=delan_pref,
+        force_prefixes=["jax_struct_"],
+        title_prefix_override="delan_jax_struct_",
     )
 
     # 1b) Residual RMSE grouped by H (optional helpful)
@@ -340,6 +403,8 @@ def main() -> None:
             n_dof=n_dof,
             strip_common_prefix=True,
             prefix_hint=delan_pref,
+            force_prefixes=["jax_struct_"],
+            title_prefix_override="delan_jax_struct_",
         )
 
 
@@ -375,6 +440,8 @@ def main() -> None:
             split_two_rows=True,
             strip_common_prefix=True,
             prefix_hint=delan_pref,
+            force_prefixes=["jax_struct_"],
+            title_prefix_override="delan_jax_struct_",
         )
 
 

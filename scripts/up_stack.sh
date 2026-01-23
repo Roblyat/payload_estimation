@@ -63,6 +63,15 @@ stream_logs() {
   docker compose logs -f --tail=200 "${services[@]}"
 }
 
+# --- APE exports (added) ---
+export APE_REPO="$HOME/.localgit/algorithmic_payload_estimation"
+export APE_PE="$HOME/.localgit/algorithmic_payload_estimation/payload_estimation"
+export APE_DELAN="$HOME/.localgit/algorithmic_payload_estimation/deep_lagrangian_networks"
+export APE_PREPROCESS="$HOME/.localgit/algorithmic_payload_estimation/payload_estimation/services/preprocess"
+export APE_SHARED="$HOME/.localgit/algorithmic_payload_estimation/payload_estimation/shared"
+export APE_EVALUATION="$HOME/.localgit/algorithmic_payload_estimation/payload_estimation/services/evaluation"
+export LSTM="$HOME/.localgit/algorithmic_payload_estimation/payload_estimation/services/lstm"
+
 start_stack() {
   docker compose up -d preprocess
   docker compose up -d delan_jax

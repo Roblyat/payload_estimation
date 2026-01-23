@@ -27,13 +27,76 @@ def _common_prefix_token(labels: List[str]) -> str:
 def _strip_prefix(labels: List[str], pref: str) -> List[str]:
     if not pref:
         return labels
-    return [s[len(pref):] if s.startswith(pref) else s for s in labels]
+    alts = _prefix_variants(pref)
+    out: List[str] = []
+    for s in labels:
+        stripped = s
+        for a in alts:
+            if stripped.startswith(a):
+                stripped = stripped[len(a):]
+                break
+        out.append(stripped)
+    return out
+
+def _prefix_variants(pref: str) -> List[str]:
+    variants = [pref]
+    if pref.startswith("delan_"):
+        variants.append(pref[len("delan_"):])
+    else:
+        variants.append(f"delan_{pref}")
+    return variants
+
+def _label_has_prefix(label: str, pref: str) -> bool:
+    if label.startswith(pref):
+        return True
+    if pref.startswith("delan_"):
+        return label.startswith(pref[len("delan_"):])
+    return label.startswith(f"delan_{pref}")
 
 def _force_prefix(labels: List[str], prefixes: List[str]) -> str:
     for p in prefixes:
-        if labels and all(l.startswith(p) for l in labels):
+        if labels and all(_label_has_prefix(l, p) for l in labels):
             return p
     return ""
+
+def _strip_any_prefixes(labels: List[str], prefixes: List[str]) -> Tuple[List[str], List[str]]:
+    if not prefixes:
+        return labels, []
+    removed: List[str] = []
+    out: List[str] = []
+    for s in labels:
+        stripped = s
+        used = None
+        for p in prefixes:
+            for v in _prefix_variants(p):
+                if stripped.startswith(v):
+                    stripped = stripped[len(v):]
+                    used = p
+                    break
+            if used:
+                break
+        if used:
+            removed.append(used)
+        out.append(stripped)
+    # de-dup but keep order
+    seen = set()
+    dedup = []
+    for p in removed:
+        if p not in seen:
+            seen.add(p)
+            dedup.append(p)
+    return out, dedup
+
+def _title_suffix_from_prefixes(prefixes: List[str]) -> str:
+    cleaned: List[str] = []
+    for p in prefixes:
+        if not p or p == "delan_":
+            continue
+        if p.startswith("delan_"):
+            p = p[len("delan_"):]
+        if p not in cleaned:
+            cleaned.append(p)
+    return ", ".join(cleaned)
 
 def _split_labels_vals(labels: List[str], vals: List[List[float]]) -> Tuple[List[str], List[List[float]], List[str], List[List[float]]]:
     n = len(labels)
@@ -77,6 +140,7 @@ def _boxplot(
     out_png: str,
     strip_common_prefix: bool = False,
     split_two_rows: bool = False,
+    strip_prefixes: List[str] | None = None,
 ):
     labels = sorted(groups.keys())
     vals = [groups[k] for k in labels]
@@ -87,10 +151,11 @@ def _boxplot(
         if forced:
             pref = forced
     labels_disp = _strip_prefix(labels, pref)
-    title_pref = pref
-    if title_pref.startswith("delan_"):
-        title_pref = title_pref[len("delan_"):]
-    title_disp = f"{title} | {title_pref}" if title_pref else title
+    labels_disp, removed = _strip_any_prefixes(labels_disp, strip_prefixes or [])
+    title_disp = title
+    title_suffix = _title_suffix_from_prefixes([pref] + removed)
+    if title_suffix:
+        title_disp = f"{title} | {title_suffix}"
 
     if split_two_rows and len(labels_disp) > 1:
         top_l, top_v, bot_l, bot_v = _split_labels_vals(labels_disp, vals)
@@ -142,6 +207,7 @@ def _per_joint_boxplot(
     out_png: str,
     n_dof: int,
     strip_common_prefix: bool = False,
+    strip_prefixes: List[str] | None = None,
 ):
     group_names = sorted(groups_per_joint.keys())
     pref = _common_prefix_token(group_names) if strip_common_prefix else ""
@@ -150,10 +216,11 @@ def _per_joint_boxplot(
         if forced:
             pref = forced
     group_disp = _strip_prefix(group_names, pref)
-    title_pref = pref
-    if title_pref.startswith("delan_"):
-        title_pref = title_pref[len("delan_"):]
-    title_disp = f"{title} | {title_pref}" if title_pref else title
+    group_disp, removed = _strip_any_prefixes(group_disp, strip_prefixes or [])
+    title_disp = title
+    title_suffix = _title_suffix_from_prefixes([pref] + removed)
+    if title_suffix:
+        title_disp = f"{title} | {title_suffix}"
 
     fig_w = max(12, 0.75 * len(group_disp))
     fig_h = max(10, 2.1 * n_dof)
@@ -320,6 +387,7 @@ def main() -> None:
          out_png=os.path.join(args.out_dir, "delan_torque_rmse_by_delan_tag.png"),
         split_two_rows=True,
         strip_common_prefix=True,
+        strip_prefixes=["jax_struct_", "torch_struct_"],
      )
 
 
@@ -342,6 +410,7 @@ def main() -> None:
              out_png=os.path.join(args.out_dir, "delan_joint_rmse_grid_by_delan_tag.png"),
              n_dof=n_dof,
             strip_common_prefix=True,
+            strip_prefixes=["jax_struct_", "torch_struct_"],
          )
 
 

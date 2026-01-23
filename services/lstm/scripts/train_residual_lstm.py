@@ -18,6 +18,12 @@ from pathlib import Path
 if "/workspace/shared/src" not in sys.path:
     sys.path.insert(0, "/workspace/shared/src")
 
+# LSTM plot helpers (service-local)
+if "/workspace/lstm/src" not in sys.path:
+    sys.path.insert(0, "/workspace/lstm/src")
+
+from lstm_plots import save_loss_curve, save_residual_overlay
+
 from path_helpers import artifact_folder, artifact_file, resolve_npz_path
 
 def resolve_windows_npz(p: str) -> str:
@@ -350,35 +356,10 @@ def main():
     print(f"Saved best model:  {ckpt_path}")
 
     # ---------- Plots ----------
-    if not args.no_plots:
-        plt.figure(figsize=(10, 4), dpi=120)
-        plt.plot(history.history["loss"], label="train")
-        plt.plot(history.history["val_loss"], label="val")
-        plt.title("LSTM training loss (scaled residuals)")
-        plt.xlabel("epoch")
-        plt.ylabel("MSE")
-        plt.grid(True, alpha=0.2)
-        plt.legend()
-        out = os.path.join(out_dir, "loss_curve.png")
-        plt.tight_layout()
-        plt.savefig(out, dpi=150)
-        print(f"Saved: {out}")
-
-        K = min(600, Y_test.shape[0])
-        fig = plt.figure(figsize=(14, 8), dpi=120)
-        for j in range(n_dof):
-            ax = fig.add_subplot(3, 2, j + 1)
-            ax.plot(Y_test[:K, j], label="GT", linewidth=1.0)
-            ax.plot(Y_pred[:K, j], label="LSTM", linewidth=1.0, alpha=0.85)
-            ax.set_title(f"Residual torque joint {j}")
-            ax.grid(True, alpha=0.2)
-            if j == 0:
-                ax.legend()
-        plt.tight_layout()
-        out = os.path.join(out_dir, "residual_gt_vs_pred.png")
-        plt.savefig(out, dpi=150)
-        print(f"Saved: {out}")
-        plt.close("all")
+    out1 = save_loss_curve(history, out_dir)
+    print(f"Saved: {out1}")
+    out2 = save_residual_overlay(Y_test, Y_pred, out_dir)
+    print(f"Saved: {out2}")
 
 
 if __name__ == "__main__":

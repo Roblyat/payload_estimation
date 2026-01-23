@@ -39,7 +39,7 @@ class Paths:
 
 def make_paths(cfg) -> Paths:
     bp = BasePaths(
-        # raw=cfg.BASE_RAW,
+        raw=cfg.BASE_RAW,
         preprocessed=cfg.BASE_PREPROCESSED,
         processed=cfg.BASE_PROCESSED,
         models_delan=cfg.BASE_MODELS_DELAN,

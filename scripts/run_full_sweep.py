@@ -51,7 +51,7 @@ FEATURE_MODES = ["full", "tau_hat", "state", "state_tauhat"]
 
 # Fixed choices you stated
 DELAN_MODEL_TYPE = "structured"  # only structured
-DELAN_HP_PRESET = "fast_debug"   # change if you want e.g. "paper" / etc.
+DELAN_HP_PRESET = "fast_debug"   # change if you want e.g. "paper" / etc. #scales with sample/trajectory amount
 
 # If you want to pass manual delan flags (optional), put them here:
 DELAN_HP_FLAGS = ""  # e.g. "--n_width 64 --n_depth 2 ..."#
@@ -64,7 +64,7 @@ LSTM_VAL_SPLIT = 0.2
 LSTM_UNITS = 128
 LSTM_DROPOUT = 0.1
 LSTM_EPS = 1e-8
-LSTM_NO_PLOTS = True
+LSTM_NO_PLOTS = False # set True to skip plotting inside container
 
 # Paths to scripts INSIDE the containers
 # preprocess container:

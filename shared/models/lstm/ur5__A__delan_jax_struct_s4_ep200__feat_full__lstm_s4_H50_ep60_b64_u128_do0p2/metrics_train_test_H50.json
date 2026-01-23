@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-01-20T17:54:23",
+  "timestamp": "2026-01-22T21:37:17",
   "npz": "/workspace/shared/data/processed/ur5__A__lstm_windows_H50__feat_full__delan_jax/ur5__A__lstm_windows_H50__feat_full__delan_jax.npz",
   "out_dir": "/workspace/shared/models/lstm/ur5__A__delan_jax_struct_s4_ep200__feat_full__lstm_s4_H50_ep60_b64_u128_do0p2",
   "out_root": "/workspace/shared/models/lstm",
@@ -139,31 +139,31 @@
     "params": 210694
   },
   "train": {
-    "epochs_ran": 43,
-    "best_epoch": 33,
-    "best_val_loss": 1.1743367910385132,
-    "final_train_loss": 0.11501231789588928,
-    "final_val_loss": 1.2174221277236938,
+    "epochs_ran": 37,
+    "best_epoch": 27,
+    "best_val_loss": 1.1048860549926758,
+    "final_train_loss": 0.1202973872423172,
+    "final_val_loss": 1.1259260177612305,
     "history_csv": "/workspace/shared/models/lstm/ur5__A__delan_jax_struct_s4_ep200__feat_full__lstm_s4_H50_ep60_b64_u128_do0p2/train_history_H50.csv"
   },
   "eval_test": {
-    "rmse_total": 1.234596610069275,
+    "rmse_total": 1.1189045906066895,
     "rmse_per_joint": [
-      0.9945374131202698,
-      2.6055238246917725,
-      1.0020430088043213,
-      0.5438186526298523,
-      0.2523653209209442,
-      0.06321465224027634
+      0.9525170922279358,
+      2.3019649982452393,
+      1.0028539896011353,
+      0.4962468147277832,
+      0.22208116948604584,
+      0.06368161737918854
     ],
-    "mse_total": 1.5242286920547485,
+    "mse_total": 1.2519474029541016,
     "mse_per_joint": [
-      0.989104688167572,
-      6.788754940032959,
-      1.0040901899337769,
-      0.29573875665664673,
-      0.0636882483959198,
-      0.003996091894805431
+      0.9072888493537903,
+      5.29904317855835,
+      1.00571608543396,
+      0.24626091122627258,
+      0.0493200458586216,
+      0.004055348690599203
     ],
     "predictions_npz": "/workspace/shared/models/lstm/ur5__A__delan_jax_struct_s4_ep200__feat_full__lstm_s4_H50_ep60_b64_u128_do0p2/predictions_test.npz",
     "best_model_path": "/workspace/shared/models/lstm/ur5__A__delan_jax_struct_s4_ep200__feat_full__lstm_s4_H50_ep60_b64_u128_do0p2/ur5__A__delan_jax_struct_s4_ep200__feat_full__lstm_s4_H50_ep60_b64_u128_do0p2.keras"

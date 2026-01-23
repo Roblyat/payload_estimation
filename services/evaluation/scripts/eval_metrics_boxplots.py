@@ -18,7 +18,7 @@ import glob
 import os
 import re
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Sequence
 
 import numpy as np
 import pandas as pd
@@ -29,6 +29,85 @@ FEATURE_RE = re.compile(r"__feat_([^_]+)__")
 DELAN_RE = re.compile(r"__delan_([^_]+(?:_[^_]+)*)__feat_")  # greedy-ish between markers
 LSTM_RE = re.compile(r"__lstm_(.+)$")
 H_FROM_FILENAME_RE = re.compile(r"_H(\d+)\.txt$")
+
+def _common_prefix_token(labels: list[str]) -> str:
+    if not labels:
+        return ""
+    pref = os.path.commonprefix(labels)
+    if "_" in pref:
+        pref = pref[: pref.rfind("_") + 1]
+    return pref if len(pref) >= 6 else ""
+
+def _strip_prefix(labels: list[str], pref: str) -> list[str]:
+    if not pref:
+        return labels
+    return [s[len(pref):] if s.startswith(pref) else s for s in labels]
+
+def _force_prefix(labels: list[str], prefixes: list[str]) -> str:
+    for p in prefixes:
+        if labels and all(s.startswith(p) for s in labels):
+            return p
+    return ""
+
+def _boxplot_groups(
+    groups: dict[str, list[float]],
+    *,
+    title: str,
+    ylabel: str,
+    out_png: str,
+    strip_common_prefix: bool = False,
+    split_two_rows: bool = False,
+):
+    labels = sorted(groups.keys())
+    vals = [groups[k] for k in labels]
+
+    pref = _common_prefix_token(labels) if strip_common_prefix else ""
+    if strip_common_prefix:
+        forced = _force_prefix(labels, ["delan_jax_struct_", "jax_struct_"])
+        if forced:
+            pref = forced
+    labels_disp = _strip_prefix(labels, pref)
+    title_pref = pref
+    if title_pref.startswith("delan_"):
+        title_pref = title_pref[len("delan_"):]
+    title_disp = f"{title} | {title_pref}" if title_pref else title
+
+    if split_two_rows and len(labels_disp) > 1:
+        n = len(labels_disp)
+        k = (n + 1) // 2
+        top_l, top_v = labels_disp[:k], vals[:k]
+        bot_l, bot_v = labels_disp[k:], vals[k:]
+        fig_w = max(12, 0.75 * max(len(top_l), len(bot_l)))
+        fig = plt.figure(figsize=(fig_w, 7.5), dpi=140)
+        ax1 = fig.add_subplot(2, 1, 1)
+        ax2 = fig.add_subplot(2, 1, 2, sharey=ax1)
+        ax1.boxplot(top_v, labels=top_l, showmeans=True)
+        ax2.boxplot(bot_v, labels=bot_l, showmeans=True)
+        for ax in (ax1, ax2):
+            ax.grid(True, axis="y", alpha=0.2)
+            for t in ax.get_xticklabels():
+                t.set_rotation(28); t.set_ha("right")
+        ax1.set_title(title_disp)
+        ax2.set_ylabel(ylabel)
+        fig.subplots_adjust(top=0.90, bottom=0.22, hspace=0.35)
+        fig.savefig(out_png, dpi=200)
+        plt.close(fig)
+        print(f"Saved: {out_png}")
+        return
+
+    fig_w = max(12, 0.75 * len(labels_disp))
+    fig = plt.figure(figsize=(fig_w, 4.8), dpi=140)
+    ax = fig.add_subplot(1, 1, 1)
+    ax.boxplot(vals, labels=labels_disp, showmeans=True)
+    ax.set_title(title_disp)
+    ax.set_ylabel(ylabel)
+    ax.grid(True, axis="y", alpha=0.2)
+    for t in ax.get_xticklabels():
+        t.set_rotation(28); t.set_ha("right")
+    fig.tight_layout()
+    fig.savefig(out_png, dpi=200)
+    plt.close(fig)
+    print(f"Saved: {out_png}")
 
 
 def _parse_float_list(s: str) -> List[float]:
@@ -301,10 +380,34 @@ def main():
     # ----------------------------
     # 3) delan_rmse by delan_id
     # ----------------------------
-    save_boxplot(
-        df, "delan_id", "delan_rmse",
-        os.path.join(args.out_dir, "box_delan_rmse_by_delan_id.png"),
-        "DeLaN torque RMSE (delan_rmse) grouped by delan_id"
+
+    # --- shorten delan_id labels (move common prefix into title) ---
+    delan_ids = df["delan_id"].dropna().astype(str).tolist()
+    pref = ""
+    if delan_ids:
+        import os as _os
+        pref = _os.path.commonprefix(delan_ids)
+        if "_" in pref:
+            pref = pref[: pref.rfind("_") + 1]
+        if len(pref) < 4:
+            pref = ""
+
+    if pref:
+        df["delan_id_short"] = df["delan_id"].astype(str).str.replace("^" + re.escape(pref), "", regex=True)
+    else:
+        df["delan_id_short"] = df["delan_id"].astype(str)
+
+    # Custom boxplot so we can strip shared prefix and optionally split into two rows
+    groups: dict[str, list[float]] = {}
+    for _, r in df.iterrows():
+        groups.setdefault(str(r["delan_id"]), []).append(float(r["delan_rmse"]))
+    _boxplot_groups(
+        groups,
+        title="DeLaN torque RMSE (delan_rmse) grouped by delan_id",
+        ylabel="delan_rmse",
+        out_png=os.path.join(args.out_dir, "box_delan_rmse_by_delan_id.png"),
+        strip_common_prefix=True,
+        split_two_rows=True,
     )
 
     # ----------------------------
@@ -382,7 +485,7 @@ def main():
             df, "feature_mode", f"joint_gain_{j}",
             os.path.join(args.out_dir, f"box_joint_gain_{j}_by_feature_mode.png"),
             f"Joint {j} gain = delan_joint_rmse - rg_joint_rmse (higher is better) by feature_mode"
-    )
+        )
 
 if __name__ == "__main__":
     main()

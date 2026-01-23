@@ -47,12 +47,81 @@ def _infer_backend_from_name(name: str) -> str:
         return "torch"
     return "unknown"
 
-def _boxplot(groups: Dict[str, List[float]], title: str, ylabel: str, out_png: str) -> None:
+def _common_prefix_token(labels: List[str]) -> str:
+    """Longest common prefix, cut back to last '_' to avoid cutting tokens."""
+    if not labels:
+        return ""
+    import os as _os
+    pref = _os.path.commonprefix(labels)
+    if "_" in pref:
+        pref = pref[: pref.rfind("_") + 1]
+    # only keep if it actually helps
+    return pref if len(pref) >= 4 else ""
+
+def _split_labels(labels: List[str]) -> Tuple[List[str], List[str]]:
+    mid = (len(labels) + 1) // 2
+    return labels[:mid], labels[mid:]
+
+
+def _common_delan_prefix_from_rows(rows: List[Dict[str, Any]]) -> str:
+    tags = [str(r.get("delan_tag") or "") for r in rows if r.get("delan_tag")]
+    if not tags:
+        return ""
+    import os as _os
+    pref = _os.path.commonprefix(tags)
+    if "_" in pref:
+        pref = pref[: pref.rfind("_") + 1]
+    return pref if len(pref) >= 4 else ""
+
+
+def _boxplot(
+    groups: Dict[str, List[float]],
+    title: str,
+    ylabel: str,
+    out_png: str,
+    *,
+    strip_common_prefix: bool = False,
+    split_two_rows: bool = False,
+    prefix_hint: str | None = None,
+) -> None:
     labels = sorted(groups.keys())
+
+    pref = _common_prefix_token(labels) if strip_common_prefix else ""
+    if prefix_hint and all(l.startswith(prefix_hint) for l in labels):
+        pref = prefix_hint
+    disp = [l[len(pref):] if (pref and l.startswith(pref)) else l for l in labels]
+    full_title = title
+    if pref and pref not in title:
+        full_title = f"{title} | {pref}"
+
+    if split_two_rows and len(labels) > 1:
+        top_lbl, bot_lbl = _split_labels(labels)
+        top_disp, bot_disp = _split_labels(disp)
+
+        fig = plt.figure(figsize=(max(10, 1.2 * max(len(top_lbl), len(bot_lbl))), 8), dpi=140)
+
+        ax1 = fig.add_subplot(2, 1, 1)
+        ax1.boxplot([groups[k] for k in top_lbl], labels=top_disp, showmeans=True)
+        ax1.set_title(full_title)
+        ax1.set_ylabel(ylabel)
+        ax1.grid(True, alpha=0.25)
+        ax1.tick_params(axis="x", rotation=30)
+
+        ax2 = fig.add_subplot(2, 1, 2)
+        ax2.boxplot([groups[k] for k in bot_lbl], labels=bot_disp, showmeans=True)
+        ax2.set_ylabel(ylabel)
+        ax2.grid(True, alpha=0.25)
+        ax2.tick_params(axis="x", rotation=30)
+
+        plt.tight_layout()
+        plt.savefig(out_png, dpi=160)
+        plt.close(fig)
+        return
+
     data = [groups[k] for k in labels]
     plt.figure(figsize=(max(10, 1.2 * len(labels)), 5), dpi=140)
-    plt.boxplot(data, labels=labels, showmeans=True)
-    plt.title(title)
+    plt.boxplot(data, labels=disp, showmeans=True)
+    plt.title(full_title)
     plt.ylabel(ylabel)
     plt.grid(True, alpha=0.25)
     plt.xticks(rotation=30, ha="right")
@@ -62,27 +131,46 @@ def _boxplot(groups: Dict[str, List[float]], title: str, ylabel: str, out_png: s
 
 
 def _per_joint_boxplot(
-    groups_per_joint: Dict[str, List[List[float]]],
+    groups_per_joint: Dict[str, List[List[float]]],  # group -> [joint0_list, ..., joint5_list]
     title: str,
     ylabel: str,
     out_png: str,
     n_dof: int,
+    *,
+    strip_common_prefix: bool = False,
+    prefix_hint: str | None = None,
 ) -> None:
     labels = sorted(groups_per_joint.keys())
-    fig = plt.figure(figsize=(14, 8), dpi=140)
+
+    pref = _common_prefix_token(labels) if strip_common_prefix else ""
+    if prefix_hint and all(l.startswith(prefix_hint) for l in labels):
+        pref = prefix_hint
+    disp = [l[len(pref):] if (pref and l.startswith(pref)) else l for l in labels]
+    full_title = title
+    if pref and pref not in title:
+        full_title = f"{title} | {pref}"
+
+    # 6x1 vertical layout
+    fig = plt.figure(figsize=(max(12, 1.2 * len(labels)), 2.3 * n_dof), dpi=140)
+
     for j in range(n_dof):
-        ax = fig.add_subplot(3, 2, j + 1)
+        ax = fig.add_subplot(n_dof, 1, j + 1)
         data = [groups_per_joint[g][j] for g in labels]
-        ax.boxplot(data, labels=labels, showmeans=True)
+        ax.boxplot(data, labels=disp, showmeans=True)
         ax.set_title(f"Joint {j}")
         ax.set_ylabel(ylabel)
         ax.grid(True, alpha=0.25)
-        ax.tick_params(axis="x", rotation=30)
-    fig.suptitle(title)
+
+        # reduce clutter: only show x tick labels on the last subplot
+        if j != n_dof - 1:
+            ax.set_xticklabels([])
+        else:
+            ax.tick_params(axis="x", rotation=30)
+
+    fig.suptitle(full_title)
     plt.tight_layout()
     plt.savefig(out_png, dpi=160)
     plt.close(fig)
-
 
 def _scatter(xs, ys, xlabel: str, ylabel: str, title: str, out_png: str) -> None:
     plt.figure(figsize=(7, 5), dpi=140)
@@ -137,6 +225,7 @@ def main() -> None:
             "run_dir": run_dir,
             "backend": backend,
             "metrics_path": mp,
+            "delan_tag": meta.get("delan_tag"),
             "feature_mode": meta.get("feature_mode"),
             "H": int(d.get("H", meta.get("H") or 0)),
             "rmse_total": rmse_total,
@@ -161,6 +250,8 @@ def main() -> None:
     if args.backend != "all":
         rows = [r for r in rows if r.get("backend") == args.backend]
 
+    delan_pref = _common_delan_prefix_from_rows(rows)
+
     # infer dof
     n_dof = None
     for r in rows:
@@ -177,10 +268,15 @@ def main() -> None:
         g1.setdefault(g, []).append(r["rmse_total"])
     _boxplot(
         g1,
-        title="LSTM residual RMSE (test) grouped by feature_mode",
+        title=f"LSTM residual RMSE (test) grouped by feature_mode | {delan_pref}" if delan_pref else
+            "LSTM residual RMSE (test) grouped by feature_mode",
         ylabel="rmse_total (residual torque units)",
         out_png=os.path.join(args.out_dir, "lstm_residual_rmse_by_feature_mode.png"),
+        split_two_rows=True,
+        strip_common_prefix=True,
+        prefix_hint=delan_pref,
     )
+
 
     # 1a) Residual RMSE grouped by feature_mode|backend (jax vs torch side-by-side)
     g1b: Dict[str, List[float]] = {}
@@ -190,9 +286,13 @@ def main() -> None:
         g1b.setdefault(key, []).append(r["rmse_total"])
     _boxplot(
         g1b,
-        title="LSTM residual RMSE (test) grouped by feature_mode|backend",
+        title=f"LSTM residual RMSE (test) grouped by feature_mode|backend | {delan_pref}" if delan_pref else
+            "LSTM residual RMSE (test) grouped by feature_mode|backend",
         ylabel="rmse_total (residual torque units)",
         out_png=os.path.join(args.out_dir, "lstm_residual_rmse_by_feature_mode_backend.png"),
+        split_two_rows=True,
+        strip_common_prefix=True,
+        prefix_hint=delan_pref,
     )
 
     # 1b) Residual RMSE grouped by H (optional helpful)
@@ -233,11 +333,15 @@ def main() -> None:
     if groups_per_joint:
         _per_joint_boxplot(
             groups_per_joint,
-            title="LSTM per-joint residual RMSE (test) grouped by feature_mode",
+            title=f"LSTM per-joint residual RMSE (test) grouped by feature_mode | {delan_pref}" if delan_pref else
+                "LSTM per-joint residual RMSE (test) grouped by feature_mode",
             ylabel="joint residual rmse",
             out_png=os.path.join(args.out_dir, "lstm_joint_rmse_grid_by_feature_mode.png"),
             n_dof=n_dof,
+            strip_common_prefix=True,
+            prefix_hint=delan_pref,
         )
+
 
     # 3) Generalization scatter: best_val_loss vs rmse_total
     xs = [r["best_val_loss"] for r in rows if np.isfinite(r["best_val_loss"]) and np.isfinite(r["rmse_total"])]
@@ -264,10 +368,15 @@ def main() -> None:
     if overfit:
         _boxplot(
             overfit,
-            title="LSTM overfit indicator grouped by feature_mode (final_val_loss / final_train_loss)",
+            title=f"LSTM overfit indicator grouped by feature_mode (val/train) | {delan_pref}" if delan_pref else
+                "LSTM overfit indicator grouped by feature_mode (final_val_loss / final_train_loss)",
             ylabel="val/train loss ratio",
             out_png=os.path.join(args.out_dir, "lstm_overfit_ratio_by_feature_mode.png"),
+            split_two_rows=True,
+            strip_common_prefix=True,
+            prefix_hint=delan_pref,
         )
+
 
     print(f"[lstm_metrics_boxplots] Saved plots to: {args.out_dir}")
 

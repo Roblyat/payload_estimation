@@ -7,10 +7,38 @@ import json
 import os
 import re
 from dataclasses import dataclass
-from typing import Any, Dict, List, Tuple
 
 import numpy as np
 import matplotlib.pyplot as plt
+
+from typing import Any, Dict, List, Optional, Tuple
+
+def _common_prefix_token(labels: List[str]) -> str:
+    """Longest common prefix, cut back to last '_' to avoid cutting tokens."""
+    if not labels:
+        return ""
+    import os as _os
+    pref = _os.path.commonprefix(labels)
+    if "_" in pref:
+        pref = pref[: pref.rfind("_") + 1]
+    # only keep if it actually helps
+    return pref if len(pref) >= 6 else ""
+
+def _strip_prefix(labels: List[str], pref: str) -> List[str]:
+    if not pref:
+        return labels
+    return [s[len(pref):] if s.startswith(pref) else s for s in labels]
+
+def _force_prefix(labels: List[str], prefixes: List[str]) -> str:
+    for p in prefixes:
+        if labels and all(l.startswith(p) for l in labels):
+            return p
+    return ""
+
+def _split_labels_vals(labels: List[str], vals: List[List[float]]) -> Tuple[List[str], List[List[float]], List[str], List[List[float]]]:
+    n = len(labels)
+    k = (n + 1) // 2
+    return labels[:k], vals[:k], labels[k:], vals[k:]
 
 
 def _safe_mkdir(p: str) -> None:
@@ -41,42 +69,118 @@ def _parse_delan_tag(tag: str) -> Dict[str, Any]:
         out["model_short"] = "unknown"
     return out
 
-def _boxplot(groups: Dict[str, List[float]], title: str, ylabel: str, out_png: str) -> None:
+def _boxplot(
+    groups: Dict[str, List[float]],
+    *,
+    title: str,
+    ylabel: str,
+    out_png: str,
+    strip_common_prefix: bool = False,
+    split_two_rows: bool = False,
+):
     labels = sorted(groups.keys())
-    data = [groups[k] for k in labels]
-    plt.figure(figsize=(max(10, 1.2 * len(labels)), 5), dpi=140)
-    plt.boxplot(data, labels=labels, showmeans=True)
-    plt.title(title)
-    plt.ylabel(ylabel)
-    plt.grid(True, alpha=0.25)
-    plt.xticks(rotation=30, ha="right")
-    plt.tight_layout()
-    plt.savefig(out_png, dpi=160)
-    plt.close()
+    vals = [groups[k] for k in labels]
 
+    pref = _common_prefix_token(labels) if strip_common_prefix else ""
+    if strip_common_prefix:
+        forced = _force_prefix(labels, ["delan_jax_struct_", "jax_struct_"])
+        if forced:
+            pref = forced
+    labels_disp = _strip_prefix(labels, pref)
+    title_pref = pref
+    if title_pref.startswith("delan_"):
+        title_pref = title_pref[len("delan_"):]
+    title_disp = f"{title} | {title_pref}" if title_pref else title
+
+    if split_two_rows and len(labels_disp) > 1:
+        top_l, top_v, bot_l, bot_v = _split_labels_vals(labels_disp, vals)
+        fig_w = max(12, 0.75 * max(len(top_l), len(bot_l)))
+        fig = plt.figure(figsize=(fig_w, 7.5), dpi=140)
+        ax1 = fig.add_subplot(2, 1, 1)
+        ax2 = fig.add_subplot(2, 1, 2, sharey=ax1)
+
+        ax1.boxplot(top_v, tick_labels=top_l, showmeans=True)
+        ax2.boxplot(bot_v, tick_labels=bot_l, showmeans=True)
+
+        for ax in (ax1, ax2):
+            ax.tick_params(axis="x", labelsize=9)
+            ax.tick_params(axis="y", labelsize=9)
+            for t in ax.get_xticklabels():
+                t.set_rotation(28)
+                t.set_ha("right")
+            ax.grid(True, axis="y", alpha=0.2)
+
+        ax1.set_title(title_disp)
+        ax2.set_ylabel(ylabel)
+        fig.subplots_adjust(top=0.90, bottom=0.22, hspace=0.35)
+        fig.savefig(out_png, dpi=200)
+        plt.close(fig)
+        print(f"Saved: {out_png}")
+        return
+
+    fig_w = max(12, 0.75 * len(labels_disp))
+    fig = plt.figure(figsize=(fig_w, 4.8), dpi=140)
+    ax = fig.add_subplot(1, 1, 1)
+    ax.boxplot(vals, tick_labels=labels_disp, showmeans=True)
+    ax.set_title(title_disp)
+    ax.set_ylabel(ylabel)
+    ax.grid(True, axis="y", alpha=0.2)
+    ax.tick_params(axis="x", labelsize=9)
+    for t in ax.get_xticklabels():
+        t.set_rotation(28)
+        t.set_ha("right")
+    fig.tight_layout()
+    fig.savefig(out_png, dpi=200)
+    plt.close(fig)
+    print(f"Saved: {out_png}")
 
 def _per_joint_boxplot(
-    groups_per_joint: Dict[str, List[List[float]]],  # group -> [joint0_list, ..., joint5_list]
+    groups_per_joint: Dict[str, List[List[float]]],
+    *,
     title: str,
     ylabel: str,
     out_png: str,
     n_dof: int,
-) -> None:
-    labels = sorted(groups_per_joint.keys())
-    fig = plt.figure(figsize=(14, 8), dpi=140)
-    for j in range(n_dof):
-        ax = fig.add_subplot(3, 2, j + 1)
-        data = [groups_per_joint[g][j] for g in labels]
-        ax.boxplot(data, labels=labels, showmeans=True)
-        ax.set_title(f"Joint {j}")
-        ax.set_ylabel(ylabel)
-        ax.grid(True, alpha=0.25)
-        ax.tick_params(axis="x", rotation=30)
-    fig.suptitle(title)
-    plt.tight_layout()
-    plt.savefig(out_png, dpi=160)
-    plt.close(fig)
+    strip_common_prefix: bool = False,
+):
+    group_names = sorted(groups_per_joint.keys())
+    pref = _common_prefix_token(group_names) if strip_common_prefix else ""
+    if strip_common_prefix:
+        forced = _force_prefix(group_names, ["delan_jax_struct_", "jax_struct_"])
+        if forced:
+            pref = forced
+    group_disp = _strip_prefix(group_names, pref)
+    title_pref = pref
+    if title_pref.startswith("delan_"):
+        title_pref = title_pref[len("delan_"):]
+    title_disp = f"{title} | {title_pref}" if title_pref else title
 
+    fig_w = max(12, 0.75 * len(group_disp))
+    fig_h = max(10, 2.1 * n_dof)
+    fig = plt.figure(figsize=(fig_w, fig_h), dpi=140)
+
+    for j in range(n_dof):
+        ax = fig.add_subplot(n_dof, 1, j + 1)
+        vals = [groups_per_joint[g][j] for g in group_names]
+        ax.boxplot(vals, tick_labels=group_disp, showmeans=True)
+        ax.set_title(f"Joint {j}", fontsize=10, pad=6)
+        ax.set_ylabel(ylabel, fontsize=9)
+        ax.grid(True, axis="y", alpha=0.2)
+        ax.tick_params(axis="y", labelsize=9)
+
+        if j < n_dof - 1:
+            ax.set_xticklabels([])
+        else:
+            ax.tick_params(axis="x", labelsize=9)
+            for t in ax.get_xticklabels():
+                t.set_rotation(28)
+                t.set_ha("right")
+
+    fig.suptitle(title_disp, y=0.995)
+    fig.tight_layout(rect=[0, 0.0, 1, 0.97])
+    fig.savefig(out_png, dpi=200)
+    plt.close(fig)
+    print(f"Saved: {out_png}")
 
 def _scatter(xs, ys, xlabel: str, ylabel: str, title: str, out_png: str) -> None:
     plt.figure(figsize=(7, 5), dpi=140)
@@ -210,11 +314,14 @@ def main() -> None:
         g = r["delan_tag"]
         groups.setdefault(g, []).append(r["torque_rmse"])
     _boxplot(
-        groups,
-        title="DeLaN torque RMSE (test) grouped by delan_tag",
-        ylabel="torque_rmse",
-        out_png=os.path.join(args.out_dir, "delan_torque_rmse_by_delan_tag.png"),
-    )
+         groups,
+         title="DeLaN torque RMSE (test) grouped by delan_tag",
+         ylabel="torque_rmse",
+         out_png=os.path.join(args.out_dir, "delan_torque_rmse_by_delan_tag.png"),
+        split_two_rows=True,
+        strip_common_prefix=True,
+     )
+
 
     # 3) Per-joint RMSE grid grouped by delan_tag
     groups_per_joint: Dict[str, List[List[float]]] = {}
@@ -229,12 +336,14 @@ def main() -> None:
             groups_per_joint[g][j].append(float(pj[j]))
     if groups_per_joint:
         _per_joint_boxplot(
-            groups_per_joint,
-            title="DeLaN per-joint RMSE (test) grouped by delan_tag",
-            ylabel="joint torque_rmse",
-            out_png=os.path.join(args.out_dir, "delan_joint_rmse_grid_by_delan_tag.png"),
-            n_dof=n_dof,
-        )
+             groups_per_joint,
+             title="DeLaN per-joint RMSE (test) grouped by delan_tag",
+             ylabel="joint torque_rmse",
+             out_png=os.path.join(args.out_dir, "delan_joint_rmse_grid_by_delan_tag.png"),
+             n_dof=n_dof,
+            strip_common_prefix=True,
+         )
+
 
     # 4) Speed vs accuracy scatter (time_per_sample_s vs torque_rmse)
     xs = [r["time_per_sample_s"] for r in rows if np.isfinite(r["time_per_sample_s"]) and np.isfinite(r["torque_rmse"])]

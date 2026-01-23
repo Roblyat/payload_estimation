@@ -1,6 +1,6 @@
 {
   "status": "ok",
-  "timestamp_unix": 1768931647.928919,
+  "timestamp_unix": 1769117825.6343243,
   "in_npz_arg": "/workspace/shared/data/processed/ur5__A__residual__delan_jax_struct_s4_ep200/ur5__A__residual__delan_jax_struct_s4_ep200.npz",
   "in_npz": "/workspace/shared/data/processed/ur5__A__residual__delan_jax_struct_s4_ep200/ur5__A__residual__delan_jax_struct_s4_ep200.npz",
   "out_npz_arg": "/workspace/shared/data/processed/ur5__A__lstm_windows_H50__feat_full__delan_jax.npz",

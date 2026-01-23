@@ -6,7 +6,7 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class AppConfig:
     # Base directories (container paths)
-    # BASE_RAW: str = "/workspace/shared/data/raw"
+    BASE_RAW: str = "/workspace/shared/data/raw"
     BASE_PREPROCESSED: str = "/workspace/shared/data/preprocessed"
     BASE_PROCESSED: str = "/workspace/shared/data/processed"
     BASE_MODELS_DELAN: str = "/workspace/shared/models/delan"

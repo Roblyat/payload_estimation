@@ -20,7 +20,7 @@ class DelanPreprocessPipeline:
             
         self.pivot = WidePivotBuilder(cfg)
         self.builder = TrajectoryDatasetBuilder(cfg, self.pivot)
-        self.splitter = TrajectorySplitter(cfg.test_fraction, cfg.random_seed,
+        self.splitter = TrajectorySplitter(cfg.test_fraction, cfg.val_fraction, cfg.random_seed,
             trajectory_amount=getattr(cfg, "trajectory_amount", None),
         )
         self.writer = NPZDatasetWriter()
@@ -33,6 +33,6 @@ class DelanPreprocessPipeline:
         if "trajectory_id" not in df.columns:
             df = self.segmenter.add_trajectory_id(df)
         trajs = self.builder.build(df)
-        train, test = self.splitter.split(trajs)
-        self.writer.write(out_npz_path, train, test)
-        return train, test
+        train, val, test = self.splitter.split(trajs)
+        self.writer.write(out_npz_path, train, val, test)
+        return train, val, test

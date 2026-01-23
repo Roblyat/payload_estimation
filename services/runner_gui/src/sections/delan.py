@@ -86,6 +86,28 @@ def render_delan(st, cfg, paths, run, pad_button, log_view):
                 "weight_decay": 1e-5,
                 "max_epoch": 200,
             },
+            "lutter_like": {
+                "n_width": 128,
+                "n_depth": 2,
+                "n_minibatch": 1024,
+                "diagonal_epsilon": 0.1,
+                "diagonal_shift": 2.0,
+                "activation": "softplus",
+                "learning_rate": 1e-4,
+                "weight_decay": 1e-5,
+                "max_epoch": 2000,
+            },
+            "lutter_like_256": {
+                "n_width": 256,
+                "n_depth": 2,
+                "n_minibatch": 1024,
+                "diagonal_epsilon": 0.1,
+                "diagonal_shift": 2.0,
+                "activation": "softplus",
+                "learning_rate": 1e-4,
+                "weight_decay": 1e-5,
+                "max_epoch": 2000,
+            },
             "long_train": {
                 "n_width": 64,
                 "n_depth": 2,
@@ -124,7 +146,7 @@ def render_delan(st, cfg, paths, run, pad_button, log_view):
 
         delan_preset = st.selectbox(
             "DeLaN hyperparameter preset",
-            ["default", "fast_debug", "long_train"],
+            ["default", "fast_debug", "lutter_like", "lutter_like_256", "long_train"],
             index=0,
             key="delan_preset",
             on_change=lambda: apply_preset_to_widgets(st.session_state["delan_preset"], preset_defaults),
@@ -207,7 +229,28 @@ def render_delan(st, cfg, paths, run, pad_button, log_view):
 
     model_short = "struct" if structured else "black"
 
-    delan_tag = f"delan_{delan_backend}_{model_short}_s{seed}_ep{delan_epochs_eff}"
+    def _fmt_hp(x: float) -> str:
+        if x == 0:
+            return "0"
+        ax = abs(x)
+        if ax < 1e-2 or ax >= 1e2:
+            s = f"{x:.0e}"
+        else:
+            s = f"{x:g}"
+        s = s.replace("+", "")
+        s = s.replace("e-0", "e-").replace("e+0", "e")
+        return s.replace(".", "p")
+
+    eff_hp = dict(hp0)
+    eff_hp.update(hp_override_ui)
+    hp_suffix = (
+        f"act{eff_hp['activation']}_b{int(eff_hp['n_minibatch'])}"
+        f"_lr{_fmt_hp(float(eff_hp['learning_rate']))}"
+        f"_wd{_fmt_hp(float(eff_hp['weight_decay']))}"
+        f"_w{int(eff_hp['n_width'])}_d{int(eff_hp['n_depth'])}"
+    )
+
+    delan_tag = f"delan_{delan_backend}_{model_short}_s{seed}_ep{delan_epochs_eff}_{hp_suffix}"
 
     st.session_state["delan_seed"] = int(seed)
     st.session_state["delan_tag"] = delan_tag

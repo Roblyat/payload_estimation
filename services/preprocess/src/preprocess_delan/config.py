@@ -43,6 +43,7 @@ class DelanPreprocessConfig:
 
     # Split
     test_fraction: float = 0.2
+    val_fraction: float = 0.1
     random_seed: int = 0
 
     # Optional: limit number of trajectories used to build the dataset.

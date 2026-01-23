@@ -1,49 +1,13 @@
 {
-  "status": "ok",
-  "timestamp_unix": 1769117825.6343243,
-  "in_npz_arg": "/workspace/shared/data/processed/ur5__A__residual__delan_jax_struct_s4_ep200/ur5__A__residual__delan_jax_struct_s4_ep200.npz",
-  "in_npz": "/workspace/shared/data/processed/ur5__A__residual__delan_jax_struct_s4_ep200/ur5__A__residual__delan_jax_struct_s4_ep200.npz",
+  "status": "error",
+  "timestamp_unix": 1769195767.5628479,
+  "in_npz_arg": "/workspace/shared/data/processed/ur5__A__residual__delan_jax_struct_s4_ep2000_acttanh_b512_lr1e-4_wd1e-5_w64_d2.npz",
+  "in_npz": "/workspace/shared/data/processed/ur5__A__residual__delan_jax_struct_s4_ep2000_acttanh_b512_lr1e-4_wd1e-5_w64_d2.npz",
   "out_npz_arg": "/workspace/shared/data/processed/ur5__A__lstm_windows_H50__feat_full__delan_jax.npz",
   "out_npz": "/workspace/shared/data/processed/ur5__A__lstm_windows_H50__feat_full__delan_jax/ur5__A__lstm_windows_H50__feat_full__delan_jax.npz",
   "out_json": "/workspace/shared/data/processed/ur5__A__lstm_windows_H50__feat_full__delan_jax/ur5__A__lstm_windows_H50__feat_full__delan_jax.json",
   "H": 50,
   "feature_mode": "full",
-  "n_dof": 6,
-  "feature_dim": 24,
-  "X_train_shape": [
-    4238,
-    50,
-    24
-  ],
-  "Y_train_shape": [
-    4238,
-    6
-  ],
-  "X_test_shape": [
-    1066,
-    50,
-    24
-  ],
-  "Y_test_shape": [
-    1066,
-    6
-  ],
-  "keys": [
-    "train_labels",
-    "test_labels",
-    "train_t",
-    "train_q",
-    "train_qd",
-    "train_qdd",
-    "train_tau",
-    "train_tau_hat",
-    "train_r_tau",
-    "test_t",
-    "test_q",
-    "test_qd",
-    "test_qdd",
-    "test_tau",
-    "test_tau_hat",
-    "test_r_tau"
-  ]
+  "error": "Input NPZ not found: /workspace/shared/data/processed/ur5__A__residual__delan_jax_struct_s4_ep2000_acttanh_b512_lr1e-4_wd1e-5_w64_d2.npz (arg was /workspace/shared/data/processed/ur5__A__residual__delan_jax_struct_s4_ep2000_acttanh_b512_lr1e-4_wd1e-5_w64_d2.npz)",
+  "traceback": "Traceback (most recent call last):\n  File \"/workspace/preprocess/scripts/build_lstm_windows.py\", line 99, in main\n    raise FileNotFoundError(f\"Input NPZ not found: {in_npz} (arg was {args.in_npz})\")\nFileNotFoundError: Input NPZ not found: /workspace/shared/data/processed/ur5__A__residual__delan_jax_struct_s4_ep2000_acttanh_b512_lr1e-4_wd1e-5_w64_d2.npz (arg was /workspace/shared/data/processed/ur5__A__residual__delan_jax_struct_s4_ep2000_acttanh_b512_lr1e-4_wd1e-5_w64_d2.npz)\n"
 }

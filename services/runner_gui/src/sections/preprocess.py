@@ -4,6 +4,9 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
 
     st.header("1) Preprocess")
 
+    def _safe_tag(x: float) -> str:
+        return str(x).replace(".", "p")
+
     p_col1, p_col2, p_col3, p_col4 = st.columns([2.0, 0.8, 1.2, 1.2])
 
     raw_data_path = "/workspace/shared/data/raw"
@@ -20,6 +23,24 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
             "Run tag (experiment id)",
             "A",
             help="Short identifier to distinguish multiple runs on the same dataset (e.g. A, lr3e-4, sweep1).",
+        )
+        test_fraction = st.number_input(
+            "Test fraction",
+            min_value=0.05,
+            max_value=0.9,
+            value=0.2,
+            step=0.05,
+            format="%.2f",
+            help="Fraction of trajectories used for test split.",
+        )
+        val_fraction = st.number_input(
+            "Val fraction",
+            min_value=0.0,
+            max_value=0.9,
+            value=0.1,
+            step=0.05,
+            format="%.2f",
+            help="Fraction of trajectories used for validation split.",
         )
 
 
@@ -64,13 +85,16 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
     with p_col4:
         pad_button()
         if st.button("Preprocess DeLaN", use_container_width=True):
+            out_npz_name = f"delan_{dataset_name}_tf{_safe_tag(test_fraction)}_vf{_safe_tag(val_fraction)}_dataset.npz"
             run(
                 f"{cfg.COMPOSE} exec -T preprocess bash -lc "
                 f"\"python3 scripts/build_delan_dataset.py "
                 f"--qdd {derive_qdd} "
                 f"--col_format {col_format} "
+                f"--test_fraction {test_fraction} "
+                f"--val_fraction {val_fraction} "
                 f"--raw_csv {raw_data_path}/{dataset_name}.{in_format} "
-                f"--out_npz {paths.preprocessed}/delan_{dataset_name}_dataset.npz "
+                f"--out_npz {paths.preprocessed}/{out_npz_name} "
                 f"\""
             )
 
@@ -80,7 +104,9 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
     # File name textboxes (base path shown in label)
     delan_backend = st.session_state.get("delan_backend", "jax")
 
-    default_delan_npz_name = f"delan_{dataset_name}_dataset.npz"
+    default_delan_npz_name = (
+        f"delan_{dataset_name}_tf{_safe_tag(test_fraction)}_vf{_safe_tag(val_fraction)}_dataset.npz"
+    )
     default_windows_npz_name = f"{base_id}__lstm_windows_H{H}__feat_{feature_mode}__delan_{delan_backend}.npz"
 
     delan_npz_name = st.text_input(
@@ -101,6 +127,8 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
     st.session_state["run_tag"] = run_tag
     st.session_state["H"] = int(H)
     st.session_state["feature_mode"] = feature_mode
+    st.session_state["test_fraction"] = float(test_fraction)
+    st.session_state["val_fraction"] = float(val_fraction)
     st.session_state["base_id"] = f"{dataset_name}__{run_tag}"
     st.session_state["npz_in"] = npz_in
     st.session_state["win_out"] = win_out

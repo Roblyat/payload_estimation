@@ -42,7 +42,7 @@ DELAN_JAX_SRC = "/workspace/delan_jax/src"
 for p in [DELAN_COMMON_SRC, DELAN_JAX_SRC, DELAN_REPO_DIR]:
     _add_path(p)
 
-from delan_train_common import DelanRunPaths, DelanTrainRun
+from delan_train_common import DelanRunPaths, DelanTrainRun, compute_tau_metrics
 from load_npz_dataset import load_npz_trajectory_dataset
 
 import deep_lagrangian_networks.jax_DeLaN_model as delan
@@ -121,6 +121,22 @@ class JaxDelanTrainer:
                 "n_depth": 2,
                 "learning_rate": 3e-4,
             },
+            "lutter_like": {
+                "activation": "softplus",
+                "n_minibatch": 1024,
+                "n_width": 128,
+                "n_depth": 2,
+                "learning_rate": 1e-4,
+                "weight_decay": 1e-5,
+            },
+            "lutter_like_256": {
+                "activation": "softplus",
+                "n_minibatch": 1024,
+                "n_width": 256,
+                "n_depth": 2,
+                "learning_rate": 1e-4,
+                "weight_decay": 1e-5,
+            },
             "long_train": {
                 "max_epoch": 8000,
                 "n_minibatch": 512,
@@ -182,8 +198,13 @@ class JaxDelanTrainer:
         print(f"  hp_preset = {args.hp_preset}")
         print("################################################")
 
-        train_data, test_data, divider, dt = load_npz_trajectory_dataset(args.npz)
+        try:
+            train_data, val_data, test_data, divider, dt = load_npz_trajectory_dataset(args.npz)
+        except ValueError as e:
+            print(f"[error] {e}")
+            raise
         train_labels, train_qp, train_qv, train_qa, train_tau = train_data
+        val_labels, val_qp, val_qv, val_qa, val_tau = val_data
         test_labels, test_qp, test_qv, test_qa, test_tau = test_data
 
         n_dof = train_qp.shape[-1]
@@ -195,6 +216,7 @@ class JaxDelanTrainer:
         print(f"   dt ≈ {dt}")
         print(f"  dof = {n_dof}")
         print(f"  Train trajectories = {len(train_labels)}")
+        print(f"  Val trajectories   = {len(val_labels)}")
         print(f"  Test trajectories  = {len(test_labels)}")
         print(f"  Train samples = {train_qp.shape[0]}")
         print(f"  Test samples  = {test_qp.shape[0]}")
@@ -299,10 +321,11 @@ class JaxDelanTrainer:
                 )
 
             if args.eval_every > 0 and (epoch_i == 1 or (epoch_i % args.eval_every) == 0):
-                q_eval = test_qp
-                qd_eval = test_qv
-                qdd_eval = test_qa
-                tau_eval = test_tau
+                use_val = val_qp.shape[0] > 0
+                q_eval = val_qp if use_val else test_qp
+                qd_eval = val_qv if use_val else test_qv
+                qdd_eval = val_qa if use_val else test_qa
+                tau_eval = val_tau if use_val else test_tau
 
                 if args.eval_n and args.eval_n > 0:
                     n = min(int(args.eval_n), q_eval.shape[0])
@@ -320,7 +343,8 @@ class JaxDelanTrainer:
                 test_mse = float((1.0 / qj.shape[0]) * jnp.sum((pred_tau_eval - tauj) ** 2))
 
                 self.train_run.record_test_point(epoch=epoch_i, mse=test_mse)
-                print(f"  [eval] test_mse={test_mse:.3e}  (n={qj.shape[0]})")
+                split_name = "val" if use_val else "test"
+                print(f"  [eval] {split_name}_mse={test_mse:.3e}  (n={qj.shape[0]})")
 
         if self.save_model:
             with open(self.run_paths.ckpt_path, "wb") as f:
@@ -339,6 +363,32 @@ class JaxDelanTrainer:
 
         print("\n################################################")
         print(f"Evaluating DeLaN | run={self.run_name}")
+
+        if val_qp.shape[0] > 0:
+            qv = jnp.array(val_qp)
+            qdv = jnp.array(val_qv)
+            qddv = jnp.array(val_qa)
+
+            t0_val = time.perf_counter()
+            pred_tau_val = delan_model(self.params, None, qv, qdv, qddv, 0.0 * qv)[1]
+            t_eval_val = (time.perf_counter() - t0_val) / float(qv.shape[0])
+
+            val_mse, val_rmse, val_mse_j, val_rmse_j = compute_tau_metrics(
+                tau_true=np.array(val_tau),
+                tau_pred=np.array(pred_tau_val),
+            )
+
+            # store separately for selection
+            self.train_run.metrics["eval_val"] = {
+                "torque_mse": float(val_mse),
+                "torque_rmse": float(val_rmse),
+                "torque_mse_per_joint": [float(x) for x in val_mse_j],
+                "torque_rmse_per_joint": [float(x) for x in val_rmse_j],
+                "time_per_sample_s": float(t_eval_val),
+                "hz": float(1.0 / t_eval_val) if t_eval_val > 0 else None,
+            }
+
+            print("  [val] Torque RMSE =", f"{val_rmse:.3e}")
 
         q = jnp.array(test_qp)
         qd = jnp.array(test_qv)
@@ -420,7 +470,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--hp_preset",
         type=str,
         default="default",
-        choices=["default", "fast_debug", "long_train"],
+        choices=["default", "fast_debug", "lutter_like", "lutter_like_256", "long_train"],
         help="Hyperparameter preset (UI dropdown).",
     )
     parser.add_argument("--n_width", type=int, default=None)

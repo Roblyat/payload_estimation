@@ -4,6 +4,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import json
+import csv
+from datetime import datetime
 
 import sys
 sys.path.append("/workspace/shared/src")
@@ -76,6 +78,16 @@ def main():
     ap.add_argument("--scalers", required=True, help="scalers_H50.npz from training")
     ap.add_argument("--features", type=str, default="full", choices=list(FEATURE_MODES),
         help="Feature mode used for LSTM input windows (must match training).",)
+    ap.add_argument("--metrics_csv", type=str, default="", help="Append summary row to this CSV path")
+    ap.add_argument("--metrics_json", type=str, default="", help="Append summary row to this JSON path")
+    # Optional sweep metadata for logging
+    ap.add_argument("--K", type=int, default=None)
+    ap.add_argument("--test_fraction", type=float, default=None)
+    ap.add_argument("--seed", type=int, default=None)
+    ap.add_argument("--delan_seed", type=int, default=None)
+    ap.add_argument("--delan_epochs", type=int, default=None)
+    ap.add_argument("--hp_preset", type=str, default=None)
+    ap.add_argument("--delan_rmse_val", type=float, default=None)
 
     args = ap.parse_args()
 
@@ -257,6 +269,63 @@ def main():
         json.dump(metrics_json, f, indent=2)
 
     print(f"Saved: {metrics_json_path}")
+
+    # ---- Append summary CSV/JSON ----
+    summary = {
+        "timestamp": datetime.now().isoformat(timespec="seconds"),
+        "split": split,
+        "H": int(H),
+        "feature_mode": args.features,
+        "K": args.K,
+        "test_fraction": args.test_fraction,
+        "seed": args.seed,
+        "delan_seed": args.delan_seed,
+        "delan_epochs": args.delan_epochs,
+        "hp_preset": args.hp_preset,
+        "delan_rmse_val": args.delan_rmse_val,
+        "delan_rmse_test": float(delan_rmse),
+        "residual_rmse": float(r_rmse),
+        "rg_rmse": float(rg_rmse),
+        "gain": float(delan_rmse - rg_rmse),
+        "gain_ratio": float(rg_rmse / delan_rmse) if delan_rmse != 0 else None,
+        "residual_npz": args.residual_npz,
+        "lstm_model": args.model,
+        "lstm_scalers": args.scalers,
+        "out_dir": args.out_dir,
+    }
+
+    if args.metrics_csv:
+        os.makedirs(os.path.dirname(args.metrics_csv), exist_ok=True)
+        file_exists = os.path.exists(args.metrics_csv)
+        with open(args.metrics_csv, "a", newline="") as f:
+            writer = csv.DictWriter(f, fieldnames=list(summary.keys()))
+            if not file_exists:
+                writer.writeheader()
+            writer.writerow(summary)
+        print(f"Appended CSV: {args.metrics_csv}")
+
+    if args.metrics_json:
+        os.makedirs(os.path.dirname(args.metrics_json), exist_ok=True)
+        if args.metrics_json.endswith(".jsonl"):
+            with open(args.metrics_json, "a") as f:
+                f.write(json.dumps(summary) + "\n")
+        else:
+            if os.path.exists(args.metrics_json):
+                try:
+                    with open(args.metrics_json, "r") as f:
+                        data = json.load(f)
+                    if isinstance(data, list):
+                        items = data
+                    else:
+                        items = [data]
+                except Exception:
+                    items = []
+            else:
+                items = []
+            items.append(summary)
+            with open(args.metrics_json, "w") as f:
+                json.dump(items, f, indent=2)
+        print(f"Appended JSON: {args.metrics_json}")
 
     # ---- Optional save predictions ----
     if args.save_pred_npz:

@@ -53,6 +53,7 @@ def main():
         derive_qdd_from_dq=True,
         # splitter settings (change if you want)
         test_fraction=0.2,
+        val_fraction=0.1,
         random_seed=0,
         # segmenter settings are irrelevant because trajectory_id is provided by ID and preserved
     )
@@ -61,7 +62,7 @@ def main():
     selector = JointSelector(cfg.dof_joints, cfg.col_joint)
     pivot = WidePivotBuilder(cfg)
     builder = TrajectoryDatasetBuilder(cfg, pivot)
-    splitter = TrajectorySplitter(cfg.test_fraction, cfg.random_seed)
+    splitter = TrajectorySplitter(cfg.test_fraction, cfg.val_fraction, cfg.random_seed)
     writer = NPZDatasetWriter()
 
     dfs = []
@@ -100,16 +101,16 @@ def main():
     # 4) Build trajectories (pivot per trajectory_id)
     trajs = builder.build(df_all)
 
-    # 5) Split trajectories into train/test
-    train, test = splitter.split(trajs)
+    # 5) Split trajectories into train/val/test
+    train, val, test = splitter.split(trajs)
 
     # 6) Ensure output dir exists and write NPZ
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
-    writer.write(out_path, train, test)
+    writer.write(out_path, train, val, test)
 
     print("\n=== Combined dataset written ===")
     print("Output:", out_path)
-    print(f"Trajectories: total={len(trajs)} train={len(train)} test={len(test)}")
+    print(f"Trajectories: total={len(trajs)} train={len(train)} val={len(val)} test={len(test)}")
     print("Done.")
 
 

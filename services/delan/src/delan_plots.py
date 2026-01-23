@@ -100,8 +100,8 @@ class DelanPlotter:
         ax1.grid(True, alpha=0.25)
 
         ax2 = ax1.twinx()
-        ax2.plot(hist_test_epoch, hist_test_mse, label="test_mse", color="C1")
-        ax2.set_ylabel("Test torque MSE", color="black")
+        ax2.plot(hist_test_epoch, hist_test_mse, label="val_mse", color="C1")
+        ax2.set_ylabel("Val torque MSE", color="black")
         ax2.tick_params(axis="y", labelcolor="black", color="black")
         ax2.tick_params(axis="x", bottom=False, labelbottom=False)
         ax2.xaxis.set_visible(False)
@@ -112,7 +112,7 @@ class DelanPlotter:
         l2, lab2 = ax2.get_legend_handles_labels()
         ax1.legend(l1 + l2, lab1 + lab2, loc="best")
 
-        ax1.set_title(f"{self.run_name} | Elbow (train loss vs test MSE)")
+        ax1.set_title(f"{self.run_name} | Elbow (train loss vs val MSE)")
         self.plt.tight_layout()
         return self._save_fig(fig, f"{pfx}__elbow_train_vs_test.png")
 

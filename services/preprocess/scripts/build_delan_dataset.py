@@ -45,6 +45,8 @@ if __name__ == "__main__":
                     help="If >0: randomly sample this many trajectories (seeded) before splitting.")
     ap.add_argument("--test_fraction", type=float, default=0.2,
                     help="Fraction of trajectories used for test split.")
+    ap.add_argument("--val_fraction", type=float, default=0.1,
+                    help="Fraction of trajectories used for validation split.")
     ap.add_argument("--seed", type=int, default=0,
                     help="Random seed for trajectory sampling and splitting.")
 
@@ -57,6 +59,7 @@ if __name__ == "__main__":
         input_format=col_format,
         derive_qdd_from_dq=derive_qdd,
         test_fraction=args.test_fraction,
+        val_fraction=args.val_fraction,
         random_seed=args.seed,
         trajectory_amount=(None if args.trajectory_amount <= 0 else args.trajectory_amount),
     )
@@ -81,9 +84,19 @@ if __name__ == "__main__":
         out_npz = out_npz + ".npz"
 
     pipe = DelanPreprocessPipeline(cfg)
-    train, test = pipe.run(raw_csv_path=raw_csv, out_npz_path=out_npz)
+    train, val, test = pipe.run(raw_csv_path=raw_csv, out_npz_path=out_npz)
 
     print(f"Saved: {out_npz}")
-    print(f"Trajectories: train={len(train)} test={len(test)}")
+    print(f"Trajectories: train={len(train)} val={len(val)} test={len(test)}")
+
+    if len(train) == 0 or len(test) == 0 or len(val) == 0:
+        msg = (
+            "ERROR: Split produced an empty subset.\n"
+            f"  train={len(train)} val={len(val)} test={len(test)}\n"
+            f"  test_fraction={args.test_fraction} val_fraction={args.val_fraction}\n"
+            "Adjust test/val fractions or increase trajectory amount."
+        )
+        print(msg)
+        raise SystemExit(1)
 
     print("Exists:", os.path.exists(out_npz))

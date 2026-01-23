@@ -16,7 +16,7 @@ class TrajectoryDatasetBuilder:
 
 class NPZDatasetWriter:
     """Store trajectories (variable length) as object arrays in an .npz."""
-    def write(self, path: str, train: list[Trajectory], test: list[Trajectory]) -> None:
+    def write(self, path: str, train: list[Trajectory], val: list[Trajectory], test: list[Trajectory]) -> None:
         def pack(trajs: list[Trajectory]):
             labels = [tr.label for tr in trajs]
             t = [tr.t for tr in trajs]
@@ -27,6 +27,7 @@ class NPZDatasetWriter:
             return labels, t, q, qd, qdd, tau
 
         tr_labels, tr_t, tr_q, tr_qd, tr_qdd, tr_tau = pack(train)
+        va_labels, va_t, va_q, va_qd, va_qdd, va_tau = pack(val)
         te_labels, te_t, te_q, te_qd, te_qdd, te_tau = pack(test)
 
         np.savez_compressed(
@@ -37,6 +38,12 @@ class NPZDatasetWriter:
             train_qd=np.array(tr_qd, dtype=object),
             train_qdd=np.array(tr_qdd, dtype=object),
             train_tau=np.array(tr_tau, dtype=object),
+            val_labels=np.array(va_labels, dtype=object),
+            val_t=np.array(va_t, dtype=object),
+            val_q=np.array(va_q, dtype=object),
+            val_qd=np.array(va_qd, dtype=object),
+            val_qdd=np.array(va_qdd, dtype=object),
+            val_tau=np.array(va_tau, dtype=object),
             test_labels=np.array(te_labels, dtype=object),
             test_t=np.array(te_t, dtype=object),
             test_q=np.array(te_q, dtype=object),

@@ -72,9 +72,9 @@ LSTM_DROPOUT = 0.1
 LSTM_EPS = 1e-8
 LSTM_NO_PLOTS = False
 
-# Summary metrics output (single source of truth)
-METRICS_CSV = f"{EVAL_DIR}/summary_metrics_sweep_1.csv"
-METRICS_JSON = f"{EVAL_DIR}/summary_metrics_sweep_1.jsonl"
+# Summary metrics output (single source of truth) - timestamped per run
+METRICS_CSV = None
+METRICS_JSON = None
 
 # Paths to scripts INSIDE the containers
 SCRIPT_BUILD_DELAN_DATASET = "scripts/build_delan_dataset.py"
@@ -214,17 +214,17 @@ def hp_suffix_from_preset(preset: str, hp_flags: str) -> str:
         f"_wd{fmt_hp(hp['weight_decay'])}_w{hp['n_width']}_d{hp['n_depth']}"
     )
 
-def read_delan_rmse(metrics_json_path: str) -> float:
+def read_delan_rmse_pair(metrics_json_path: str) -> tuple[float, float]:
     if not os.path.exists(metrics_json_path):
-        return float("inf")
+        return float("inf"), float("inf")
     try:
         with open(metrics_json_path, "r") as f:
             d = json.load(f)
-        if "eval_val" in d:
-            return float(d.get("eval_val", {}).get("torque_rmse", float("inf")))
-        return float(d.get("eval_test", {}).get("torque_rmse", float("inf")))
+        val_rmse = float(d.get("eval_val", {}).get("torque_rmse", float("inf")))
+        test_rmse = float(d.get("eval_test", {}).get("torque_rmse", float("inf")))
+        return val_rmse, test_rmse
     except Exception:
-        return float("inf")
+        return float("inf"), float("inf")
 
 
 def main():
@@ -234,6 +234,10 @@ def main():
     master_log_path = logs_dir / f"sweep1_{DATASET_NAME}_{RUN_TAG}_{ts}.log"
 
     raw_csv = f"{RAW_DIR}/{DATASET_NAME}.{IN_FORMAT}"
+
+    global METRICS_CSV, METRICS_JSON
+    METRICS_CSV = f"{EVAL_DIR}/summary_metrics_sweep_1_{ts}.csv"
+    METRICS_JSON = f"{EVAL_DIR}/summary_metrics_sweep_1_{ts}.jsonl"
 
     with master_log_path.open("w", encoding="utf-8") as master_log:
         master_log.write(banner([
@@ -319,22 +323,23 @@ def main():
                             run_cmd(cmd, run_log)
 
                             metrics_json = f"{MODELS_DELAN_DIR_HOST}/{delan_id}/metrics.json"
-                            rmse = read_delan_rmse(metrics_json)
+                            val_rmse, test_rmse = read_delan_rmse_pair(metrics_json)
                             delan_candidates.append({
                                 "delan_seed": delan_seed,
                                 "delan_tag": delan_tag,
                                 "delan_id": delan_id,
                                 "ckpt": ckpt,
-                                "rmse": rmse,
+                                "val_rmse": val_rmse,
+                                "test_rmse": test_rmse,
                                 "metrics_json": metrics_json,
                             })
 
                         # ---------- 3) Select best DeLaN ----------
-                        delan_candidates.sort(key=lambda d: d["rmse"])
+                        delan_candidates.sort(key=lambda d: d["val_rmse"])
                         best = delan_candidates[0]
                         run_log.write("\n" + banner([
-                            "3) SELECT BEST DELAN (test RMSE proxy for val)",
-                            f"best_seed={best['delan_seed']} rmse={best['rmse']}",
+                            "3) SELECT BEST DELAN (by val RMSE)",
+                            f"best_seed={best['delan_seed']} val_rmse={best['val_rmse']} test_rmse={best['test_rmse']}",
                             f"metrics_json={best['metrics_json']}",
                         ], char="#") + "\n")
 
@@ -428,7 +433,8 @@ def main():
                                     f"--delan_seed {best['delan_seed']} "
                                     f"--delan_epochs {DELAN_EPOCHS} "
                                     f"--hp_preset {DELAN_HP_PRESET} "
-                                    f"--delan_rmse_val {best['rmse']}"
+                                    f"--delan_rmse_val {best['val_rmse']} "
+                                    f"--delan_rmse_test {best['test_rmse']}"
                                 )
                                 run_cmd(cmd, run_log)
 

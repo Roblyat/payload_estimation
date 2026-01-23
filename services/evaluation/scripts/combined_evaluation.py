@@ -88,6 +88,7 @@ def main():
     ap.add_argument("--delan_epochs", type=int, default=None)
     ap.add_argument("--hp_preset", type=str, default=None)
     ap.add_argument("--delan_rmse_val", type=float, default=None)
+    ap.add_argument("--delan_rmse_test", type=float, default=None)
 
     args = ap.parse_args()
 
@@ -284,6 +285,7 @@ def main():
         "hp_preset": args.hp_preset,
         "delan_rmse_val": args.delan_rmse_val,
         "delan_rmse_test": float(delan_rmse),
+        "delan_rmse_test_meta": args.delan_rmse_test,
         "residual_rmse": float(r_rmse),
         "rg_rmse": float(rg_rmse),
         "gain": float(delan_rmse - rg_rmse),

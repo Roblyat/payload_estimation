@@ -23,6 +23,7 @@ if "/workspace/lstm/src" not in sys.path:
     sys.path.insert(0, "/workspace/lstm/src")
 
 from lstm_plots import save_loss_curve, save_residual_overlay
+from lstm_plots import save_residual_rmse_per_joint_bar, save_residual_rmse_time_curve
 
 from path_helpers import artifact_folder, artifact_file, resolve_npz_path
 
@@ -118,6 +119,7 @@ def main():
         help="Activation for LSTM (candidate/state). Default matches Keras default (tanh).",
     )
     ap.add_argument("--no_plots", action="store_true")
+    ap.add_argument("--dt", type=float, default=None, help="Optional dt for plots (seconds). If omitted, uses sample index.")
     ap.add_argument("--eps", type=float, default=1e-8)
     ap.add_argument("--model_name", default="best.keras", help="Filename for the best model checkpoint inside out_dir (e.g. best_seed4_H50.keras)"
 )
@@ -193,6 +195,7 @@ def main():
             "units": args.units,
             "dropout": args.dropout,
             "activation": args.activation,
+            "dt": args.dt,
             "eps": args.eps,
             "model_name": args.model_name,
         },
@@ -371,10 +374,15 @@ def main():
     print(f"Saved best model:  {ckpt_path}")
 
     # ---------- Plots ----------
-    out1 = save_loss_curve(history, out_dir)
-    print(f"Saved: {out1}")
-    out2 = save_residual_overlay(Y_test, Y_pred, out_dir)
-    print(f"Saved: {out2}")
+    if not args.no_plots:
+        out1 = save_loss_curve(history, out_dir)
+        print(f"Saved: {out1}")
+        out2 = save_residual_overlay(Y_test, Y_pred, out_dir)
+        print(f"Saved: {out2}")
+        out3 = save_residual_rmse_per_joint_bar(Y_test, Y_pred, out_dir)
+        print(f"Saved: {out3}")
+        out4 = save_residual_rmse_time_curve(Y_test, Y_pred, out_dir, dt=args.dt)
+        print(f"Saved: {out4}")
 
 
 if __name__ == "__main__":

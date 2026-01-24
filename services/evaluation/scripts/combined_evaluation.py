@@ -1,17 +1,27 @@
 import os
 import argparse
 import numpy as np
-import matplotlib.pyplot as plt
 import tensorflow as tf
 import json
 import csv
 from datetime import datetime
 
 import sys
+from pathlib import Path
+
+# Local evaluation src/ (for plotting helpers)
+_EVAL_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(_EVAL_ROOT / "src"))
 sys.path.append("/workspace/shared/src")
 from feature_builders import build_features, FEATURE_MODES
 
 from path_helpers import resolve_npz_path
+from eval_plots import (
+    save_residual_overlay_grid,
+    save_torque_overlay_grid,
+    save_torque_rmse_per_joint_grouped_bar,
+    save_torque_rmse_time_curve,
+)
 
 def apply_x_scaler_feat(feat: np.ndarray, x_mean: np.ndarray, x_std: np.ndarray):
     # feat: (T, D)
@@ -73,6 +83,7 @@ def main():
     ap.add_argument("--split", choices=["test", "train"], default="test")
     ap.add_argument("--batch", type=int, default=256)
     ap.add_argument("--max_plot_samples", type=int, default=800)
+    ap.add_argument("--dt", type=float, default=None, help="Sample period (seconds) for time-axis plots")
     ap.add_argument("--save_pred_npz", action="store_true",
                     help="Save per-trajectory predictions to NPZ in out_dir")
     ap.add_argument("--scalers", required=True, help="scalers_H50.npz from training")
@@ -340,40 +351,51 @@ def main():
         print(f"Saved: {out_npz}")
 
     # ---- Plots (first K samples of concatenated valid region) ----
-    K = min(args.max_plot_samples, tau_gt_valid_all.shape[0])
-
-    # 1) Residual GT vs Pred
-    fig = plt.figure(figsize=(14, 8), dpi=120)
-    for j in range(n_dof):
-        ax = fig.add_subplot(3, 2, j + 1)
-        ax.plot(r_gt_valid_all[:K, j], label="GT residual", linewidth=1.0)
-        ax.plot(r_hat_valid_all[:K, j], label="LSTM residual", linewidth=1.0, alpha=0.85)
-        ax.set_title(f"Residual joint {j}")
-        ax.grid(True, alpha=0.2)
-        if j == 0:
-            ax.legend()
-    plt.tight_layout()
-    out = os.path.join(args.out_dir, f"residual_gt_vs_pred_{split}_H{H}.png")
-    plt.savefig(out, dpi=150)
+    out = save_residual_overlay_grid(
+        r_gt_valid_all,
+        r_hat_valid_all,
+        args.out_dir,
+        max_samples=args.max_plot_samples,
+        title=f"Residual: GT vs LSTM ({split}, valid k>=H-1)",
+        out_name=f"residual_gt_vs_pred_{split}_H{H}.png",
+    )
     print(f"Saved: {out}")
-    plt.close(fig)
 
-    # 2) Torque GT vs DeLaN vs Combined
-    fig = plt.figure(figsize=(14, 8), dpi=120)
-    for j in range(n_dof):
-        ax = fig.add_subplot(3, 2, j + 1)
-        ax.plot(tau_gt_valid_all[:K, j], label="GT tau", linewidth=1.0)
-        ax.plot(tau_delan_valid_all[:K, j], label="DeLaN tau_hat", linewidth=1.0, alpha=0.85)
-        ax.plot(tau_rg_valid_all[:K, j], label="Combined tau_RG", linewidth=1.0, alpha=0.85)
-        ax.set_title(f"Torque joint {j}")
-        ax.grid(True, alpha=0.2)
-        if j == 0:
-            ax.legend()
-    plt.tight_layout()
-    out = os.path.join(args.out_dir, f"torque_gt_vs_delan_vs_combined_{split}_H{H}.png")
-    plt.savefig(out, dpi=150)
+    out = save_torque_overlay_grid(
+        tau_gt_valid_all,
+        tau_delan_valid_all,
+        tau_rg_valid_all,
+        args.out_dir,
+        max_samples=args.max_plot_samples,
+        title=f"Torque: GT vs DeLaN vs Combined ({split}, valid k>=H-1)",
+        out_name=f"torque_gt_vs_delan_vs_combined_{split}_H{H}.png",
+    )
     print(f"Saved: {out}")
-    plt.close(fig)
+
+    out = save_torque_rmse_per_joint_grouped_bar(
+        tau_gt_valid_all,
+        tau_delan_valid_all,
+        tau_rg_valid_all,
+        args.out_dir,
+        max_samples=None,
+        max_joints=n_dof,
+        title=f"Torque RMSE per joint (GT baseline) ({split}, valid k>=H-1)",
+        out_name=f"torque_rmse_per_joint_grouped_{split}_H{H}.png",
+    )
+    print(f"Saved: {out}")
+
+    out = save_torque_rmse_time_curve(
+        tau_gt_valid_all,
+        tau_delan_valid_all,
+        tau_rg_valid_all,
+        args.out_dir,
+        dt=args.dt,
+        max_samples=args.max_plot_samples,
+        max_joints=n_dof,
+        title=f"Torque RMSE over time (joint-avg) ({split}, valid k>=H-1)",
+        out_name=f"torque_rmse_time_{split}_H{H}.png",
+    )
+    print(f"Saved: {out}")
 
 
 if __name__ == "__main__":

@@ -65,6 +65,25 @@ def render_delan(st, cfg, paths, run, pad_button, log_view):
             help="Random seed for weight init / shuffling.",
         )
 
+        d_log_every = st.number_input(
+            "Log every (epochs)",
+            min_value=0,
+            max_value=100000,
+            value=5,
+            step=1,
+            help="Print/record training curves every N epochs. 0 disables periodic logging (epoch 1 still logs).",
+            key="d_log_every",
+        )
+        d_eval_every = st.number_input(
+            "Eval every (epochs)",
+            min_value=0,
+            max_value=100000,
+            value=5,
+            step=1,
+            help="Evaluate on val/test every N epochs (for elbow plot). 0 disables periodic eval.",
+            key="d_eval_every",
+        )
+
     with d_row1_c3:
         
         # ----------------------------
@@ -329,6 +348,8 @@ def render_delan(st, cfg, paths, run, pad_button, log_view):
                 f"-s {seed} "
                 f"-r {render_flag} "
                 f"--hp_preset {delan_preset} "
+                f"--eval_every {int(d_eval_every)} "
+                f"--log_every {int(d_log_every)} "
                 f"{hp_flags} "
                 f"--save_path {ckpt}"
                 f"\""

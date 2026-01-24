@@ -101,6 +101,7 @@ class JaxDelanTrainer:
             "render": int(args.r[0]),
             "eval_every": int(args.eval_every),
             "eval_n": int(args.eval_n),
+            "log_every": int(args.log_every),
         }
         self.train_run = DelanTrainRun(
             run_paths=self.run_paths,
@@ -325,7 +326,7 @@ class JaxDelanTrainer:
             epoch_i += 1
             logs = jax.tree.map(lambda x: x / n_batches, logs)
 
-            if epoch_i == 1 or np.mod(epoch_i, 50) == 0:
+            if epoch_i == 1 or (args.log_every > 0 and (epoch_i % args.log_every) == 0):
                 print(
                     f"Epoch {epoch_i:05d}: "
                     f"Time={time.perf_counter()-t0_start:6.1f}s, "
@@ -513,8 +514,14 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--eval_every",
         type=int,
-        default=200,
+        default=5,
         help="Evaluate on test split every N epochs (for elbow plot). 0 disables periodic eval.",
+    )
+    parser.add_argument(
+        "--log_every",
+        type=int,
+        default=5,
+        help="Print/record training curves every N epochs. 0 disables periodic logging (epoch 1 still logs).",
     )
     parser.add_argument(
         "--eval_n",

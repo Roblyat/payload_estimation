@@ -45,10 +45,10 @@ RUN_TAG = "A"
 IN_FORMAT = "csv"
 COL_FORMAT = "wide"
 DERIVE_QDD = True
-FILTER_ACCEL = True
-FILTER_CUTOFF_HZ = 8.0
-FILTER_ORDER = 4
-FILTER_QDD = True
+LOWPASS_SIGNALS = True
+LOWPASS_CUTOFF_HZ = 8.0
+LOWPASS_ORDER = 4
+LOWPASS_QDD = True
 
 # Sweep
 TRAJ_AMOUNTS = [50, 75, 100, 150, 180]
@@ -252,7 +252,7 @@ def main():
             f"traj_amounts={TRAJ_AMOUNTS} test_fracs={TEST_FRACTIONS} seeds={SEEDS}",
             f"val_fraction={VAL_FRACTION}",
             f"H={H_LIST} feature_modes={FEATURE_MODES}",
-            f"filter_accel={FILTER_ACCEL} cutoff_hz={FILTER_CUTOFF_HZ} order={FILTER_ORDER} filter_qdd={FILTER_QDD}",
+            f"lowpass_signals={LOWPASS_SIGNALS} cutoff_hz={LOWPASS_CUTOFF_HZ} order={LOWPASS_ORDER} lowpass_qdd={LOWPASS_QDD}",
             f"DeLaN: backend=jax type={DELAN_MODEL_TYPE} hp_preset={DELAN_HP_PRESET} epochs={DELAN_EPOCHS}",
             f"LSTM: epochs_max={LSTM_EPOCHS} batch={LSTM_BATCH} val_split={LSTM_VAL_SPLIT}",
             f"metrics_csv={METRICS_CSV}",
@@ -286,16 +286,16 @@ def main():
                         cmd = compose_exec(
                             SVC_PREPROCESS,
                             f"python3 {SCRIPT_BUILD_DELAN_DATASET} "
-                            f"--qdd {str(DERIVE_QDD)} "
+                            f"--derive_qdd_from_qd {str(DERIVE_QDD)} "
                             f"--col_format {COL_FORMAT} "
                             f"--trajectory_amount {K} "
                             f"--test_fraction {tf} "
                             f"--val_fraction {VAL_FRACTION} "
                             f"--seed {seed} "
-                            f"--filter_accel {FILTER_ACCEL} "
-                            f"--filter_cutoff_hz {FILTER_CUTOFF_HZ} "
-                            f"--filter_order {FILTER_ORDER} "
-                            f"--filter_qdd {FILTER_QDD} "
+                            f"--lowpass_signals {LOWPASS_SIGNALS} "
+                            f"--lowpass_cutoff_hz {LOWPASS_CUTOFF_HZ} "
+                            f"--lowpass_order {LOWPASS_ORDER} "
+                            f"--lowpass_qdd {LOWPASS_QDD} "
                             f"--raw_csv {raw_csv} "
                             f"--out_npz {npz_in}"
                         )

@@ -33,7 +33,12 @@ def str2bool(v: str) -> bool:
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("--qdd", type=str2bool, default=True)
+    ap.add_argument(
+        "--derive_qdd_from_qd",
+        type=str2bool,
+        default=True,
+        help="Derive acceleration qdd from velocity qd via numerical differentiation.",
+    )
     ap.add_argument("--col_format", type=str, default="long")
     ap.add_argument("--raw_csv", type=str,
         default=os.environ.get("RAW_CSV", "/workspace/shared/data/raw/raw_data.csv"),
@@ -50,19 +55,35 @@ if __name__ == "__main__":
                     help="Fraction of trajectories used for validation split.")
     ap.add_argument("--seed", type=int, default=0,
                     help="Random seed for trajectory sampling and splitting.")
-    ap.add_argument("--filter_accel", type=str2bool, default=False,
-                    help="Apply low-pass filtering to q/qd/tau and optionally qdd.")
-    ap.add_argument("--filter_cutoff_hz", type=float, default=20.0,
-                    help="Low-pass cutoff frequency (Hz).")
-    ap.add_argument("--filter_order", type=int, default=4,
-                    help="Butterworth filter order.")
-    ap.add_argument("--filter_qdd", type=str2bool, default=True,
-                    help="Also low-pass filter qdd after derivation.")
+    ap.add_argument(
+        "--lowpass_signals",
+        type=str2bool,
+        default=False,
+        help="Apply a Butterworth low-pass filter to q, qd, and tau (and optionally qdd).",
+    )
+    ap.add_argument(
+        "--lowpass_cutoff_hz",
+        type=float,
+        default=20.0,
+        help="Low-pass cutoff frequency (Hz).",
+    )
+    ap.add_argument(
+        "--lowpass_order",
+        type=int,
+        default=4,
+        help="Butterworth filter order.",
+    )
+    ap.add_argument(
+        "--lowpass_qdd",
+        type=str2bool,
+        default=True,
+        help="Also low-pass filter qdd after derivation.",
+    )
 
     args = ap.parse_args()
 
     col_format = args.col_format
-    derive_qdd = args.qdd
+    derive_qdd = args.derive_qdd_from_qd
 
     cfg = DelanPreprocessConfig(
         input_format=col_format,
@@ -71,10 +92,10 @@ if __name__ == "__main__":
         val_fraction=args.val_fraction,
         random_seed=args.seed,
         trajectory_amount=(None if args.trajectory_amount <= 0 else args.trajectory_amount),
-        filter_accel=args.filter_accel,
-        filter_cutoff_hz=args.filter_cutoff_hz,
-        filter_order=args.filter_order,
-        filter_qdd=args.filter_qdd,
+        filter_accel=args.lowpass_signals,
+        filter_cutoff_hz=args.lowpass_cutoff_hz,
+        filter_order=args.lowpass_order,
+        filter_qdd=args.lowpass_qdd,
     )
 
     raw_csv = args.raw_csv 

@@ -57,12 +57,12 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
             value=True,
             help="If Acceleration column is not provided in the raw CSV, derive it from Velocity via numerical differentiation.",
         )
-        filter_accel = st.checkbox(
+        lowpass_signals = st.checkbox(
             "Filter q/qd/tau",
             value=False,
             help="Apply a Butterworth low-pass filter to q, qd, and tau (and optionally qdd).",
         )
-        filter_cutoff_hz = st.number_input(
+        lowpass_cutoff_hz = st.number_input(
             "Filter cutoff (Hz)",
             min_value=0.1,
             max_value=200.0,
@@ -70,7 +70,7 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
             step=1.0,
             help="Low-pass cutoff frequency for filtering.",
         )
-        filter_order = st.number_input(
+        lowpass_order = st.number_input(
             "Filter order",
             min_value=1,
             max_value=10,
@@ -78,7 +78,7 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
             step=1,
             help="Butterworth filter order.",
         )
-        filter_qdd = st.checkbox(
+        lowpass_qdd = st.checkbox(
             "Filter qdd",
             value=True,
             help="Apply the same low-pass filter to qdd after derivation.",
@@ -123,14 +123,14 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
             run(
                 f"{cfg.COMPOSE} exec -T preprocess bash -lc "
                 f"\"python3 scripts/build_delan_dataset.py "
-                f"--qdd {derive_qdd} "
+                f"--derive_qdd_from_qd {derive_qdd} "
                 f"--col_format {col_format} "
                 f"--test_fraction {test_fraction} "
                 f"--val_fraction {val_fraction} "
-                f"--filter_accel {filter_accel} "
-                f"--filter_cutoff_hz {filter_cutoff_hz} "
-                f"--filter_order {filter_order} "
-                f"--filter_qdd {filter_qdd} "
+                f"--lowpass_signals {lowpass_signals} "
+                f"--lowpass_cutoff_hz {lowpass_cutoff_hz} "
+                f"--lowpass_order {lowpass_order} "
+                f"--lowpass_qdd {lowpass_qdd} "
                 f"--raw_csv {raw_data_path}/{dataset_name}.{in_format} "
                 f"--out_npz {out_npz_path} "
                 f"\""
@@ -167,10 +167,10 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
     st.session_state["feature_mode"] = feature_mode
     st.session_state["test_fraction"] = float(test_fraction)
     st.session_state["val_fraction"] = float(val_fraction)
-    st.session_state["filter_accel"] = bool(filter_accel)
-    st.session_state["filter_cutoff_hz"] = float(filter_cutoff_hz)
-    st.session_state["filter_order"] = int(filter_order)
-    st.session_state["filter_qdd"] = bool(filter_qdd)
+    st.session_state["lowpass_signals"] = bool(lowpass_signals)
+    st.session_state["lowpass_cutoff_hz"] = float(lowpass_cutoff_hz)
+    st.session_state["lowpass_order"] = int(lowpass_order)
+    st.session_state["lowpass_qdd"] = bool(lowpass_qdd)
     st.session_state["base_id"] = f"{dataset_name}__{run_tag}"
     st.session_state["npz_in"] = npz_in
     st.session_state["win_out"] = win_out

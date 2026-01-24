@@ -276,7 +276,7 @@ def main():
                         cmd = compose_exec(
                             SVC_PREPROCESS,
                             f"python3 {SCRIPT_BUILD_DELAN_DATASET} "
-                            f"--qdd {str(DERIVE_QDD)} "
+                            f"--derive_qdd_from_qd {str(DERIVE_QDD)} "
                             f"--col_format {COL_FORMAT} "
                             f"--trajectory_amount {K} "
                             f"--test_fraction {tf} "

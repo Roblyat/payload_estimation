@@ -234,6 +234,23 @@ class DelanTrainRun:
         if torque_plot_path is not None:
             self.metrics["artifacts"]["torque_plot_png"] = torque_plot_path
 
+        rmse_time_path = self.plotter.save_torque_rmse_time_curve(
+            tau_gt=np.array(tau_true),
+            tau_pred=np.array(tau_pred),
+            dt=float(dt) if dt is not None else None,
+            max_samples=None,
+        )
+        if rmse_time_path is not None:
+            self.metrics["artifacts"]["torque_rmse_time_png"] = rmse_time_path
+
+        rmse_per_joint_path = self.plotter.save_torque_rmse_per_joint_bar(
+            tau_gt=np.array(tau_true),
+            tau_pred=np.array(tau_pred),
+            max_samples=None,
+        )
+        if rmse_per_joint_path is not None:
+            self.metrics["artifacts"]["torque_rmse_per_joint_png"] = rmse_per_joint_path
+
         metrics_path = os.path.join(self.run_paths.model_dir, "metrics_test.txt")
         with open(metrics_path, "w") as f:
             f.write(f"run_name={self.run_name}\n")

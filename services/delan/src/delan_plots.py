@@ -173,6 +173,89 @@ class DelanPlotter:
             max_joints=max_joints,
         )
 
+    def save_torque_rmse_time_curve(
+        self,
+        tau_gt: np.ndarray,
+        tau_pred: np.ndarray,
+        *,
+        dt: float | None = None,
+        prefix: Optional[str] = None,
+        max_samples: int | None = None,
+        max_joints: int = 6,
+    ) -> Optional[str]:
+        if not self._enabled():
+            return None
+
+        pfx = prefix or self.run_name
+        tau_gt = np.asarray(tau_gt)
+        tau_pred = np.asarray(tau_pred)
+        n_dof = tau_gt.shape[1]
+
+        K = tau_gt.shape[0]
+        if max_samples is not None:
+            K = min(int(max_samples), K)
+        tau_gt = tau_gt[:K, : min(n_dof, max_joints)]
+        tau_pred = tau_pred[:K, : min(n_dof, max_joints)]
+
+        err = tau_pred - tau_gt
+        rmse_t = np.sqrt(np.mean(err ** 2, axis=1))
+
+        if dt is not None and dt > 0:
+            x = np.arange(rmse_t.shape[0]) * float(dt)
+            x_label = "Time [s]"
+        else:
+            x = np.arange(rmse_t.shape[0])
+            x_label = "Sample"
+
+        fig = self.plt.figure(figsize=(10, 4), dpi=120)
+        ax = fig.add_subplot(1, 1, 1)
+        ax.plot(x, rmse_t, linewidth=1.2)
+        ax.set_title(f"{self.run_name} | Torque RMSE (joints 0-{min(n_dof, max_joints)-1})")
+        ax.set_xlabel(x_label)
+        ax.set_ylabel("Torque RMSE")
+        ax.grid(True, alpha=0.25)
+        self.plt.tight_layout()
+        return self._save_fig(fig, f"{pfx}__DeLaN_Torque_RMSE_Time.png")
+
+    def save_torque_rmse_per_joint_bar(
+        self,
+        tau_gt: np.ndarray,
+        tau_pred: np.ndarray,
+        *,
+        prefix: Optional[str] = None,
+        max_samples: int | None = None,
+        max_joints: int = 6,
+    ) -> Optional[str]:
+        if not self._enabled():
+            return None
+
+        pfx = prefix or self.run_name
+        tau_gt = np.asarray(tau_gt)
+        tau_pred = np.asarray(tau_pred)
+        n_dof = tau_gt.shape[1]
+
+        K = tau_gt.shape[0]
+        if max_samples is not None:
+            K = min(int(max_samples), K)
+        tau_gt = tau_gt[:K, : min(n_dof, max_joints)]
+        tau_pred = tau_pred[:K, : min(n_dof, max_joints)]
+
+        err = tau_pred - tau_gt
+        rmse_per_joint = np.sqrt(np.mean(err ** 2, axis=0))
+
+        fig = self.plt.figure(figsize=(8, 4), dpi=120)
+        ax = fig.add_subplot(1, 1, 1)
+        joints = np.arange(rmse_per_joint.shape[0])
+        ax.bar(joints, rmse_per_joint)
+        ax.set_title(f"{self.run_name} | Torque RMSE per joint")
+        ax.set_xlabel("Joint")
+        ax.set_ylabel("Torque RMSE")
+        ax.set_xticks(joints)
+        ax.set_xticklabels([f"joint{j}" for j in joints])
+        ax.grid(True, axis="y", alpha=0.25)
+        self.plt.tight_layout()
+        return self._save_fig(fig, f"{pfx}__DeLaN_Torque_RMSE_per_joint.png")
+
     def save_metrics_txt(self, lines: Sequence[str], filename: str = "metrics_test.txt") -> str:
         os.makedirs(self.model_dir, exist_ok=True)
         path = os.path.join(self.model_dir, filename)

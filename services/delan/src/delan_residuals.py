@@ -2,9 +2,40 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Dict, Tuple
 
 import numpy as np
+
+
+def _resolve_npz_path(npz_path: str) -> str:
+    """
+    Accepts:
+      - /root/stem/stem.npz   (new)
+      - /root/stem           (dir -> /root/stem/stem.npz)
+      - /root/stem.npz       (old flat; if not found, try /root/stem/stem.npz)
+    """
+    p = os.path.expanduser(str(npz_path))
+
+    if os.path.isdir(p):
+        stem = os.path.basename(os.path.normpath(p))
+        return os.path.join(p, f"{stem}.npz")
+
+    if p.endswith(".npz") and (not os.path.exists(p)):
+        stem = Path(p).stem
+        root = os.path.dirname(p)
+        if os.path.basename(root) == stem:
+            # new path was provided but doesn't exist -> try old flat
+            candidate = os.path.join(os.path.dirname(root), f"{stem}.npz")
+            if os.path.exists(candidate):
+                return candidate
+        else:
+            # old flat was provided but doesn't exist -> try new folder layout
+            candidate = os.path.join(root, stem, f"{stem}.npz")
+            if os.path.exists(candidate):
+                return candidate
+
+    return p
 
 
 def load_traj_npz(npz_path: str) -> Dict[str, Any]:
@@ -17,6 +48,7 @@ def load_traj_npz(npz_path: str) -> Dict[str, Any]:
 
     Returns a dict with lists of trajectories.
     """
+    npz_path = _resolve_npz_path(npz_path)
     d = np.load(npz_path, allow_pickle=True)
 
     out: Dict[str, Any] = {}

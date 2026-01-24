@@ -30,9 +30,12 @@ def render_lstm(st, cfg, paths, run, pad_button, log_view):
     win_out = st.session_state.get("win_out", artifact_file(paths.processed, Path(windows_name).stem, "npz"))
 
     # Show it (no second text_input by default)
+    # Streamlit note: with a fixed `key`, `value=` won't update on reruns unless we also
+    # update session_state for that key. This field is display-only but should reflect changes
+    # made in the preprocess section.
+    st.session_state["lstm_windows_name_display"] = windows_name
     st.text_input(
         f"LSTM windows ({paths.processed}/)",
-        windows_name,
         disabled=True,
         key="lstm_windows_name_display",
     )
@@ -47,6 +50,7 @@ def render_lstm(st, cfg, paths, run, pad_button, log_view):
     st.session_state.setdefault("lstm_val_split", 0.10)
     st.session_state.setdefault("lstm_eps", 1e-8)
     st.session_state.setdefault("lstm_no_plots", False)
+    st.session_state.setdefault("lstm_activation", "tanh")
 
     l_row1_c1, l_row1_c2, l_row1_c3, l_row1_c4 = st.columns([2.2, 1.0, 1.0, 1.2])
 
@@ -107,6 +111,13 @@ def render_lstm(st, cfg, paths, run, pad_button, log_view):
             format="%.2f",
             key="lstm_val_split",
             help="Fraction of training windows used for validation (Keras validation_split).",
+        )
+
+        activation = st.selectbox(
+            "LSTM activation",
+            ["tanh", "relu", "softplus"],
+            key="lstm_activation",
+            help="Activation for LSTM (candidate/state). Default is tanh (Keras default).",
         )
 
         units = st.number_input(
@@ -197,6 +208,7 @@ def render_lstm(st, cfg, paths, run, pad_button, log_view):
                 f"--seed {lstm_seed} "
                 f"--units {units} "
                 f"--dropout {dropout} "
+                f"--activation {activation} "
                 f"--eps {eps}"
                 f"{no_plots_flag}"
                 f"\""

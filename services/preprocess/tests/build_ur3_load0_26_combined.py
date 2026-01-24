@@ -19,7 +19,12 @@ from preprocess_delan.config import DelanPreprocessConfig
 from preprocess_delan.io_csv import RawCSVLoader
 from preprocess_delan.joints import JointSelector
 from preprocess_delan.pivot import WidePivotBuilder
-from preprocess_delan.dataset import TrajectoryDatasetBuilder, NPZDatasetWriter
+from preprocess_delan.dataset import (
+    TrajectoryDatasetBuilder,
+    NPZDatasetWriter,
+    normalize_out_npz_path,
+    write_dataset_json,
+)
 from preprocess_delan.split import TrajectorySplitter
 
 
@@ -35,7 +40,7 @@ def natural_key_dataset_num(p: str) -> int:
 def main():
     raw_dir = "/workspace/shared/data/raw"
     out_dir = "/workspace/shared/data/preprocessed"
-    out_path = os.path.join(out_dir, "delan_UR3_Load0_combined_26_dataset.npz")
+    out_path = normalize_out_npz_path(os.path.join(out_dir, "delan_UR3_Load0_combined_26_dataset.npz"))
 
     pattern = os.path.join(raw_dir, "UR3_Load0_DataSet*.csv")
     files = sorted(glob.glob(pattern), key=natural_key_dataset_num)
@@ -107,6 +112,7 @@ def main():
     # 6) Ensure output dir exists and write NPZ
     os.makedirs(os.path.dirname(out_path), exist_ok=True)
     writer.write(out_path, train, val, test)
+    write_dataset_json(out_path, train, val, test)
 
     print("\n=== Combined dataset written ===")
     print("Output:", out_path)

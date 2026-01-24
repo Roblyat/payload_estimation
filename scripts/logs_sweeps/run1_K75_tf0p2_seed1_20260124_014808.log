@@ -1,0 +1,788 @@
+######################################################################################################################
+### RUN: K=75 test_fraction=0.2 seed=1                                                                             ###
+### npz_in=/workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz ###
+######################################################################################################################
+
+#####################
+### 1) PREPROCESS ###
+#####################
+
+============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T preprocess bash -lc 'python3 scripts/build_delan_dataset.py --qdd True --col_format wide --trajectory_amount 75 --test_fraction 0.2 --val_fraction 0.1 --seed 1 --filter_accel True --filter_cutoff_hz 8.0 --filter_order 4 --filter_qdd True --raw_csv /workspace/shared/data/raw/delan_UR3_Load0_combined_26.csv --out_npz /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz' ===
+============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Saved: /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz
+Trajectories: train=52 val=8 test=15
+Exists: True
+
+###################################################################################################################################################################################################################################################
+### DELAN VARIANT: delan_seed=0                                                                                                                                                                                                                 ###
+### ckpt=/workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax ###
+###################################################################################################################################################################################################################################################
+
+######################
+### 2) DELAN TRAIN ###
+######################
+
+==========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T delan_jax bash -lc 'python3 /workspace/delan_jax/scripts/rbyt_train_delan_jax.py --npz /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz -t structured -s 0 -r 0 --hp_preset lutter_like_256 --epochs 400 --save_path /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax' ===
+==========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Final hyper: {'dataset': 'delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2', 'n_width': 256, 'n_depth': 2, 'n_minibatch': 1024, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'softplus', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 400, 'lagrangian_type': <function structured_lagrangian_fn at 0x7ff8ebbf8280>}
+
+
+################################################
+DeLaN run: delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2
+  model_dir = /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2
+  ckpt_path = /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax
+  type = structured
+  hp_preset = lutter_like_256
+################################################
+
+
+################################################
+Dataset: delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz
+  npz = /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz
+   dt ≈ 0.02784919441460803
+  dof = 6
+  Train trajectories = 52
+  Val trajectories   = 8
+  Test trajectories  = 15
+  Train samples = 30776
+  Test samples  = 5024
+################################################
+
+2026-01-24 01:01:41.340539: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-24 01:01:43.165801: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+################################################
+Training DeLaN | run=delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2 | type=structured | dof=6
+################################################
+Epoch 00001: Time=   4.0s, Loss=4.19e+03, Inv=4.19e+03, For=5.88e+00, Power=4.80e+02
+  [eval] val_mse=1.107e+03  (n=1515)
+Epoch 00050: Time=   6.6s, Loss=4.33e+00, Inv=4.33e+00, For=5.38e+01, Power=8.10e-01
+Epoch 00100: Time=   7.8s, Loss=3.65e+00, Inv=3.65e+00, For=1.65e+02, Power=7.69e-01
+Epoch 00150: Time=   9.0s, Loss=3.43e+00, Inv=3.43e+00, For=3.10e+02, Power=7.71e-01
+Epoch 00200: Time=  10.3s, Loss=3.31e+00, Inv=3.31e+00, For=4.45e+02, Power=7.73e-01
+  [eval] val_mse=1.276e+00  (n=1515)
+Epoch 00250: Time=  11.5s, Loss=3.15e+00, Inv=3.15e+00, For=6.19e+02, Power=7.73e-01
+Epoch 00300: Time=  12.7s, Loss=3.01e+00, Inv=3.01e+00, For=9.37e+02, Power=7.75e-01
+Epoch 00350: Time=  13.9s, Loss=2.91e+00, Inv=2.91e+00, For=1.25e+03, Power=7.77e-01
+Epoch 00400: Time=  15.2s, Loss=2.82e+00, Inv=2.82e+00, For=1.60e+03, Power=7.76e-01
+  [eval] val_mse=1.172e+00  (n=1515)
+Saved DeLaN checkpoint: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax
+Saved training history: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__train_history.csv
+
+################################################
+Evaluating DeLaN | run=delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2
+  [val] Torque RMSE = 4.420e-01
+Torque MSE  = 1.954e-01
+Torque RMSE = 4.420e-01
+Per-joint MSE : 3.724e-01 3.488e-01 1.370e-01 1.540e-01 6.575e-02 9.440e-02
+Per-joint RMSE: 6.103e-01 5.906e-01 3.701e-01 3.924e-01 2.564e-01 3.072e-01
+Comp Time per Sample = 3.116e-04s / 3209.5Hz
+Saved metrics TXT: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/metrics_test.txt
+Saved metrics JSON: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/metrics.json
+
+###################################################################################################################################################################################################################################################
+### DELAN VARIANT: delan_seed=1                                                                                                                                                                                                                 ###
+### ckpt=/workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s1_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s1_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax ###
+###################################################################################################################################################################################################################################################
+
+######################
+### 2) DELAN TRAIN ###
+######################
+
+==========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T delan_jax bash -lc 'python3 /workspace/delan_jax/scripts/rbyt_train_delan_jax.py --npz /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz -t structured -s 1 -r 0 --hp_preset lutter_like_256 --epochs 400 --save_path /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s1_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s1_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax' ===
+==========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Final hyper: {'dataset': 'delan_UR3_Load0_combined_26__A__delan_jax_struct_s1_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2', 'n_width': 256, 'n_depth': 2, 'n_minibatch': 1024, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'softplus', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 400, 'lagrangian_type': <function structured_lagrangian_fn at 0x7fba96afc280>}
+
+
+################################################
+DeLaN run: delan_UR3_Load0_combined_26__A__delan_jax_struct_s1_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2
+  model_dir = /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s1_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2
+  ckpt_path = /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s1_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s1_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax
+  type = structured
+  hp_preset = lutter_like_256
+################################################
+
+
+################################################
+Dataset: delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz
+  npz = /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz
+   dt ≈ 0.02784919441460803
+  dof = 6
+  Train trajectories = 52
+  Val trajectories   = 8
+  Test trajectories  = 15
+  Train samples = 30776
+  Test samples  = 5024
+################################################
+
+2026-01-24 01:02:05.762535: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-24 01:02:07.556471: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+################################################
+Training DeLaN | run=delan_UR3_Load0_combined_26__A__delan_jax_struct_s1_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2 | type=structured | dof=6
+################################################
+Epoch 00001: Time=   3.9s, Loss=1.75e+03, Inv=1.75e+03, For=5.92e+00, Power=2.03e+02
+  [eval] val_mse=5.236e+02  (n=1515)
+Epoch 00050: Time=   6.5s, Loss=4.08e+00, Inv=4.08e+00, For=4.71e+01, Power=8.07e-01
+Epoch 00100: Time=   7.7s, Loss=3.56e+00, Inv=3.56e+00, For=1.21e+02, Power=7.75e-01
+Epoch 00150: Time=   9.1s, Loss=3.37e+00, Inv=3.37e+00, For=2.46e+02, Power=7.72e-01
+Epoch 00200: Time=  10.3s, Loss=3.18e+00, Inv=3.18e+00, For=4.23e+02, Power=7.70e-01
+  [eval] val_mse=1.461e+00  (n=1515)
+Epoch 00250: Time=  11.6s, Loss=3.02e+00, Inv=3.02e+00, For=5.61e+02, Power=7.70e-01
+Epoch 00300: Time=  12.9s, Loss=2.89e+00, Inv=2.89e+00, For=8.94e+02, Power=7.72e-01
+Epoch 00350: Time=  14.2s, Loss=2.78e+00, Inv=2.78e+00, For=2.10e+03, Power=7.76e-01
+Epoch 00400: Time=  15.5s, Loss=2.71e+00, Inv=2.71e+00, For=5.16e+03, Power=7.78e-01
+  [eval] val_mse=1.617e+00  (n=1515)
+Saved DeLaN checkpoint: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s1_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s1_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax
+Saved training history: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s1_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s1_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__train_history.csv
+
+################################################
+Evaluating DeLaN | run=delan_UR3_Load0_combined_26__A__delan_jax_struct_s1_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2
+  [val] Torque RMSE = 5.191e-01
+Torque MSE  = 2.863e-01
+Torque RMSE = 5.351e-01
+Per-joint MSE : 4.400e-01 6.101e-01 1.144e-01 2.123e-01 1.595e-01 1.818e-01
+Per-joint RMSE: 6.633e-01 7.811e-01 3.382e-01 4.608e-01 3.994e-01 4.263e-01
+Comp Time per Sample = 3.319e-04s / 3012.8Hz
+Saved metrics TXT: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s1_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/metrics_test.txt
+Saved metrics JSON: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s1_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/metrics.json
+
+###################################################################################################################################################################################################################################################
+### DELAN VARIANT: delan_seed=2                                                                                                                                                                                                                 ###
+### ckpt=/workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s2_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s2_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax ###
+###################################################################################################################################################################################################################################################
+
+######################
+### 2) DELAN TRAIN ###
+######################
+
+==========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T delan_jax bash -lc 'python3 /workspace/delan_jax/scripts/rbyt_train_delan_jax.py --npz /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz -t structured -s 2 -r 0 --hp_preset lutter_like_256 --epochs 400 --save_path /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s2_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s2_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax' ===
+==========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Final hyper: {'dataset': 'delan_UR3_Load0_combined_26__A__delan_jax_struct_s2_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2', 'n_width': 256, 'n_depth': 2, 'n_minibatch': 1024, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'softplus', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 400, 'lagrangian_type': <function structured_lagrangian_fn at 0x7d3e8c1c4280>}
+
+
+################################################
+DeLaN run: delan_UR3_Load0_combined_26__A__delan_jax_struct_s2_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2
+  model_dir = /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s2_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2
+  ckpt_path = /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s2_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s2_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax
+  type = structured
+  hp_preset = lutter_like_256
+################################################
+
+
+################################################
+Dataset: delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz
+  npz = /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz
+   dt ≈ 0.02784919441460803
+  dof = 6
+  Train trajectories = 52
+  Val trajectories   = 8
+  Test trajectories  = 15
+  Train samples = 30776
+  Test samples  = 5024
+################################################
+
+2026-01-24 01:02:30.709366: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-24 01:02:32.522299: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+################################################
+Training DeLaN | run=delan_UR3_Load0_combined_26__A__delan_jax_struct_s2_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2 | type=structured | dof=6
+################################################
+Epoch 00001: Time=   3.9s, Loss=4.52e+03, Inv=4.52e+03, For=5.98e+00, Power=3.10e+02
+  [eval] val_mse=2.780e+02  (n=1515)
+Epoch 00050: Time=   6.5s, Loss=4.58e+00, Inv=4.58e+00, For=5.65e+01, Power=8.37e-01
+Epoch 00100: Time=   7.8s, Loss=3.79e+00, Inv=3.79e+00, For=1.66e+02, Power=7.77e-01
+Epoch 00150: Time=   9.0s, Loss=3.51e+00, Inv=3.51e+00, For=3.89e+02, Power=7.77e-01
+Epoch 00200: Time=  10.3s, Loss=3.36e+00, Inv=3.36e+00, For=9.22e+02, Power=7.76e-01
+  [eval] val_mse=1.240e+00  (n=1515)
+Epoch 00250: Time=  11.5s, Loss=3.21e+00, Inv=3.21e+00, For=1.79e+03, Power=7.75e-01
+Epoch 00300: Time=  12.7s, Loss=3.02e+00, Inv=3.02e+00, For=1.96e+03, Power=7.72e-01
+Epoch 00350: Time=  14.0s, Loss=2.89e+00, Inv=2.89e+00, For=1.80e+03, Power=7.72e-01
+Epoch 00400: Time=  15.2s, Loss=2.78e+00, Inv=2.78e+00, For=3.11e+03, Power=7.74e-01
+  [eval] val_mse=1.314e+00  (n=1515)
+Saved DeLaN checkpoint: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s2_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s2_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax
+Saved training history: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s2_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s2_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__train_history.csv
+
+################################################
+Evaluating DeLaN | run=delan_UR3_Load0_combined_26__A__delan_jax_struct_s2_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2
+  [val] Torque RMSE = 4.680e-01
+Torque MSE  = 2.253e-01
+Torque RMSE = 4.747e-01
+Per-joint MSE : 4.903e-01 3.440e-01 1.218e-01 2.143e-01 1.032e-01 7.826e-02
+Per-joint RMSE: 7.002e-01 5.865e-01 3.490e-01 4.629e-01 3.212e-01 2.798e-01
+Comp Time per Sample = 3.070e-04s / 3257.7Hz
+Saved metrics TXT: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s2_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/metrics_test.txt
+Saved metrics JSON: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s2_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/metrics.json
+
+###################################################################################################################################################################################################################################################
+### DELAN VARIANT: delan_seed=3                                                                                                                                                                                                                 ###
+### ckpt=/workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s3_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s3_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax ###
+###################################################################################################################################################################################################################################################
+
+######################
+### 2) DELAN TRAIN ###
+######################
+
+==========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T delan_jax bash -lc 'python3 /workspace/delan_jax/scripts/rbyt_train_delan_jax.py --npz /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz -t structured -s 3 -r 0 --hp_preset lutter_like_256 --epochs 400 --save_path /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s3_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s3_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax' ===
+==========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Final hyper: {'dataset': 'delan_UR3_Load0_combined_26__A__delan_jax_struct_s3_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2', 'n_width': 256, 'n_depth': 2, 'n_minibatch': 1024, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'softplus', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 400, 'lagrangian_type': <function structured_lagrangian_fn at 0x7f65ff374280>}
+
+
+################################################
+DeLaN run: delan_UR3_Load0_combined_26__A__delan_jax_struct_s3_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2
+  model_dir = /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s3_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2
+  ckpt_path = /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s3_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s3_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax
+  type = structured
+  hp_preset = lutter_like_256
+################################################
+
+
+################################################
+Dataset: delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz
+  npz = /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz
+   dt ≈ 0.02784919441460803
+  dof = 6
+  Train trajectories = 52
+  Val trajectories   = 8
+  Test trajectories  = 15
+  Train samples = 30776
+  Test samples  = 5024
+################################################
+
+2026-01-24 01:02:55.202979: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-24 01:02:57.046272: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+################################################
+Training DeLaN | run=delan_UR3_Load0_combined_26__A__delan_jax_struct_s3_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2 | type=structured | dof=6
+################################################
+Epoch 00001: Time=   4.0s, Loss=5.28e+03, Inv=5.28e+03, For=5.84e+00, Power=6.92e+02
+  [eval] val_mse=1.272e+03  (n=1515)
+Epoch 00050: Time=   6.5s, Loss=4.54e+00, Inv=4.54e+00, For=2.30e+01, Power=8.94e-01
+Epoch 00100: Time=   7.7s, Loss=3.72e+00, Inv=3.72e+00, For=6.72e+01, Power=7.91e-01
+Epoch 00150: Time=   9.0s, Loss=3.52e+00, Inv=3.52e+00, For=1.24e+02, Power=7.78e-01
+Epoch 00200: Time=  10.2s, Loss=3.37e+00, Inv=3.37e+00, For=1.79e+02, Power=7.74e-01
+  [eval] val_mse=1.151e+00  (n=1515)
+Epoch 00250: Time=  11.5s, Loss=3.21e+00, Inv=3.21e+00, For=2.60e+02, Power=7.70e-01
+Epoch 00300: Time=  12.7s, Loss=3.07e+00, Inv=3.07e+00, For=4.12e+02, Power=7.70e-01
+Epoch 00350: Time=  14.0s, Loss=2.96e+00, Inv=2.96e+00, For=6.84e+02, Power=7.69e-01
+Epoch 00400: Time=  15.2s, Loss=2.87e+00, Inv=2.87e+00, For=1.81e+03, Power=7.70e-01
+  [eval] val_mse=1.347e+00  (n=1515)
+Saved DeLaN checkpoint: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s3_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s3_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax
+Saved training history: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s3_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s3_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__train_history.csv
+
+################################################
+Evaluating DeLaN | run=delan_UR3_Load0_combined_26__A__delan_jax_struct_s3_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2
+  [val] Torque RMSE = 4.738e-01
+Torque MSE  = 2.065e-01
+Torque RMSE = 4.544e-01
+Per-joint MSE : 4.372e-01 2.842e-01 1.665e-01 1.555e-01 1.136e-01 8.173e-02
+Per-joint RMSE: 6.612e-01 5.331e-01 4.080e-01 3.944e-01 3.371e-01 2.859e-01
+Comp Time per Sample = 2.998e-04s / 3335.5Hz
+Saved metrics TXT: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s3_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/metrics_test.txt
+Saved metrics JSON: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s3_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/metrics.json
+
+###################################################################################################################################################################################################################################################
+### DELAN VARIANT: delan_seed=4                                                                                                                                                                                                                 ###
+### ckpt=/workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s4_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s4_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax ###
+###################################################################################################################################################################################################################################################
+
+######################
+### 2) DELAN TRAIN ###
+######################
+
+==========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T delan_jax bash -lc 'python3 /workspace/delan_jax/scripts/rbyt_train_delan_jax.py --npz /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz -t structured -s 4 -r 0 --hp_preset lutter_like_256 --epochs 400 --save_path /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s4_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s4_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax' ===
+==========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Final hyper: {'dataset': 'delan_UR3_Load0_combined_26__A__delan_jax_struct_s4_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2', 'n_width': 256, 'n_depth': 2, 'n_minibatch': 1024, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'softplus', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 400, 'lagrangian_type': <function structured_lagrangian_fn at 0x79ddee7f8280>}
+
+
+################################################
+DeLaN run: delan_UR3_Load0_combined_26__A__delan_jax_struct_s4_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2
+  model_dir = /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s4_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2
+  ckpt_path = /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s4_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s4_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax
+  type = structured
+  hp_preset = lutter_like_256
+################################################
+
+
+################################################
+Dataset: delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz
+  npz = /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz
+   dt ≈ 0.02784919441460803
+  dof = 6
+  Train trajectories = 52
+  Val trajectories   = 8
+  Test trajectories  = 15
+  Train samples = 30776
+  Test samples  = 5024
+################################################
+
+2026-01-24 01:03:19.696163: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-24 01:03:21.510606: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+################################################
+Training DeLaN | run=delan_UR3_Load0_combined_26__A__delan_jax_struct_s4_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2 | type=structured | dof=6
+################################################
+Epoch 00001: Time=   4.0s, Loss=6.19e+03, Inv=6.19e+03, For=5.76e+00, Power=3.13e+02
+  [eval] val_mse=1.105e+03  (n=1515)
+Epoch 00050: Time=   6.6s, Loss=4.76e+00, Inv=4.76e+00, For=5.25e+01, Power=8.18e-01
+Epoch 00100: Time=   7.8s, Loss=3.77e+00, Inv=3.77e+00, For=2.12e+02, Power=7.79e-01
+Epoch 00150: Time=   9.1s, Loss=3.49e+00, Inv=3.49e+00, For=5.68e+02, Power=7.75e-01
+Epoch 00200: Time=  10.3s, Loss=3.28e+00, Inv=3.28e+00, For=1.31e+03, Power=7.73e-01
+  [eval] val_mse=2.342e+00  (n=1515)
+Epoch 00250: Time=  11.6s, Loss=3.11e+00, Inv=3.11e+00, For=2.56e+03, Power=7.72e-01
+Epoch 00300: Time=  12.8s, Loss=2.99e+00, Inv=2.99e+00, For=2.86e+03, Power=7.72e-01
+Epoch 00350: Time=  14.1s, Loss=2.88e+00, Inv=2.88e+00, For=2.74e+03, Power=7.73e-01
+Epoch 00400: Time=  15.3s, Loss=2.80e+00, Inv=2.80e+00, For=2.67e+03, Power=7.73e-01
+  [eval] val_mse=1.980e+00  (n=1515)
+Saved DeLaN checkpoint: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s4_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s4_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax
+Saved training history: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s4_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s4_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__train_history.csv
+
+################################################
+Evaluating DeLaN | run=delan_UR3_Load0_combined_26__A__delan_jax_struct_s4_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2
+  [val] Torque RMSE = 5.745e-01
+Torque MSE  = 2.165e-01
+Torque RMSE = 4.653e-01
+Per-joint MSE : 4.174e-01 3.366e-01 1.157e-01 1.698e-01 1.188e-01 1.409e-01
+Per-joint RMSE: 6.461e-01 5.802e-01 3.402e-01 4.120e-01 3.447e-01 3.753e-01
+Comp Time per Sample = 3.015e-04s / 3316.8Hz
+Saved metrics TXT: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s4_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/metrics_test.txt
+Saved metrics JSON: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s4_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/metrics.json
+
+
+###############################################################################################################################################################################################################################
+### 3) SELECT BEST DELAN (by val RMSE)                                                                                                                                                                                      ###
+### best_seed=0 val_rmse=0.4420173600766327 test_rmse=0.44203259750705587                                                                                                                                                   ###
+### metrics_json=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/metrics.json ###
+###############################################################################################################################################################################################################################
+
+#######################################
+### 4) EXPORT RESIDUALS (best only) ###
+#######################################
+
+=====================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T delan_jax bash -lc 'python3 /workspace/delan_jax/scripts/export_delan_residuals_jax.py --npz_in /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz --ckpt /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax --out /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__residual__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz' ===
+=====================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Loading dataset: /workspace/shared/data/preprocessed/delan_delan_UR3_Load0_combined_26_K75_tf0p2_vf0p1_seed1_dataset.npz
+Loading checkpoint: /workspace/shared/models/delan/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax
+Detected n_dof=6 (seed=0)
+2026-01-24 01:03:42.612816: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+
+Exporting split=train: 52 trajectories
+2026-01-24 01:03:44.073232: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-24 01:03:44.073245: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+  done 25/52
+  done 50/52
+  done 52/52
+
+Exporting split=test: 15 trajectories
+  done 15/15
+
+Saved residual trajectory dataset: /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__residual__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__residual__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz
+Keys: ['test_labels', 'test_q', 'test_qd', 'test_qdd', 'test_r_tau', 'test_t', 'test_tau', 'test_tau_hat', 'train_labels', 'train_q', 'train_qd', 'train_qdd', 'train_r_tau', 'train_t', 'train_tau', 'train_tau_hat']
+Saved export JSON: /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__residual__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__residual__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.json
+
+
+##############################
+### BLOCK: H=100 feat=full ###
+##############################
+
+#############################
+### 5) BUILD LSTM WINDOWS ###
+#############################
+
+=====================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T preprocess bash -lc 'python3 scripts/build_lstm_windows.py --in_npz /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__residual__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz --out_npz /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__lstm_windows_H100__feat_full__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz --H 100 --features full' ===
+=====================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Building LSTM windows
+  in_npz      = /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__residual__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz
+  out_npz     = /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__lstm_windows_H100__feat_full__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz
+  H           = 100
+  feature_mode= full
+Saved: /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__lstm_windows_H100__feat_full__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__lstm_windows_H100__feat_full__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz
+Saved: /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__lstm_windows_H100__feat_full__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__lstm_windows_H100__feat_full__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.json
+H=100, n_dof=6, feature_dim=24
+X_train: (28126, 100, 24)  Y_train: (28126, 6)
+X_test : (4307, 100, 24)  Y_test : (4307, 6)
+feature_mode=full
+
+
+#####################
+### 6) TRAIN LSTM ###
+#####################
+
+=========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T lstm bash -lc 'python3 -c '"'"'import runpy
+import keras.callbacks as cb
+_Orig = cb.ModelCheckpoint
+
+class PatchedModelCheckpoint(_Orig):
+    def __init__(self, filepath, *args, **kwargs):
+        if isinstance(filepath, str) and (not filepath.endswith('"'"'"'"'"'"'"'"'.keras'"'"'"'"'"'"'"'"')) and (not filepath.endswith('"'"'"'"'"'"'"'"'.h5'"'"'"'"'"'"'"'"')):
+            filepath = filepath + '"'"'"'"'"'"'"'"'.keras'"'"'"'"'"'"'"'"'
+        super().__init__(filepath, *args, **kwargs)
+
+cb.ModelCheckpoint = PatchedModelCheckpoint
+runpy.run_path('"'"'"'"'"'"'"'"'scripts/train_residual_lstm.py'"'"'"'"'"'"'"'"', run_name='"'"'"'"'"'"'"'"'__main__'"'"'"'"'"'"'"'"')
+'"'"' --npz /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__lstm_windows_H100__feat_full__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz --out_dir /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H100_ep120_b64_u128_do0p2 --model_name residual_lstm.keras --epochs 120 --batch 64 --val_split 0.1 --seed 1 --units 128 --dropout 0.2 --eps 1e-08 ' ===
+=========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+2026-01-24 01:03:50.858552: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-01-24 01:03:50.882918: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI AVX512_BF16 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+################################################
+LSTM Residual Dataset:
+  npz = /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__lstm_windows_H100__feat_full__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__lstm_windows_H100__feat_full__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz
+   H  = 100
+  din = 24
+ dout = 6
+  X_train = (28126, 100, 24), Y_train = (28126, 6)
+  X_test  = (4307, 100, 24),  Y_test  = (4307, 6)
+################################################
+
+Saved scalers: /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H100_ep120_b64_u128_do0p2/scalers_H100.npz
+X mean/std shapes: (24,)/(24,)
+Y mean/std shapes: (6,)/(6,)
+2026-01-24 01:03:52.317205: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:03:52.322472: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:03:52.324761: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:03:52.326778: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:03:52.327737: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:03:52.328519: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:03:52.413822: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:03:52.414732: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:03:52.415535: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:03:52.416324: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1928] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 9099 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 4070 Ti, pci bus id: 0000:01:00.0, compute capability: 8.9
+/usr/local/lib/python3.11/dist-packages/keras/src/layers/rnn/rnn.py:205: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+  super().__init__(**kwargs)
+Model: "sequential"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Layer (type)                    ┃ Output Shape           ┃       Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ lstm (LSTM)                     │ (None, 100, 128)       │        78,336 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dropout (Dropout)               │ (None, 100, 128)       │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ lstm_1 (LSTM)                   │ (None, 128)            │       131,584 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dropout_1 (Dropout)             │ (None, 128)            │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense (Dense)                   │ (None, 6)              │           774 │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+ Total params: 210,694 (823.02 KB)
+ Trainable params: 210,694 (823.02 KB)
+ Non-trainable params: 0 (0.00 B)
+
+
+Epoch 1/120
+2026-01-24 01:03:53.514850: I external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:465] Loaded cuDNN version 8906
+396/396 - 3s - 8ms/step - loss: 0.1299 - val_loss: 0.1558
+Epoch 2/120
+396/396 - 2s - 4ms/step - loss: 0.0613 - val_loss: 0.1376
+Epoch 3/120
+396/396 - 2s - 4ms/step - loss: 0.0496 - val_loss: 0.1362
+Epoch 4/120
+396/396 - 2s - 5ms/step - loss: 0.0451 - val_loss: 0.1323
+Epoch 5/120
+396/396 - 2s - 4ms/step - loss: 0.0418 - val_loss: 0.1281
+Epoch 6/120
+396/396 - 2s - 4ms/step - loss: 0.0395 - val_loss: 0.1253
+Epoch 7/120
+396/396 - 2s - 4ms/step - loss: 0.0380 - val_loss: 0.1255
+Epoch 8/120
+396/396 - 2s - 4ms/step - loss: 0.0367 - val_loss: 0.1225
+Epoch 9/120
+396/396 - 2s - 4ms/step - loss: 0.0355 - val_loss: 0.1183
+Epoch 10/120
+396/396 - 2s - 4ms/step - loss: 0.0344 - val_loss: 0.1180
+Epoch 11/120
+396/396 - 2s - 4ms/step - loss: 0.0334 - val_loss: 0.1169
+Epoch 12/120
+396/396 - 2s - 4ms/step - loss: 0.0332 - val_loss: 0.1121
+Epoch 13/120
+396/396 - 2s - 4ms/step - loss: 0.0319 - val_loss: 0.1052
+Epoch 14/120
+396/396 - 2s - 4ms/step - loss: 0.0312 - val_loss: 0.1089
+Epoch 15/120
+396/396 - 2s - 4ms/step - loss: 0.0361 - val_loss: 0.1128
+Epoch 16/120
+396/396 - 2s - 4ms/step - loss: 0.0308 - val_loss: 0.1082
+Epoch 17/120
+396/396 - 2s - 4ms/step - loss: 0.0310 - val_loss: 0.1161
+Epoch 18/120
+396/396 - 2s - 4ms/step - loss: 0.0294 - val_loss: 0.1132
+Epoch 19/120
+396/396 - 2s - 4ms/step - loss: 0.0293 - val_loss: 0.1148
+Epoch 20/120
+396/396 - 2s - 4ms/step - loss: 0.0288 - val_loss: 0.1147
+Epoch 21/120
+396/396 - 2s - 4ms/step - loss: 0.0287 - val_loss: 0.1171
+Epoch 22/120
+396/396 - 2s - 4ms/step - loss: 0.0280 - val_loss: 0.1085
+Epoch 23/120
+396/396 - 2s - 4ms/step - loss: 0.0275 - val_loss: 0.1109
+Saved metrics JSON: /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H100_ep120_b64_u128_do0p2/metrics_train_test_H100.json
+
+################################################
+LSTM Residual Evaluation (test, unscaled units):
+Total RMSE: 0.2760
+Per-joint RMSE: 0.3162 0.4340 0.2128 0.2477 0.1805 0.1720
+################################################
+
+Saved predictions: /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H100_ep120_b64_u128_do0p2/predictions_test.npz
+Saved best model:  /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H100_ep120_b64_u128_do0p2/residual_lstm.keras
+Saved: /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H100_ep120_b64_u128_do0p2/loss_curve.png
+Saved: /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H100_ep120_b64_u128_do0p2/residual_gt_vs_pred.png
+
+
+##############################
+### 7) COMBINED EVALUATION ###
+##############################
+
+===================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/combined_evaluation.py --residual_npz /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__residual__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz --model /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H100_ep120_b64_u128_do0p2/residual_lstm.keras --scalers /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H100_ep120_b64_u128_do0p2/scalers_H100.npz --out_dir /workspace/shared/evaluation/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H100_ep120_b64_u128_do0p2 --H 100 --split test --features full --save_pred_npz --metrics_csv /workspace/shared/evaluation/summary_metrics_sweep_1_20260124_014808.csv --metrics_json /workspace/shared/evaluation/summary_metrics_sweep_1_20260124_014808.jsonl --K 75 --test_fraction 0.2 --seed 1 --delan_seed 0 --delan_epochs 400 --hp_preset lutter_like_256 --delan_rmse_val 0.4420173600766327 --delan_rmse_test 0.44203259750705587' ===
+===================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+2026-01-24 01:04:35.870462: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-01-24 01:04:35.896276: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI AVX512_BF16 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+################################################
+Evaluate & Combine
+ residual_npz = /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__residual__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__residual__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz
+ model        = /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H100_ep120_b64_u128_do0p2/residual_lstm.keras
+ split        = test
+ H            = 100
+ n_traj       = 15
+ n_dof        = 6
+ feature_dim  = 24
+################################################
+2026-01-24 01:04:36.755189: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:04:36.760026: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:04:36.760815: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:04:36.762454: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:04:36.763239: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:04:36.763979: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:04:36.843822: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:04:36.844676: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:04:36.845426: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:04:36.846162: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1928] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 9100 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 4070 Ti, pci bus id: 0000:01:00.0, compute capability: 8.9
+2026-01-24 01:04:37.173919: I external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:465] Loaded cuDNN version 8906
+
+################################################
+Stage-2 Evaluation (test, valid k>=H-1):
+DeLaN torque:   MSE=1.943813e-01  RMSE=4.408869e-01
+  per-joint RMSE: 0.6038 0.5985 0.3745 0.3861 0.2505 0.3025
+Residual LSTM:  MSE=7.619754e-02      RMSE=2.760390e-01
+  per-joint RMSE: 0.3162 0.4340 0.2128 0.2477 0.1805 0.1720
+Combined torque MSE=7.619754e-02     RMSE=2.760390e-01
+  per-joint RMSE: 0.3162 0.4340 0.2128 0.2477 0.1805 0.1720
+################################################
+
+Saved: /workspace/shared/evaluation/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H100_ep120_b64_u128_do0p2/metrics_test_H100.txt
+Saved: /workspace/shared/evaluation/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H100_ep120_b64_u128_do0p2/metrics_test_H100.json
+Appended CSV: /workspace/shared/evaluation/summary_metrics_sweep_1_20260124_014808.csv
+Appended JSON: /workspace/shared/evaluation/summary_metrics_sweep_1_20260124_014808.jsonl
+Saved: /workspace/shared/evaluation/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H100_ep120_b64_u128_do0p2/combined_predictions_test_H100.npz
+Saved: /workspace/shared/evaluation/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H100_ep120_b64_u128_do0p2/residual_gt_vs_pred_test_H100.png
+Saved: /workspace/shared/evaluation/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H100_ep120_b64_u128_do0p2/torque_gt_vs_delan_vs_combined_test_H100.png
+
+
+##############################
+### BLOCK: H=150 feat=full ###
+##############################
+
+#############################
+### 5) BUILD LSTM WINDOWS ###
+#############################
+
+=====================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T preprocess bash -lc 'python3 scripts/build_lstm_windows.py --in_npz /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__residual__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz --out_npz /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__lstm_windows_H150__feat_full__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz --H 150 --features full' ===
+=====================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Building LSTM windows
+  in_npz      = /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__residual__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz
+  out_npz     = /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__lstm_windows_H150__feat_full__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz
+  H           = 150
+  feature_mode= full
+Saved: /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__lstm_windows_H150__feat_full__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__lstm_windows_H150__feat_full__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz
+Saved: /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__lstm_windows_H150__feat_full__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__lstm_windows_H150__feat_full__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.json
+H=150, n_dof=6, feature_dim=24
+X_train: (26826, 150, 24)  Y_train: (26826, 6)
+X_test : (3957, 150, 24)  Y_test : (3957, 6)
+feature_mode=full
+
+
+#####################
+### 6) TRAIN LSTM ###
+#####################
+
+=========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T lstm bash -lc 'python3 -c '"'"'import runpy
+import keras.callbacks as cb
+_Orig = cb.ModelCheckpoint
+
+class PatchedModelCheckpoint(_Orig):
+    def __init__(self, filepath, *args, **kwargs):
+        if isinstance(filepath, str) and (not filepath.endswith('"'"'"'"'"'"'"'"'.keras'"'"'"'"'"'"'"'"')) and (not filepath.endswith('"'"'"'"'"'"'"'"'.h5'"'"'"'"'"'"'"'"')):
+            filepath = filepath + '"'"'"'"'"'"'"'"'.keras'"'"'"'"'"'"'"'"'
+        super().__init__(filepath, *args, **kwargs)
+
+cb.ModelCheckpoint = PatchedModelCheckpoint
+runpy.run_path('"'"'"'"'"'"'"'"'scripts/train_residual_lstm.py'"'"'"'"'"'"'"'"', run_name='"'"'"'"'"'"'"'"'__main__'"'"'"'"'"'"'"'"')
+'"'"' --npz /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__lstm_windows_H150__feat_full__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz --out_dir /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H150_ep120_b64_u128_do0p2 --model_name residual_lstm.keras --epochs 120 --batch 64 --val_split 0.1 --seed 1 --units 128 --dropout 0.2 --eps 1e-08 ' ===
+=========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+2026-01-24 01:04:39.427162: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-01-24 01:04:39.451876: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI AVX512_BF16 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+################################################
+LSTM Residual Dataset:
+  npz = /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__lstm_windows_H150__feat_full__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__lstm_windows_H150__feat_full__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz
+   H  = 150
+  din = 24
+ dout = 6
+  X_train = (26826, 150, 24), Y_train = (26826, 6)
+  X_test  = (3957, 150, 24),  Y_test  = (3957, 6)
+################################################
+
+Saved scalers: /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H150_ep120_b64_u128_do0p2/scalers_H150.npz
+X mean/std shapes: (24,)/(24,)
+Y mean/std shapes: (6,)/(6,)
+2026-01-24 01:04:41.052333: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:04:41.057602: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:04:41.058657: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:04:41.060389: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:04:41.061306: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:04:41.062175: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:04:41.157577: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:04:41.158472: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:04:41.159272: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:04:41.160056: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1928] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 9092 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 4070 Ti, pci bus id: 0000:01:00.0, compute capability: 8.9
+/usr/local/lib/python3.11/dist-packages/keras/src/layers/rnn/rnn.py:205: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+  super().__init__(**kwargs)
+Model: "sequential"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Layer (type)                    ┃ Output Shape           ┃       Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ lstm (LSTM)                     │ (None, 150, 128)       │        78,336 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dropout (Dropout)               │ (None, 150, 128)       │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ lstm_1 (LSTM)                   │ (None, 128)            │       131,584 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dropout_1 (Dropout)             │ (None, 128)            │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense (Dense)                   │ (None, 6)              │           774 │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+ Total params: 210,694 (823.02 KB)
+ Trainable params: 210,694 (823.02 KB)
+ Non-trainable params: 0 (0.00 B)
+
+
+Epoch 1/120
+2026-01-24 01:04:42.347106: I external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:465] Loaded cuDNN version 8906
+378/378 - 4s - 10ms/step - loss: 0.1287 - val_loss: 0.2144
+Epoch 2/120
+378/378 - 2s - 6ms/step - loss: 0.0600 - val_loss: 0.1740
+Epoch 3/120
+378/378 - 2s - 6ms/step - loss: 0.0500 - val_loss: 0.1467
+Epoch 4/120
+378/378 - 2s - 6ms/step - loss: 0.0441 - val_loss: 0.1415
+Epoch 5/120
+378/378 - 2s - 6ms/step - loss: 0.0417 - val_loss: 0.1445
+Epoch 6/120
+378/378 - 2s - 6ms/step - loss: 0.0397 - val_loss: 0.1427
+Epoch 7/120
+378/378 - 2s - 6ms/step - loss: 0.0374 - val_loss: 0.1367
+Epoch 8/120
+378/378 - 2s - 6ms/step - loss: 0.0358 - val_loss: 0.1373
+Epoch 9/120
+378/378 - 2s - 6ms/step - loss: 0.0347 - val_loss: 0.1370
+Epoch 10/120
+378/378 - 2s - 6ms/step - loss: 0.0343 - val_loss: 0.1272
+Epoch 11/120
+378/378 - 2s - 6ms/step - loss: 0.0322 - val_loss: 0.1314
+Epoch 12/120
+378/378 - 2s - 6ms/step - loss: 0.0322 - val_loss: 0.1328
+Epoch 13/120
+378/378 - 2s - 6ms/step - loss: 0.0330 - val_loss: 0.1210
+Epoch 14/120
+378/378 - 2s - 6ms/step - loss: 0.0315 - val_loss: 0.1251
+Epoch 15/120
+378/378 - 2s - 6ms/step - loss: 0.0304 - val_loss: 0.1228
+Epoch 16/120
+378/378 - 2s - 6ms/step - loss: 0.0296 - val_loss: 0.1230
+Epoch 17/120
+378/378 - 2s - 6ms/step - loss: 0.0295 - val_loss: 0.1256
+Epoch 18/120
+378/378 - 2s - 6ms/step - loss: 0.0293 - val_loss: 0.1216
+Epoch 19/120
+378/378 - 2s - 6ms/step - loss: 0.0288 - val_loss: 0.1309
+Epoch 20/120
+378/378 - 2s - 6ms/step - loss: 0.0283 - val_loss: 0.1338
+Epoch 21/120
+378/378 - 2s - 6ms/step - loss: 0.0280 - val_loss: 0.1265
+Epoch 22/120
+378/378 - 2s - 6ms/step - loss: 0.0276 - val_loss: 0.1245
+Epoch 23/120
+378/378 - 2s - 6ms/step - loss: 0.0274 - val_loss: 0.1231
+Saved metrics JSON: /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H150_ep120_b64_u128_do0p2/metrics_train_test_H150.json
+
+################################################
+LSTM Residual Evaluation (test, unscaled units):
+Total RMSE: 0.2674
+Per-joint RMSE: 0.3437 0.3774 0.1982 0.2424 0.1796 0.1956
+################################################
+
+Saved predictions: /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H150_ep120_b64_u128_do0p2/predictions_test.npz
+Saved best model:  /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H150_ep120_b64_u128_do0p2/residual_lstm.keras
+Saved: /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H150_ep120_b64_u128_do0p2/loss_curve.png
+Saved: /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H150_ep120_b64_u128_do0p2/residual_gt_vs_pred.png
+
+
+##############################
+### 7) COMBINED EVALUATION ###
+##############################
+
+===================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/combined_evaluation.py --residual_npz /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__residual__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz --model /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H150_ep120_b64_u128_do0p2/residual_lstm.keras --scalers /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H150_ep120_b64_u128_do0p2/scalers_H150.npz --out_dir /workspace/shared/evaluation/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H150_ep120_b64_u128_do0p2 --H 150 --split test --features full --save_pred_npz --metrics_csv /workspace/shared/evaluation/summary_metrics_sweep_1_20260124_014808.csv --metrics_json /workspace/shared/evaluation/summary_metrics_sweep_1_20260124_014808.jsonl --K 75 --test_fraction 0.2 --seed 1 --delan_seed 0 --delan_epochs 400 --hp_preset lutter_like_256 --delan_rmse_val 0.4420173600766327 --delan_rmse_test 0.44203259750705587' ===
+===================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+2026-01-24 01:05:36.271055: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-01-24 01:05:36.296679: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI AVX512_BF16 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+################################################
+Evaluate & Combine
+ residual_npz = /workspace/shared/data/processed/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__residual__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__residual__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz
+ model        = /workspace/shared/models/lstm/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H150_ep120_b64_u128_do0p2/residual_lstm.keras
+ split        = test
+ H            = 150
+ n_traj       = 15
+ n_dof        = 6
+ feature_dim  = 24
+################################################
+2026-01-24 01:05:37.159731: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:05:37.164636: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:05:37.165444: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:05:37.167240: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:05:37.168137: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:05:37.169027: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:05:37.244263: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:05:37.245183: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:05:37.245936: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-24 01:05:37.246677: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1928] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 9138 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 4070 Ti, pci bus id: 0000:01:00.0, compute capability: 8.9
+2026-01-24 01:05:37.581509: I external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:465] Loaded cuDNN version 8906
+
+################################################
+Stage-2 Evaluation (test, valid k>=H-1):
+DeLaN torque:   MSE=1.891270e-01  RMSE=4.348873e-01
+  per-joint RMSE: 0.5919 0.5885 0.3764 0.3780 0.2516 0.3004
+Residual LSTM:  MSE=7.150900e-02      RMSE=2.674117e-01
+  per-joint RMSE: 0.3437 0.3774 0.1982 0.2424 0.1796 0.1956
+Combined torque MSE=7.150900e-02     RMSE=2.674117e-01
+  per-joint RMSE: 0.3437 0.3774 0.1982 0.2424 0.1796 0.1956
+################################################
+
+Saved: /workspace/shared/evaluation/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H150_ep120_b64_u128_do0p2/metrics_test_H150.txt
+Saved: /workspace/shared/evaluation/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H150_ep120_b64_u128_do0p2/metrics_test_H150.json
+Appended CSV: /workspace/shared/evaluation/summary_metrics_sweep_1_20260124_014808.csv
+Appended JSON: /workspace/shared/evaluation/summary_metrics_sweep_1_20260124_014808.jsonl
+Saved: /workspace/shared/evaluation/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H150_ep120_b64_u128_do0p2/combined_predictions_test_H150.npz
+Saved: /workspace/shared/evaluation/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H150_ep120_b64_u128_do0p2/residual_gt_vs_pred_test_H150.png
+Saved: /workspace/shared/evaluation/delan_UR3_Load0_combined_26__A__K75_tf0p2_vf0p1__delan_jax_struct_s0_ep400_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_s1_H150_ep120_b64_u128_do0p2/torque_gt_vs_delan_vs_combined_test_H150.png
+

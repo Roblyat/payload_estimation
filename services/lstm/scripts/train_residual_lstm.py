@@ -110,6 +110,13 @@ def main():
     ap.add_argument("--seed", type=int, default=4)
     ap.add_argument("--units", type=int, default=128)
     ap.add_argument("--dropout", type=float, default=0.2)
+    ap.add_argument(
+        "--activation",
+        type=str,
+        default="tanh",
+        choices=["tanh", "relu", "softplus"],
+        help="Activation for LSTM (candidate/state). Default matches Keras default (tanh).",
+    )
     ap.add_argument("--no_plots", action="store_true")
     ap.add_argument("--eps", type=float, default=1e-8)
     ap.add_argument("--model_name", default="best.keras", help="Filename for the best model checkpoint inside out_dir (e.g. best_seed4_H50.keras)"
@@ -185,6 +192,7 @@ def main():
             "seed": args.seed,
             "units": args.units,
             "dropout": args.dropout,
+            "activation": args.activation,
             "eps": args.eps,
             "model_name": args.model_name,
         },
@@ -234,9 +242,16 @@ def main():
 
     # ---------- Model ----------
     model = Sequential()
-    model.add(LSTM(units=args.units, return_sequences=True, input_shape=(H, feature_dim)))
+    model.add(
+        LSTM(
+            units=args.units,
+            return_sequences=True,
+            activation=args.activation,
+            input_shape=(H, feature_dim),
+        )
+    )
     model.add(Dropout(args.dropout))
-    model.add(LSTM(units=args.units))
+    model.add(LSTM(units=args.units, activation=args.activation))
     model.add(Dropout(args.dropout))
     model.add(Dense(n_dof))  # predict scaled residuals
 

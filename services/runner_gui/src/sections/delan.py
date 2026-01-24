@@ -1,4 +1,11 @@
 from __future__ import annotations
+from pathlib import Path
+import sys
+
+if "/workspace/shared/src" not in sys.path:
+    sys.path.insert(0, "/workspace/shared/src")
+
+from path_helpers import artifact_file
 
 def render_delan(st, cfg, paths, run, pad_button, log_view):
 
@@ -25,9 +32,10 @@ def render_delan(st, cfg, paths, run, pad_button, log_view):
     ckpt_ext = cfg.DELAN_CKPT_EXT[delan_backend]
 
     # resolved inputs from preprocess (with safe fallbacks)
+    default_dataset_stem = f"delan_{dataset_name}_dataset"
     npz_in = st.session_state.get(
         "npz_in",
-        f"{paths.preprocessed}/delan_{dataset_name}_dataset.npz",
+        artifact_file(paths.preprocessed, Path(default_dataset_stem).stem, "npz"),
     )
 
     d_row1_c1, d_row1_c2, d_row1_c3, d_row1_c4 = st.columns([1.3, 1.0, 1.2, 1.6])

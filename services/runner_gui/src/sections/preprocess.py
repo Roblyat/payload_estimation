@@ -1,4 +1,11 @@
 from __future__ import annotations
+from pathlib import Path
+import sys
+
+if "/workspace/shared/src" not in sys.path:
+    sys.path.insert(0, "/workspace/shared/src")
+
+from path_helpers import artifact_file
 
 def render_preprocess(st, cfg, paths, run, pad_button, log_view):
 
@@ -112,6 +119,7 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
         pad_button()
         if st.button("Preprocess DeLaN", use_container_width=True):
             out_npz_name = f"delan_{dataset_name}_tf{_safe_tag(test_fraction)}_vf{_safe_tag(val_fraction)}_dataset.npz"
+            out_npz_path = artifact_file(paths.preprocessed, Path(out_npz_name).stem, "npz")
             run(
                 f"{cfg.COMPOSE} exec -T preprocess bash -lc "
                 f"\"python3 scripts/build_delan_dataset.py "
@@ -124,7 +132,7 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
                 f"--filter_order {filter_order} "
                 f"--filter_qdd {filter_qdd} "
                 f"--raw_csv {raw_data_path}/{dataset_name}.{in_format} "
-                f"--out_npz {paths.preprocessed}/{out_npz_name} "
+                f"--out_npz {out_npz_path} "
                 f"\""
             )
 
@@ -144,7 +152,7 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
         default_delan_npz_name,
         help="NPZ produced by preprocess (trajectory NPZ for DeLaN training).",
     )
-    npz_in = f"{paths.preprocessed}/{delan_npz_name}"
+    npz_in = artifact_file(paths.preprocessed, Path(delan_npz_name).stem, "npz")
 
     windows_npz_name = st.text_input(
         f"LSTM windows ({paths.processed}/)",

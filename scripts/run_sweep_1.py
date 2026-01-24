@@ -271,7 +271,8 @@ def main():
 
                     # preprocess output NPZ (unique per K/tf/seed)
                     delan_npz_name = f"delan_{DATASET_NAME}_K{K}_tf{safe_tag(tf)}_vf{safe_tag(VAL_FRACTION)}_seed{seed}_dataset.npz"
-                    npz_in = f"{PREPROCESSED_DIR}/{delan_npz_name}"
+                    npz_stem = Path(delan_npz_name).stem
+                    npz_in = f"{PREPROCESSED_DIR}/{npz_stem}/{npz_stem}.npz"
 
                     run_log_path = logs_dir / f"run1_K{K}_tf{safe_tag(tf)}_seed{seed}_{ts}.log"
                     with run_log_path.open("w", encoding="utf-8") as run_log:

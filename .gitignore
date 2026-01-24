@@ -1,5 +1,6 @@
 shared/data/preprocessed/*
 !shared/data/preprocessed/.gitkeep
+!shared/data/preprocessed/delan_ur5_tf0p2_vf0p1_dataset
 shared/data/processed/*
 !shared/data/processed/.gitkeep
 shared/data/raw/*

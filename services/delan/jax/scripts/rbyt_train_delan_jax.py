@@ -3,6 +3,7 @@ import functools
 import os
 import sys
 import time
+from pathlib import Path
 
 import dill as pickle
 import haiku as hk
@@ -33,6 +34,28 @@ def _init_matplotlib(render: bool):
 def _add_path(path: str) -> None:
     if path and path not in sys.path:
         sys.path.insert(0, path)
+
+
+def _resolve_npz_path(p: str) -> str:
+    """
+    Accept both:
+      - /root/stem/stem.npz (new)
+      - /root/stem.npz      (old)
+    If the given path does not exist, try the other convention.
+    """
+    p = os.path.expanduser(str(p))
+    if p.endswith(".npz") and (not os.path.exists(p)):
+        stem = Path(p).stem
+        root = os.path.dirname(p)
+        if os.path.basename(root) == stem:
+            candidate = os.path.join(os.path.dirname(root), f"{stem}.npz")
+            if os.path.exists(candidate):
+                return candidate
+        else:
+            candidate = os.path.join(root, stem, f"{stem}.npz")
+            if os.path.exists(candidate):
+                return candidate
+    return p
 
 
 DELAN_REPO_DIR = os.environ.get("DELAN_REPO_DIR", "/workspace/delan_repo")
@@ -450,7 +473,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         "--npz",
         type=str,
         required=False,
-        default="/workspace/shared/data/preprocessed/delan_ur5_dataset.npz",
+        default="/workspace/shared/data/preprocessed/delan_ur5_dataset/delan_ur5_dataset.npz",
         help="Path to delan_ur5_dataset.npz",
     )
     parser.add_argument(
@@ -504,6 +527,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
 
 if __name__ == "__main__":
     args = _build_arg_parser().parse_args()
+    args.npz = _resolve_npz_path(args.npz)
     trainer = JaxDelanTrainer(args)
     trainer.run()
     trainer.finalize_plot()

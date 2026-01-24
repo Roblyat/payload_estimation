@@ -4,7 +4,7 @@ services:
     environment:
       PYTHONDONTWRITEBYTECODE: "1"
       RAW_CSV: /workspace/shared/data/raw/raw_data.csv
-      OUT_NPZ: /workspace/shared/data/preprocessed/delan_ur5_dataset.npz
+      OUT_NPZ: /workspace/shared/data/preprocessed/delan_ur5_dataset/delan_ur5_dataset.npz
     volumes:
       - ${APE_PREPROCESS}:/workspace/preprocess
       - ${APE_SHARED}/data/raw:/workspace/shared/data/raw
@@ -131,7 +131,7 @@ services:
       - APE_PREPROCESS=${APE_PREPROCESS}
       - APE_EVALUATION=${APE_EVALUATION}
       - LSTM=${LSTM}
-      - DELAN_REPO=${DELAN_REPO}
+      - ${APE_DELAN}:/workspace/delan_repo
       - DISPLAY=${DISPLAY}
       - STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
       - STREAMLIT_SERVER_HEADLESS=true

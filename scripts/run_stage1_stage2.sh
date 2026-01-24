@@ -4,7 +4,7 @@ set -euo pipefail
 H="${H:-50}"
 SEED="${SEED:-4}"
 
-NPZ_IN="${NPZ_IN:-/workspace/shared/data/preprocessed/delan_ur5_dataset.npz}"
+NPZ_IN="${NPZ_IN:-/workspace/shared/data/preprocessed/delan_ur5_dataset/delan_ur5_dataset.npz}"
 CKPT="${CKPT:-/workspace/shared/models/delan/delan_ur5_struct_seed${SEED}.jax}"
 RES_OUT="${RES_OUT:-/workspace/shared/data/processed/ur5_residual_traj.npz}"
 WIN_OUT="${WIN_OUT:-/workspace/shared/data/processed/ur5_lstm_windows_H${H}.npz}"

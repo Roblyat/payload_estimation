@@ -45,10 +45,14 @@ RUN_TAG = "A"
 IN_FORMAT = "csv"
 COL_FORMAT = "wide"
 DERIVE_QDD = True
+FILTER_ACCEL = True
+FILTER_CUTOFF_HZ = 8.0
+FILTER_ORDER = 4
+FILTER_QDD = True
 
 # Sweep
-TRAJ_AMOUNTS = [25, 50, 75, 100, 150]
-TEST_FRACTIONS = [0.2, 0.3]
+TRAJ_AMOUNTS = [50, 75, 100, 150, 180]
+TEST_FRACTIONS = [0.2]
 VAL_FRACTION = 0.1
 SEEDS = [0, 1, 2]
 
@@ -58,17 +62,17 @@ FEATURE_MODES = ["full"]
 
 # DeLaN settings
 DELAN_MODEL_TYPE = "structured"
-DELAN_HP_PRESET = "lutter_like"  # or "lutter_like_256"
+DELAN_HP_PRESET = "lutter_like_256"  # or "lutter_like_256"
 DELAN_HP_FLAGS = ""  # optional extra flags
-DELAN_SEEDS = [0, 1, 2]
-DELAN_EPOCHS = 300  # decoupled from K
+DELAN_SEEDS = [0, 1, 2, 3, 4]
+DELAN_EPOCHS = 400  # decoupled from K
 
 # LSTM hyperparams (early stopping already in trainer)
 LSTM_EPOCHS = 120  # max epochs; early stopping will shorten if needed
-LSTM_BATCH = 256
-LSTM_VAL_SPLIT = 0.2
+LSTM_BATCH = 64
+LSTM_VAL_SPLIT = 0.1
 LSTM_UNITS = 128
-LSTM_DROPOUT = 0.1
+LSTM_DROPOUT = 0.2
 LSTM_EPS = 1e-8
 LSTM_NO_PLOTS = False
 
@@ -248,6 +252,7 @@ def main():
             f"traj_amounts={TRAJ_AMOUNTS} test_fracs={TEST_FRACTIONS} seeds={SEEDS}",
             f"val_fraction={VAL_FRACTION}",
             f"H={H_LIST} feature_modes={FEATURE_MODES}",
+            f"filter_accel={FILTER_ACCEL} cutoff_hz={FILTER_CUTOFF_HZ} order={FILTER_ORDER} filter_qdd={FILTER_QDD}",
             f"DeLaN: backend=jax type={DELAN_MODEL_TYPE} hp_preset={DELAN_HP_PRESET} epochs={DELAN_EPOCHS}",
             f"LSTM: epochs_max={LSTM_EPOCHS} batch={LSTM_BATCH} val_split={LSTM_VAL_SPLIT}",
             f"metrics_csv={METRICS_CSV}",
@@ -286,6 +291,10 @@ def main():
                             f"--test_fraction {tf} "
                             f"--val_fraction {VAL_FRACTION} "
                             f"--seed {seed} "
+                            f"--filter_accel {FILTER_ACCEL} "
+                            f"--filter_cutoff_hz {FILTER_CUTOFF_HZ} "
+                            f"--filter_order {FILTER_ORDER} "
+                            f"--filter_qdd {FILTER_QDD} "
                             f"--raw_csv {raw_csv} "
                             f"--out_npz {npz_in}"
                         )

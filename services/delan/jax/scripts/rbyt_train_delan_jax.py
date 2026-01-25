@@ -66,6 +66,7 @@ for p in [DELAN_COMMON_SRC, DELAN_JAX_SRC, DELAN_REPO_DIR]:
     _add_path(p)
 
 from delan_train_common import DelanRunPaths, DelanTrainRun, compute_tau_metrics
+from delan_train_common import EarlyStopConfig, EarlyStopper
 from load_npz_dataset import load_npz_trajectory_dataset
 
 import deep_lagrangian_networks.jax_DeLaN_model as delan
@@ -102,6 +103,10 @@ class JaxDelanTrainer:
             "eval_every": int(args.eval_every),
             "eval_n": int(args.eval_n),
             "log_every": int(args.log_every),
+            "early_stop": bool(args.early_stop),
+            "early_stop_patience": int(args.early_stop_patience),
+            "early_stop_min_delta": float(args.early_stop_min_delta),
+            "early_stop_warmup_evals": int(args.early_stop_warmup_evals),
         }
         self.train_run = DelanTrainRun(
             run_paths=self.run_paths,
@@ -309,6 +314,18 @@ class JaxDelanTrainer:
         print(f"Training DeLaN | run={self.run_name} | type={self.model_choice} | dof={n_dof}")
         print("################################################")
 
+        early_cfg = EarlyStopConfig(
+            enabled=bool(args.early_stop),
+            patience=int(args.early_stop_patience),
+            min_delta=float(args.early_stop_min_delta),
+            warmup_evals=int(args.early_stop_warmup_evals),
+            mode="min",
+        )
+        early_stopper = EarlyStopper(early_cfg)
+        best_params_snapshot = None
+        restored_best = False
+        monitor_split = "val"
+
         t0_start = time.perf_counter()
         epoch_i = 0
         while epoch_i < self.hyper["max_epoch"] and not self.load_model:
@@ -350,6 +367,7 @@ class JaxDelanTrainer:
                 qd_eval = val_qv if use_val else test_qv
                 qdd_eval = val_qa if use_val else test_qa
                 tau_eval = val_tau if use_val else test_tau
+                monitor_split = "val" if use_val else "test"
 
                 if args.eval_n and args.eval_n > 0:
                     n = min(int(args.eval_n), q_eval.shape[0])
@@ -364,21 +382,48 @@ class JaxDelanTrainer:
                 tauj = jnp.array(tau_eval)
 
                 pred_tau_eval = delan_model(self.params, None, qj, qdj, qddj, 0.0 * qj)[1]
-                test_mse = float((1.0 / qj.shape[0]) * jnp.sum((pred_tau_eval - tauj) ** 2))
+                eval_mse = float((1.0 / qj.shape[0]) * jnp.sum((pred_tau_eval - tauj) ** 2))
 
-                self.train_run.record_test_point(epoch=epoch_i, mse=test_mse)
+                self.train_run.record_test_point(epoch=epoch_i, mse=eval_mse)
                 split_name = "val" if use_val else "test"
-                print(f"  [eval] {split_name}_mse={test_mse:.3e}  (n={qj.shape[0]})")
+                print(f"  [eval] {split_name}_mse={eval_mse:.3e}  (n={qj.shape[0]})")
+
+                should_stop, improved = early_stopper.update(metric=eval_mse, epoch=epoch_i)
+                if improved:
+                    best_params_snapshot = jax.device_get(self.params)
+                if should_stop:
+                    print(
+                        f"  [early_stop] stop at epoch={epoch_i} "
+                        f"(best_epoch={early_stopper.best_epoch}, best_{split_name}_mse={early_stopper.best_metric:.3e})"
+                    )
+                    break
+
+        if best_params_snapshot is not None and early_cfg.enabled:
+            self.params = jax.device_put(best_params_snapshot)
+            restored_best = True
+
+        early_stop_metrics = early_stopper.to_dict(
+            monitor="val_mse",
+            restored_best=restored_best,
+            monitor_split=monitor_split,
+        )
 
         if self.save_model:
+            epoch_to_save = early_stopper.best_epoch if restored_best and early_stopper.best_epoch is not None else epoch_i
             with open(self.run_paths.ckpt_path, "wb") as f:
                 pickle.dump(
-                    {"epoch": epoch_i, "hyper": self.hyper, "params": self.params, "seed": self.seed},
+                    {
+                        "epoch": int(epoch_to_save),
+                        "hyper": self.hyper,
+                        "params": self.params,
+                        "seed": self.seed,
+                        "early_stop": early_stop_metrics,
+                    },
                     f,
                 )
             print(f"Saved DeLaN checkpoint: {self.run_paths.ckpt_path}")
 
-        self.train_run.finalize_train_metrics(epochs_ran=epoch_i)
+        self.train_run.finalize_train_metrics(epochs_ran=epoch_i, early_stop=early_stop_metrics)
         self.train_run.save_training_artifacts(save_model=self.save_model)
 
         train_csv = self.train_run.metrics["artifacts"].get("train_history_csv")
@@ -528,6 +573,29 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         type=int,
         default=0,
         help="If >0, evaluate only on first eval_n test samples for speed. 0 = full test set.",
+    )
+    parser.add_argument(
+        "--early_stop",
+        action="store_true",
+        help="Enable early stopping monitored on val_mse (evaluated every --eval_every epochs).",
+    )
+    parser.add_argument(
+        "--early_stop_patience",
+        type=int,
+        default=10,
+        help="Early stopping patience in evaluation events (not epochs).",
+    )
+    parser.add_argument(
+        "--early_stop_min_delta",
+        type=float,
+        default=0.0,
+        help="Minimum improvement required to reset patience.",
+    )
+    parser.add_argument(
+        "--early_stop_warmup_evals",
+        type=int,
+        default=0,
+        help="Ignore non-improving evals for the first N evaluation events.",
     )
     return parser
 

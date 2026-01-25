@@ -51,6 +51,10 @@ def render_lstm(st, cfg, paths, run, pad_button, log_view):
     st.session_state.setdefault("lstm_eps", 1e-8)
     st.session_state.setdefault("lstm_no_plots", False)
     st.session_state.setdefault("lstm_activation", "tanh")
+    st.session_state.setdefault("lstm_early_stop", True)
+    st.session_state.setdefault("lstm_early_stop_patience", 10)
+    st.session_state.setdefault("lstm_early_stop_min_delta", 0.0)
+    st.session_state.setdefault("lstm_early_stop_warmup_evals", 0)
 
     l_row1_c1, l_row1_c2, l_row1_c3, l_row1_c4 = st.columns([2.2, 1.0, 1.0, 1.2])
 
@@ -157,6 +161,45 @@ def render_lstm(st, cfg, paths, run, pad_button, log_view):
             help="Skip generating loss_curve.png and residual_gt_vs_pred.png.",
         )
 
+        st.divider()
+
+        early_stop = st.checkbox(
+            "Early stopping (val_loss)",
+            value=bool(st.session_state.get("lstm_early_stop", True)),
+            key="lstm_early_stop",
+            help="Stop training when val_loss hasn't improved for N epochs (requires Validation split > 0).",
+        )
+        early_stop_patience = st.number_input(
+            "Early stop patience (epochs)",
+            min_value=0,
+            max_value=100000,
+            value=int(st.session_state.get("lstm_early_stop_patience", 10)),
+            step=1,
+            key="lstm_early_stop_patience",
+            help="How many epochs without improvement before stopping.",
+        )
+        early_stop_min_delta = st.number_input(
+            "Early stop min_delta",
+            min_value=0.0,
+            max_value=1e9,
+            value=float(st.session_state.get("lstm_early_stop_min_delta", 0.0)),
+            step=1e-6,
+            format="%.6f",
+            key="lstm_early_stop_min_delta",
+            help="Minimum improvement in val_loss to reset patience. 0.0 counts any improvement.",
+        )
+        early_stop_warmup_evals = st.number_input(
+            "Early stop warmup epochs",
+            min_value=0,
+            max_value=100000,
+            value=int(st.session_state.get("lstm_early_stop_warmup_evals", 0)),
+            step=1,
+            key="lstm_early_stop_warmup_evals",
+            help="Ignore early stopping for the first N epochs (warmup).",
+        )
+        if early_stop and float(val_split) <= 0.0:
+            st.warning("Early stopping is enabled, but Validation split is 0.0, so val_loss won't exist.")
+
     with l_row1_c4:
         pad_button()
         if st.button("Build LSTM windows", use_container_width=True):
@@ -209,7 +252,11 @@ def render_lstm(st, cfg, paths, run, pad_button, log_view):
                 f"--units {units} "
                 f"--dropout {dropout} "
                 f"--activation {activation} "
-                f"--eps {eps}"
+                f"--eps {eps} "
+                f"--early_stop {early_stop} "
+                f"--early_stop_patience {int(early_stop_patience)} "
+                f"--early_stop_min_delta {float(early_stop_min_delta)} "
+                f"--early_stop_warmup_evals {int(early_stop_warmup_evals)}"
                 f"{no_plots_flag}"
                 f"\""
             )

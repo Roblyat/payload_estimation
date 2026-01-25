@@ -3,6 +3,7 @@
 # Usage:
 #   python3 scripts/run_sweep_1.py
 
+import csv
 import json
 import os
 import shlex
@@ -38,20 +39,23 @@ EVAL_DIR = "/workspace/shared/evaluation"
 
 # Host path for reading DeLaN metrics.json (selection stage)
 MODELS_DELAN_DIR_HOST = str(REPO_ROOT / "shared" / "models" / "delan")
+MODELS_LSTM_DIR_HOST = str(REPO_ROOT / "shared" / "models" / "lstm")
+EVAL_DIR_HOST = str(REPO_ROOT / "shared" / "evaluation")
 
 # Dataset settings (your scenario)
-DATASET_NAME = "delan_UR3_Load0_combined_26"  # raw file: RAW_DIR/{DATASET_NAME}.csv
+DATASET_NAME = "UR3_Load0_cc"  # raw file: RAW_DIR/{DATASET_NAME}.csv
 RUN_TAG = "A"
 IN_FORMAT = "csv"
 COL_FORMAT = "wide"
 DERIVE_QDD = True
 LOWPASS_SIGNALS = True
-LOWPASS_CUTOFF_HZ = 8.0
+LOWPASS_CUTOFF_HZ = 10.0
 LOWPASS_ORDER = 4
-LOWPASS_QDD = True
+# Low-pass qdd after derivation (kept False because it showed no effect @ 100 Hz sampling).
+LOWPASS_QDD = False
 
 # Sweep
-TRAJ_AMOUNTS = [50, 75, 100, 150, 180]
+TRAJ_AMOUNTS = [8, 16, 32, 48, 64, 84, 122]
 TEST_FRACTIONS = [0.2]
 VAL_FRACTION = 0.1
 SEEDS = [0, 1, 2]
@@ -65,7 +69,7 @@ DELAN_MODEL_TYPE = "structured"
 DELAN_HP_PRESET = "lutter_like_256"  # or "lutter_like_256"
 DELAN_HP_FLAGS = ""  # optional extra flags
 DELAN_SEEDS = [0, 1, 2, 3, 4]
-DELAN_EPOCHS = 400  # decoupled from K
+DELAN_EPOCHS = 50  # decoupled from K
 
 # LSTM hyperparams (early stopping already in trainer)
 LSTM_EPOCHS = 120  # max epochs; early stopping will shorten if needed
@@ -75,10 +79,6 @@ LSTM_UNITS = 128
 LSTM_DROPOUT = 0.2
 LSTM_EPS = 1e-8
 LSTM_NO_PLOTS = False
-
-# Summary metrics output (single source of truth) - timestamped per run
-METRICS_CSV = None
-METRICS_JSON = None
 
 # Paths to scripts INSIDE the containers
 SCRIPT_BUILD_DELAN_DATASET = "scripts/build_delan_dataset.py"
@@ -230,18 +230,80 @@ def read_delan_rmse_pair(metrics_json_path: str) -> tuple[float, float]:
     except Exception:
         return float("inf"), float("inf")
 
+def read_delan_metrics(metrics_json_path: str) -> dict:
+    if not os.path.exists(metrics_json_path):
+        return {"exists": False}
+    try:
+        with open(metrics_json_path, "r") as f:
+            d = json.load(f)
+        return {
+            "exists": True,
+            "val_rmse": float(d.get("eval_val", {}).get("torque_rmse", float("inf"))),
+            "val_mse": float(d.get("eval_val", {}).get("torque_mse", float("inf"))),
+            "test_rmse": float(d.get("eval_test", {}).get("torque_rmse", float("inf"))),
+            "test_mse": float(d.get("eval_test", {}).get("torque_mse", float("inf"))),
+        }
+    except Exception:
+        return {"exists": False}
+
+def read_lstm_metrics(metrics_json_path: str) -> dict:
+    if not os.path.exists(metrics_json_path):
+        return {"exists": False}
+    try:
+        with open(metrics_json_path, "r") as f:
+            d = json.load(f)
+        train = d.get("train", {}) if isinstance(d, dict) else {}
+        eval_test = d.get("eval_test", {}) if isinstance(d, dict) else {}
+        return {
+            "exists": True,
+            "epochs_ran": train.get("epochs_ran"),
+            "best_epoch": train.get("best_epoch"),
+            "best_val_loss": train.get("best_val_loss"),
+            "final_train_loss": train.get("final_train_loss"),
+            "final_val_loss": train.get("final_val_loss"),
+            "rmse_total": eval_test.get("rmse_total"),
+            "mse_total": eval_test.get("mse_total"),
+            "best_model_path": eval_test.get("best_model_path"),
+        }
+    except Exception:
+        return {"exists": False}
+
+def append_csv_row(path: str, fieldnames: list[str], row: dict) -> None:
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    exists = os.path.exists(path)
+    with open(path, "a", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
+        if not exists:
+            writer.writeheader()
+        writer.writerow(row)
+
+def append_jsonl(path: str, record: dict) -> None:
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "a", encoding="utf-8") as f:
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
 
 def main():
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     logs_dir = Path("logs_sweeps")
     logs_dir.mkdir(parents=True, exist_ok=True)
-    master_log_path = logs_dir / f"sweep1_{DATASET_NAME}_{RUN_TAG}_{ts}.log"
 
     raw_csv = f"{RAW_DIR}/{DATASET_NAME}.{IN_FORMAT}"
 
-    global METRICS_CSV, METRICS_JSON
-    METRICS_CSV = f"{EVAL_DIR}/summary_metrics_sweep_1_{ts}.csv"
-    METRICS_JSON = f"{EVAL_DIR}/summary_metrics_sweep_1_{ts}.jsonl"
+    master_logs = []
+
+    lowpass_qdd = LOWPASS_QDD
+    lowpass_tag = f"lpqdd{'T' if lowpass_qdd else 'F'}"
+    master_log_path = logs_dir / f"sweep1_{DATASET_NAME}_{RUN_TAG}_{lowpass_tag}_{ts}.log"
+    metrics_csv = f"{EVAL_DIR}/summary_metrics_sweep_1_{lowpass_tag}_{ts}.csv"
+    metrics_jsonl = f"{EVAL_DIR}/summary_metrics_sweep_1_{lowpass_tag}_{ts}.jsonl"
+
+    delan_summary_csv = str(Path(EVAL_DIR_HOST) / f"summary_delan_sweep_1_{lowpass_tag}_{ts}.csv")
+    delan_summary_jsonl = str(Path(EVAL_DIR_HOST) / f"summary_delan_sweep_1_{lowpass_tag}_{ts}.jsonl")
+    lstm_summary_csv = str(Path(EVAL_DIR_HOST) / f"summary_lstm_sweep_1_{lowpass_tag}_{ts}.csv")
+    lstm_summary_jsonl = str(Path(EVAL_DIR_HOST) / f"summary_lstm_sweep_1_{lowpass_tag}_{ts}.jsonl")
+
+    master_logs.append(master_log_path)
 
     with master_log_path.open("w", encoding="utf-8") as master_log:
         master_log.write(banner([
@@ -252,32 +314,39 @@ def main():
             f"traj_amounts={TRAJ_AMOUNTS} test_fracs={TEST_FRACTIONS} seeds={SEEDS}",
             f"val_fraction={VAL_FRACTION}",
             f"H={H_LIST} feature_modes={FEATURE_MODES}",
-            f"lowpass_signals={LOWPASS_SIGNALS} cutoff_hz={LOWPASS_CUTOFF_HZ} order={LOWPASS_ORDER} lowpass_qdd={LOWPASS_QDD}",
+            f"lowpass_signals={LOWPASS_SIGNALS} cutoff_hz={LOWPASS_CUTOFF_HZ} order={LOWPASS_ORDER} lowpass_qdd={lowpass_qdd}",
             f"DeLaN: backend=jax type={DELAN_MODEL_TYPE} hp_preset={DELAN_HP_PRESET} epochs={DELAN_EPOCHS}",
             f"LSTM: epochs_max={LSTM_EPOCHS} batch={LSTM_BATCH} val_split={LSTM_VAL_SPLIT}",
-            f"metrics_csv={METRICS_CSV}",
-            f"metrics_json={METRICS_JSON}",
+            f"metrics_csv={metrics_csv}",
+            f"metrics_json={metrics_jsonl}",
+            f"delan_summary_csv(host)={delan_summary_csv}",
+            f"delan_summary_json(host)={delan_summary_jsonl}",
+            f"lstm_summary_csv(host)={lstm_summary_csv}",
+            f"lstm_summary_json(host)={lstm_summary_jsonl}",
         ], char="#") + "\n")
 
         for K in TRAJ_AMOUNTS:
             for tf in TEST_FRACTIONS:
                 master_log.write("\n" + banner([
-                    f"SUBSWEEP: K={K} test_fraction={tf}"
+                    f"SUBSWEEP: lowpass_qdd={lowpass_qdd}  K={K} test_fraction={tf}"
                 ], char="#") + "\n")
                 master_log.flush()
 
                 for seed in SEEDS:
-                    base_id = f"{DATASET_NAME}__{RUN_TAG}"
+                    base_id = f"{DATASET_NAME}__{RUN_TAG}__{lowpass_tag}"
 
-                    # preprocess output NPZ (unique per K/tf/seed)
-                    delan_npz_name = f"delan_{DATASET_NAME}_K{K}_tf{safe_tag(tf)}_vf{safe_tag(VAL_FRACTION)}_seed{seed}_dataset.npz"
+                    # preprocess output NPZ (unique per lowpass/K/tf/seed)
+                    delan_npz_name = (
+                        f"delan_{DATASET_NAME}_{lowpass_tag}_K{K}_tf{safe_tag(tf)}"
+                        f"_vf{safe_tag(VAL_FRACTION)}_seed{seed}_dataset.npz"
+                    )
                     npz_stem = Path(delan_npz_name).stem
                     npz_in = f"{PREPROCESSED_DIR}/{npz_stem}/{npz_stem}.npz"
 
-                    run_log_path = logs_dir / f"run1_K{K}_tf{safe_tag(tf)}_seed{seed}_{ts}.log"
+                    run_log_path = logs_dir / f"run1_{lowpass_tag}_K{K}_tf{safe_tag(tf)}_seed{seed}_{ts}.log"
                     with run_log_path.open("w", encoding="utf-8") as run_log:
                         run_log.write(banner([
-                            f"RUN: K={K} test_fraction={tf} seed={seed}",
+                            f"RUN: lowpass_qdd={lowpass_qdd}  K={K} test_fraction={tf} seed={seed}",
                             f"npz_in={npz_in}",
                         ], char="#") + "\n")
 
@@ -295,165 +364,288 @@ def main():
                             f"--lowpass_signals {LOWPASS_SIGNALS} "
                             f"--lowpass_cutoff_hz {LOWPASS_CUTOFF_HZ} "
                             f"--lowpass_order {LOWPASS_ORDER} "
-                            f"--lowpass_qdd {LOWPASS_QDD} "
+                            f"--lowpass_qdd {lowpass_qdd} "
                             f"--raw_csv {raw_csv} "
                             f"--out_npz {npz_in}"
                         )
                         run_cmd(cmd, run_log)
 
-                        # ---------- 2) DeLaN Train (all seeds) ----------
-                        hp_suffix = hp_suffix_from_preset(DELAN_HP_PRESET, DELAN_HP_FLAGS)
-                        delan_candidates = []
-                        for delan_seed in DELAN_SEEDS:
-                            model_short = "struct"
-                            delan_tag = f"delan_jax_{model_short}_s{delan_seed}_ep{DELAN_EPOCHS}_{hp_suffix}"
-                            delan_id = f"{DATASET_NAME}__{RUN_TAG}__{delan_tag}"
-                            delan_run_dir = f"{MODELS_DELAN_DIR}/{delan_id}"
-                            ckpt = f"{delan_run_dir}/{delan_id}.jax"
+                        if True:
+                            # ---------- 2) DeLaN Train (all seeds) ----------
+                            hp_suffix = hp_suffix_from_preset(DELAN_HP_PRESET, DELAN_HP_FLAGS)
+                            delan_candidates = []
+                            for delan_seed in DELAN_SEEDS:
+                                model_short = "struct"
+                                delan_tag = f"delan_jax_{model_short}_s{delan_seed}_ep{DELAN_EPOCHS}_{hp_suffix}"
+                                delan_id = f"{DATASET_NAME}__{RUN_TAG}__{lowpass_tag}__{delan_tag}"
+                                delan_run_dir = f"{MODELS_DELAN_DIR}/{delan_id}"
+                                ckpt = f"{delan_run_dir}/{delan_id}.jax"
 
-                            run_log.write(banner([
-                                f"DELAN VARIANT: delan_seed={delan_seed}",
-                                f"ckpt={ckpt}",
+                                run_log.write(banner([
+                                    f"DELAN VARIANT: delan_seed={delan_seed}",
+                                    f"ckpt={ckpt}",
+                                ], char="#") + "\n")
+
+                                run_log.write("\n" + banner(["2) DELAN TRAIN"], char="#") + "\n")
+                                hp_flags = (DELAN_HP_FLAGS + " ") if DELAN_HP_FLAGS.strip() else ""
+                                cmd = compose_exec(
+                                    SVC_DELAN,
+                                    f"python3 {SCRIPT_TRAIN_DELAN_JAX} "
+                                    f"--npz {npz_in} "
+                                    f"-t {DELAN_MODEL_TYPE} "
+                                    f"-s {delan_seed} "
+                                    f"-r 0 "
+                                    f"--hp_preset {DELAN_HP_PRESET} "
+                                    f"--epochs {DELAN_EPOCHS} "
+                                    f"{hp_flags}"
+                                    f"--save_path {ckpt}"
+                                )
+                                run_cmd(cmd, run_log)
+
+                                metrics_json = f"{MODELS_DELAN_DIR_HOST}/{delan_id}/metrics.json"
+                                val_rmse, test_rmse = read_delan_rmse_pair(metrics_json)
+                                delan_candidates.append({
+                                    "delan_seed": delan_seed,
+                                    "delan_tag": delan_tag,
+                                    "delan_id": delan_id,
+                                    "ckpt": ckpt,
+                                    "val_rmse": val_rmse,
+                                    "test_rmse": test_rmse,
+                                    "metrics_json": metrics_json,
+                                })
+
+                            # ---------- 3) Select best DeLaN ----------
+                            delan_candidates.sort(key=lambda d: d["val_rmse"])
+                            best = delan_candidates[0]
+                            run_log.write("\n" + banner([
+                                "3) SELECT BEST DELAN (by val RMSE)",
+                                f"best_seed={best['delan_seed']} val_rmse={best['val_rmse']} test_rmse={best['test_rmse']}",
+                                f"metrics_json={best['metrics_json']}",
                             ], char="#") + "\n")
 
-                            run_log.write("\n" + banner(["2) DELAN TRAIN"], char="#") + "\n")
-                            hp_flags = (DELAN_HP_FLAGS + " ") if DELAN_HP_FLAGS.strip() else ""
+                            # DeLaN sweep summary (host-written): one row per candidate, mark best
+                            delan_fields = [
+                                "timestamp",
+                                "dataset",
+                                "run_tag",
+                                "lowpass_qdd",
+                                "lowpass_tag",
+                                "K",
+                                "test_fraction",
+                                "val_fraction",
+                                "seed",
+                                "delan_seed",
+                                "delan_epochs",
+                                "hp_preset",
+                                "hp_flags",
+                                "model_type",
+                                "ckpt",
+                                "metrics_json",
+                                "metrics_exists",
+                                "val_rmse",
+                                "val_mse",
+                                "test_rmse",
+                                "test_mse",
+                                "selected",
+                            ]
+                            for cand in delan_candidates:
+                                m = read_delan_metrics(cand["metrics_json"])
+                                row = {
+                                    "timestamp": ts,
+                                    "dataset": DATASET_NAME,
+                                    "run_tag": RUN_TAG,
+                                    "lowpass_qdd": lowpass_qdd,
+                                    "lowpass_tag": lowpass_tag,
+                                    "K": K,
+                                    "test_fraction": tf,
+                                    "val_fraction": VAL_FRACTION,
+                                    "seed": seed,
+                                    "delan_seed": cand["delan_seed"],
+                                    "delan_epochs": DELAN_EPOCHS,
+                                    "hp_preset": DELAN_HP_PRESET,
+                                    "hp_flags": DELAN_HP_FLAGS,
+                                    "model_type": DELAN_MODEL_TYPE,
+                                    "ckpt": cand["ckpt"],
+                                    "metrics_json": cand["metrics_json"],
+                                    "metrics_exists": bool(m.get("exists", False)),
+                                    "val_rmse": m.get("val_rmse", cand.get("val_rmse")),
+                                    "val_mse": m.get("val_mse"),
+                                    "test_rmse": m.get("test_rmse", cand.get("test_rmse")),
+                                    "test_mse": m.get("test_mse"),
+                                    "selected": cand["delan_seed"] == best["delan_seed"],
+                                }
+                                append_csv_row(delan_summary_csv, delan_fields, row)
+                                append_jsonl(delan_summary_jsonl, row)
+
+                            # ---------- 4) Export residuals (best only) ----------
+                            residual_name = (
+                                f"{base_id}__K{K}_tf{safe_tag(tf)}_vf{safe_tag(VAL_FRACTION)}"
+                                f"__residual__{best['delan_tag']}.npz"
+                            )
+                            res_out = f"{PROCESSED_DIR}/{residual_name}"
+
+                            run_log.write("\n" + banner(["4) EXPORT RESIDUALS (best only)"], char="#") + "\n")
                             cmd = compose_exec(
                                 SVC_DELAN,
-                                f"python3 {SCRIPT_TRAIN_DELAN_JAX} "
-                                f"--npz {npz_in} "
-                                f"-t {DELAN_MODEL_TYPE} "
-                                f"-s {delan_seed} "
-                                f"-r 0 "
-                                f"--hp_preset {DELAN_HP_PRESET} "
-                                f"--epochs {DELAN_EPOCHS} "
-                                f"{hp_flags}"
-                                f"--save_path {ckpt}"
+                                f"python3 {SCRIPT_EXPORT_DELAN_RES} "
+                                f"--npz_in {npz_in} "
+                                f"--ckpt {best['ckpt']} "
+                                f"--out {res_out}"
                             )
                             run_cmd(cmd, run_log)
 
-                            metrics_json = f"{MODELS_DELAN_DIR_HOST}/{delan_id}/metrics.json"
-                            val_rmse, test_rmse = read_delan_rmse_pair(metrics_json)
-                            delan_candidates.append({
-                                "delan_seed": delan_seed,
-                                "delan_tag": delan_tag,
-                                "delan_id": delan_id,
-                                "ckpt": ckpt,
-                                "val_rmse": val_rmse,
-                                "test_rmse": test_rmse,
-                                "metrics_json": metrics_json,
-                            })
+                            # ---------- 5-7) LSTM windows -> train -> eval ----------
+                            for H in H_LIST:
+                                for feat in FEATURE_MODES:
+                                    run_log.write("\n" + banner([
+                                        f"BLOCK: H={H} feat={feat}"
+                                    ], char="#") + "\n")
 
-                        # ---------- 3) Select best DeLaN ----------
-                        delan_candidates.sort(key=lambda d: d["val_rmse"])
-                        best = delan_candidates[0]
-                        run_log.write("\n" + banner([
-                            "3) SELECT BEST DELAN (by val RMSE)",
-                            f"best_seed={best['delan_seed']} val_rmse={best['val_rmse']} test_rmse={best['test_rmse']}",
-                            f"metrics_json={best['metrics_json']}",
-                        ], char="#") + "\n")
+                                    windows_npz_name = (
+                                        f"{base_id}__K{K}_tf{safe_tag(tf)}_vf{safe_tag(VAL_FRACTION)}__lstm_windows_H{H}"
+                                        f"__feat_{feat}__{best['delan_tag']}.npz"
+                                    )
+                                    win_out = f"{PROCESSED_DIR}/{windows_npz_name}"
 
-                        # ---------- 4) Export residuals (best only) ----------
-                        residual_name = f"{base_id}__K{K}_tf{safe_tag(tf)}_vf{safe_tag(VAL_FRACTION)}__residual__{best['delan_tag']}.npz"
-                        res_out = f"{PROCESSED_DIR}/{residual_name}"
+                                    lstm_dir_name = (
+                                        f"{base_id}__K{K}_tf{safe_tag(tf)}_vf{safe_tag(VAL_FRACTION)}__{best['delan_tag']}"
+                                        f"__feat_{feat}__lstm_s{seed}_H{H}"
+                                        f"_ep{LSTM_EPOCHS}_b{LSTM_BATCH}_u{LSTM_UNITS}_do{safe_tag(LSTM_DROPOUT)}"
+                                    )
+                                    lstm_out = f"{MODELS_LSTM_DIR}/{lstm_dir_name}"
+                                    lstm_model_name = "residual_lstm.keras"
+                                    lstm_model_path = f"{lstm_out}/{lstm_model_name}"
+                                    lstm_scalers_path = f"{lstm_out}/scalers_H{H}.npz"
 
-                        run_log.write("\n" + banner(["4) EXPORT RESIDUALS (best only)"], char="#") + "\n")
-                        cmd = compose_exec(
-                            SVC_DELAN,
-                            f"python3 {SCRIPT_EXPORT_DELAN_RES} "
-                            f"--npz_in {npz_in} "
-                            f"--ckpt {best['ckpt']} "
-                            f"--out {res_out}"
-                        )
-                        run_cmd(cmd, run_log)
+                                    eval_out = f"{EVAL_DIR}/{lstm_dir_name}"
 
-                        # ---------- 5-7) LSTM windows -> train -> eval ----------
-                        for H in H_LIST:
-                            for feat in FEATURE_MODES:
-                                run_log.write("\n" + banner([
-                                    f"BLOCK: H={H} feat={feat}"
-                                ], char="#") + "\n")
+                                    # 5) Build windows
+                                    run_log.write("\n" + banner(["5) BUILD LSTM WINDOWS"], char="#") + "\n")
+                                    cmd = compose_exec(
+                                        SVC_PREPROCESS,
+                                        f"python3 {SCRIPT_BUILD_LSTM_WINDOWS} "
+                                        f"--in_npz {res_out} "
+                                        f"--out_npz {win_out} "
+                                        f"--H {H} "
+                                        f"--features {feat}"
+                                    )
+                                    run_cmd(cmd, run_log)
 
-                                windows_npz_name = (
-                                    f"{base_id}__K{K}_tf{safe_tag(tf)}_vf{safe_tag(VAL_FRACTION)}__lstm_windows_H{H}"
-                                    f"__feat_{feat}__{best['delan_tag']}.npz"
-                                )
-                                win_out = f"{PROCESSED_DIR}/{windows_npz_name}"
+                                    # 6) Train LSTM
+                                    run_log.write("\n" + banner(["6) TRAIN LSTM"], char="#") + "\n")
+                                    inner = lstm_train_cmd_patched(
+                                        npz=win_out,
+                                        out_dir=lstm_out,
+                                        model_name=lstm_model_name,
+                                        epochs=LSTM_EPOCHS,
+                                        batch=LSTM_BATCH,
+                                        val_split=LSTM_VAL_SPLIT,
+                                        seed=seed,
+                                        units=LSTM_UNITS,
+                                        dropout=LSTM_DROPOUT,
+                                        eps=LSTM_EPS,
+                                        no_plots=LSTM_NO_PLOTS,
+                                    )
+                                    cmd = compose_exec(SVC_LSTM, inner)
+                                    run_cmd(cmd, run_log)
 
-                                lstm_dir_name = (
-                                    f"{base_id}__K{K}_tf{safe_tag(tf)}_vf{safe_tag(VAL_FRACTION)}__{best['delan_tag']}"
-                                    f"__feat_{feat}__lstm_s{seed}_H{H}"
-                                    f"_ep{LSTM_EPOCHS}_b{LSTM_BATCH}_u{LSTM_UNITS}_do{safe_tag(LSTM_DROPOUT)}"
-                                )
-                                lstm_out = f"{MODELS_LSTM_DIR}/{lstm_dir_name}"
-                                lstm_model_name = "residual_lstm.keras"
-                                lstm_model_path = f"{lstm_out}/{lstm_model_name}"
-                                lstm_scalers_path = f"{lstm_out}/scalers_H{H}.npz"
+                                    # LSTM sweep summary (host-written): 1 row per (K/tf/seed/H/feat)
+                                    lstm_metrics_path = (
+                                        f"{MODELS_LSTM_DIR_HOST}/{lstm_dir_name}/metrics_train_test_H{H}.json"
+                                    )
+                                    lm = read_lstm_metrics(lstm_metrics_path)
+                                    lstm_fields = [
+                                        "timestamp",
+                                        "dataset",
+                                        "run_tag",
+                                        "lowpass_qdd",
+                                        "lowpass_tag",
+                                        "K",
+                                        "test_fraction",
+                                        "val_fraction",
+                                        "seed",
+                                        "H",
+                                        "features",
+                                        "lstm_out",
+                                        "metrics_json",
+                                        "metrics_exists",
+                                        "epochs_ran",
+                                        "best_epoch",
+                                        "best_val_loss",
+                                        "final_train_loss",
+                                        "final_val_loss",
+                                        "rmse_total",
+                                        "mse_total",
+                                        "best_model_path",
+                                        "delan_seed",
+                                        "delan_tag",
+                                        "delan_rmse_val",
+                                        "delan_rmse_test",
+                                    ]
+                                    lstm_row = {
+                                        "timestamp": ts,
+                                        "dataset": DATASET_NAME,
+                                        "run_tag": RUN_TAG,
+                                        "lowpass_qdd": lowpass_qdd,
+                                        "lowpass_tag": lowpass_tag,
+                                        "K": K,
+                                        "test_fraction": tf,
+                                        "val_fraction": VAL_FRACTION,
+                                        "seed": seed,
+                                        "H": H,
+                                        "features": feat,
+                                        "lstm_out": lstm_out,
+                                        "metrics_json": lstm_metrics_path,
+                                        "metrics_exists": bool(lm.get("exists", False)),
+                                        "epochs_ran": lm.get("epochs_ran"),
+                                        "best_epoch": lm.get("best_epoch"),
+                                        "best_val_loss": lm.get("best_val_loss"),
+                                        "final_train_loss": lm.get("final_train_loss"),
+                                        "final_val_loss": lm.get("final_val_loss"),
+                                        "rmse_total": lm.get("rmse_total"),
+                                        "mse_total": lm.get("mse_total"),
+                                        "best_model_path": lm.get("best_model_path"),
+                                        "delan_seed": best["delan_seed"],
+                                        "delan_tag": best["delan_tag"],
+                                        "delan_rmse_val": best["val_rmse"],
+                                        "delan_rmse_test": best["test_rmse"],
+                                    }
+                                    append_csv_row(lstm_summary_csv, lstm_fields, lstm_row)
+                                    append_jsonl(lstm_summary_jsonl, lstm_row)
 
-                                eval_out = f"{EVAL_DIR}/{lstm_dir_name}"
+                                    # 7) Combined evaluation + metrics append
+                                    run_log.write("\n" + banner(["7) COMBINED EVALUATION"], char="#") + "\n")
+                                    cmd = compose_exec(
+                                        SVC_EVAL,
+                                        f"python3 {SCRIPT_EVAL} "
+                                        f"--residual_npz {res_out} "
+                                        f"--model {lstm_model_path} "
+                                        f"--scalers {lstm_scalers_path} "
+                                        f"--out_dir {eval_out} "
+                                        f"--H {H} "
+                                        f"--split test "
+                                        f"--features {feat} "
+                                        f"--save_pred_npz "
+                                        f"--metrics_csv {metrics_csv} "
+                                        f"--metrics_json {metrics_jsonl} "
+                                        f"--K {K} "
+                                        f"--test_fraction {tf} "
+                                        f"--seed {seed} "
+                                        f"--delan_seed {best['delan_seed']} "
+                                        f"--delan_epochs {DELAN_EPOCHS} "
+                                        f"--hp_preset {DELAN_HP_PRESET} "
+                                        f"--delan_rmse_val {best['val_rmse']} "
+                                        f"--delan_rmse_test {best['test_rmse']}"
+                                    )
+                                    run_cmd(cmd, run_log)
 
-                                # 5) Build windows
-                                run_log.write("\n" + banner(["5) BUILD LSTM WINDOWS"], char="#") + "\n")
-                                cmd = compose_exec(
-                                    SVC_PREPROCESS,
-                                    f"python3 {SCRIPT_BUILD_LSTM_WINDOWS} "
-                                    f"--in_npz {res_out} "
-                                    f"--out_npz {win_out} "
-                                    f"--H {H} "
-                                    f"--features {feat}"
-                                )
-                                run_cmd(cmd, run_log)
+                        master_log.write(f"\n[OK] lowpass_qdd={lowpass_qdd} K={K} tf={tf} seed={seed}  log={run_log_path}\n")
+                        master_log.flush()
 
-                                # 6) Train LSTM
-                                run_log.write("\n" + banner(["6) TRAIN LSTM"], char="#") + "\n")
-                                inner = lstm_train_cmd_patched(
-                                    npz=win_out,
-                                    out_dir=lstm_out,
-                                    model_name=lstm_model_name,
-                                    epochs=LSTM_EPOCHS,
-                                    batch=LSTM_BATCH,
-                                    val_split=LSTM_VAL_SPLIT,
-                                    seed=seed,
-                                    units=LSTM_UNITS,
-                                    dropout=LSTM_DROPOUT,
-                                    eps=LSTM_EPS,
-                                    no_plots=LSTM_NO_PLOTS,
-                                )
-                                cmd = compose_exec(SVC_LSTM, inner)
-                                run_cmd(cmd, run_log)
+            master_log.write("\n" + banner(["Sweep1 finished OK"], char="#") + "\n")
 
-                                # 7) Combined evaluation + metrics append
-                                run_log.write("\n" + banner(["7) COMBINED EVALUATION"], char="#") + "\n")
-                                cmd = compose_exec(
-                                    SVC_EVAL,
-                                    f"python3 {SCRIPT_EVAL} "
-                                    f"--residual_npz {res_out} "
-                                    f"--model {lstm_model_path} "
-                                    f"--scalers {lstm_scalers_path} "
-                                    f"--out_dir {eval_out} "
-                                    f"--H {H} "
-                                    f"--split test "
-                                    f"--features {feat} "
-                                    f"--save_pred_npz "
-                                    f"--metrics_csv {METRICS_CSV} "
-                                    f"--metrics_json {METRICS_JSON} "
-                                    f"--K {K} "
-                                    f"--test_fraction {tf} "
-                                    f"--seed {seed} "
-                                    f"--delan_seed {best['delan_seed']} "
-                                    f"--delan_epochs {DELAN_EPOCHS} "
-                                    f"--hp_preset {DELAN_HP_PRESET} "
-                                    f"--delan_rmse_val {best['val_rmse']} "
-                                    f"--delan_rmse_test {best['test_rmse']}"
-                                )
-                                run_cmd(cmd, run_log)
-
-                    master_log.write(f"\n[OK] K={K} tf={tf} seed={seed}  log={run_log_path}\n")
-                    master_log.flush()
-
-        master_log.write("\n" + banner(["Sweep1 finished OK"], char="#") + "\n")
-
-    print(f"\nMASTER LOG: {master_log_path}")
+    for p in master_logs:
+        print(f"\nMASTER LOG: {p}")
     print("Done.")
 
 

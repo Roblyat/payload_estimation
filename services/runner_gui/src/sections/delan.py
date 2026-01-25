@@ -84,6 +84,47 @@ def render_delan(st, cfg, paths, run, pad_button, log_view):
             key="d_eval_every",
         )
 
+        st.divider()
+
+        d_early_stop = st.checkbox(
+            "Early stopping (val_mse)",
+            value=False,
+            help="Stop training when val_mse hasn't improved for N evaluation events. Uses the same evaluation cadence as 'Eval every'.",
+            key="d_early_stop",
+        )
+
+        d_early_stop_patience = st.number_input(
+            "Early stop patience (eval events)",
+            min_value=0,
+            max_value=100000,
+            value=10,
+            step=1,
+            help="How many evaluation events without improvement before stopping. With eval_every=1, this equals epochs.",
+            key="d_early_stop_patience",
+        )
+        d_early_stop_min_delta = st.number_input(
+            "Early stop min_delta",
+            min_value=0.0,
+            max_value=1e9,
+            value=0.0,
+            step=1e-6,
+            format="%.6f",
+            help="Minimum improvement in val_mse to reset patience. 0.0 counts any improvement.",
+            key="d_early_stop_min_delta",
+        )
+        d_early_stop_warmup_evals = st.number_input(
+            "Early stop warmup evals",
+            min_value=0,
+            max_value=100000,
+            value=0,
+            step=1,
+            help="Ignore non-improving evals for the first N evaluation events (useful to skip early noise).",
+            key="d_early_stop_warmup_evals",
+        )
+
+        if d_early_stop and int(d_eval_every) == 0:
+            st.warning("Early stopping is enabled, but Eval every is 0 (no evals) so early stopping won't trigger.")
+
     with d_row1_c3:
         
         # ----------------------------
@@ -350,6 +391,10 @@ def render_delan(st, cfg, paths, run, pad_button, log_view):
                 f"--hp_preset {delan_preset} "
                 f"--eval_every {int(d_eval_every)} "
                 f"--log_every {int(d_log_every)} "
+                f"{(' --early_stop' if d_early_stop else '')} "
+                f"--early_stop_patience {int(d_early_stop_patience)} "
+                f"--early_stop_min_delta {float(d_early_stop_min_delta)} "
+                f"--early_stop_warmup_evals {int(d_early_stop_warmup_evals)} "
                 f"{hp_flags} "
                 f"--save_path {ckpt}"
                 f"\""

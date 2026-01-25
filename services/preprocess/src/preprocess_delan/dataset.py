@@ -109,18 +109,26 @@ def _trajectory_dts(t: np.ndarray) -> np.ndarray:
     return dts
 
 
+def _trajectory_dt_median(t: np.ndarray) -> Optional[float]:
+    dts = _trajectory_dts(t)
+    if dts.size == 0:
+        return None
+    dt = float(np.median(dts))
+    if not np.isfinite(dt) or dt <= 0:
+        return None
+    return dt
+
+
 def _dataset_dt_mean(train: list[Trajectory], val: list[Trajectory], test: list[Trajectory]) -> Optional[float]:
-    dt_chunks: list[np.ndarray] = []
+    traj_dts: list[float] = []
     for tr in (train + val + test):
-        dts = _trajectory_dts(tr.t)
-        if dts.size:
-            dt_chunks.append(dts)
-    if not dt_chunks:
+        dt = _trajectory_dt_median(tr.t)
+        if dt is None:
+            return None
+        traj_dts.append(dt)
+    if not traj_dts:
         return None
-    all_dts = np.concatenate(dt_chunks)
-    if all_dts.size == 0:
-        return None
-    dt_mean = float(np.mean(all_dts))
+    dt_mean = float(np.mean(traj_dts))
     if not np.isfinite(dt_mean) or dt_mean <= 0:
         return None
     return dt_mean
@@ -140,6 +148,10 @@ def write_dataset_json(
 
     Adds per-trajectory durations if they can be computed for all trajectories:
       "durations": {"train": {"traj_0000": 0.83, ...}, "val": {...}, "test": {...}}
+
+    Adds per-trajectory sampling time (median dt within each trajectory), if it can be
+    computed for all trajectories:
+      "dts": {"train": {"traj_0000": 0.002, ...}, "val": {...}, "test": {...}}
     """
     json_path = dataset_json_path(out_npz_path)
 
@@ -150,12 +162,9 @@ def write_dataset_json(
         "test": int(len(test)),
     }
 
-    dt_mean = _dataset_dt_mean(train, val, test)
-    if dt_mean is not None:
-        meta["dt"] = dt_mean
-
     splits: dict[str, list[Trajectory]] = {"train": train, "val": val, "test": test}
     durations: dict[str, dict[str, float]] = {}
+    dts: dict[str, dict[str, float]] = {}
 
     include_durations = (len(train) + len(val) + len(test)) > 0
     if include_durations:
@@ -173,6 +182,26 @@ def write_dataset_json(
 
     if include_durations:
         meta["durations"] = durations
+
+    include_dts = (len(train) + len(val) + len(test)) > 0
+    if include_dts:
+        for split_name, trajs in splits.items():
+            split_dts: dict[str, float] = {}
+            for tr in trajs:
+                dt = _trajectory_dt_median(tr.t)
+                if dt is None:
+                    include_dts = False
+                    break
+                split_dts[str(tr.label)] = dt
+            if not include_dts:
+                break
+            dts[split_name] = split_dts
+
+    if include_dts:
+        meta["dts"] = dts
+        dt_mean = _dataset_dt_mean(train, val, test)
+        if dt_mean is not None:
+            meta["dt"] = dt_mean
 
     os.makedirs(os.path.dirname(json_path) or ".", exist_ok=True)
     with open(json_path, "w", encoding="utf-8") as f:

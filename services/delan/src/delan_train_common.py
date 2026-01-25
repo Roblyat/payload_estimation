@@ -69,6 +69,98 @@ class DelanTrainHistory:
         self.test_mse.append(float(mse))
 
 
+@dataclass(frozen=True)
+class EarlyStopConfig:
+    enabled: bool = False
+    patience: int = 10
+    min_delta: float = 0.0
+    warmup_evals: int = 0
+    mode: str = "min"
+
+
+class EarlyStopper:
+    """
+    Simple framework-agnostic early stopping helper.
+
+    Notes:
+      - patience is counted in "evaluation events" (i.e., how often you call update),
+        not in epochs.
+      - mode='min' means lower metric is better.
+    """
+
+    def __init__(self, cfg: EarlyStopConfig) -> None:
+        if cfg.mode not in ("min",):
+            raise ValueError(f"Unsupported early stop mode: {cfg.mode}")
+        if cfg.patience < 0:
+            raise ValueError("patience must be >= 0")
+        if cfg.warmup_evals < 0:
+            raise ValueError("warmup_evals must be >= 0")
+
+        self.cfg = cfg
+        self.num_evals: int = 0
+        self.bad_evals: int = 0
+        self.best_metric: Optional[float] = None
+        self.best_epoch: Optional[int] = None
+        self.stopped: bool = False
+        self.stop_epoch: Optional[int] = None
+
+    def update(self, *, metric: float, epoch: int) -> Tuple[bool, bool]:
+        """
+        Returns: (should_stop, improved)
+        """
+        self.num_evals += 1
+
+        m = float(metric)
+        e = int(epoch)
+
+        improved = False
+        if self.best_metric is None:
+            improved = True
+        else:
+            improved = m < (float(self.best_metric) - float(self.cfg.min_delta))
+
+        if improved:
+            self.best_metric = m
+            self.best_epoch = e
+            self.bad_evals = 0
+            return False, True
+
+        if self.num_evals <= int(self.cfg.warmup_evals):
+            return False, False
+
+        self.bad_evals += 1
+        if self.cfg.enabled and self.bad_evals >= int(self.cfg.patience):
+            self.stopped = True
+            self.stop_epoch = e
+            return True, False
+
+        return False, False
+
+    def to_dict(
+        self,
+        *,
+        monitor: str,
+        restored_best: bool,
+        monitor_split: str,
+    ) -> Dict[str, Any]:
+        return {
+            "enabled": bool(self.cfg.enabled),
+            "monitor": str(monitor),
+            "monitor_split": str(monitor_split),
+            "mode": str(self.cfg.mode),
+            "patience": int(self.cfg.patience),
+            "min_delta": float(self.cfg.min_delta),
+            "warmup_evals": int(self.cfg.warmup_evals),
+            "num_evals": int(self.num_evals),
+            "bad_evals": int(self.bad_evals),
+            "best_metric": None if self.best_metric is None else float(self.best_metric),
+            "best_epoch": self.best_epoch,
+            "stopped": bool(self.stopped),
+            "stop_epoch": self.stop_epoch,
+            "restored_best": bool(restored_best),
+        }
+
+
 def compute_tau_metrics(
     tau_true: np.ndarray,
     tau_pred: np.ndarray,
@@ -158,10 +250,12 @@ class DelanTrainRun:
     def record_test_point(self, *, epoch: int, mse: float) -> None:
         self.history.record_test(epoch, mse)
 
-    def finalize_train_metrics(self, *, epochs_ran: int) -> None:
+    def finalize_train_metrics(self, *, epochs_ran: int, early_stop: Optional[Dict[str, Any]] = None) -> None:
         self.metrics["train"]["epochs_ran"] = int(epochs_ran)
         self.metrics["train"]["history_points"] = int(len(self.history.epoch))
         self.metrics["train"]["elbow_points"] = int(len(self.history.test_epoch))
+        if early_stop is not None:
+            self.metrics["train"]["early_stop"] = dict(early_stop)
 
     def save_training_artifacts(self, *, save_model: bool) -> None:
         if not save_model:

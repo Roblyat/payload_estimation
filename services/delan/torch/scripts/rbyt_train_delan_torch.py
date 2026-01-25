@@ -60,7 +60,7 @@ DELAN_TORCH_SRC = "/workspace/delan_torch/src"
 for p in [DELAN_COMMON_SRC, DELAN_TORCH_SRC, DELAN_REPO_DIR]:
     _add_path(p)
 
-from delan_train_common import DelanRunPaths, DelanTrainRun
+from delan_train_common import DelanRunPaths, DelanTrainRun, EarlyStopConfig, EarlyStopper
 from load_npz_dataset import load_npz_trajectory_dataset
 
 from deep_lagrangian_networks.DeLaN_model import DeepLagrangianNetwork
@@ -112,6 +112,10 @@ class TorchDelanTrainer:
             "eval_n": int(args.eval_n),
             "loss_norm": args.loss_norm,
             "log_every": int(args.log_every),
+            "early_stop": bool(args.early_stop),
+            "early_stop_patience": int(args.early_stop_patience),
+            "early_stop_min_delta": float(args.early_stop_min_delta),
+            "early_stop_warmup_evals": int(args.early_stop_warmup_evals),
         }
         self.train_run = DelanTrainRun(
             run_paths=self.run_paths,
@@ -205,8 +209,9 @@ class TorchDelanTrainer:
         print(f"  hp_preset = {args.hp_preset}")
         print("################################################")
 
-        train_data, test_data, divider, dt = load_npz_trajectory_dataset(args.npz)
+        train_data, val_data, test_data, divider, dt = load_npz_trajectory_dataset(args.npz)
         train_labels, train_qp, train_qv, train_qa, train_tau = train_data
+        val_labels, val_qp, val_qv, val_qa, val_tau = val_data
         test_labels, test_qp, test_qv, test_qa, test_tau = test_data
 
         n_dof = train_qp.shape[-1]
@@ -218,6 +223,7 @@ class TorchDelanTrainer:
         print(f"   dt ≈ {dt}")
         print(f"  dof = {n_dof}")
         print(f"  Train trajectories = {len(train_labels)}")
+        print(f"  Val trajectories   = {len(val_labels)}")
         print(f"  Test trajectories  = {len(test_labels)}")
         print(f"  Train samples = {train_qp.shape[0]}")
         print(f"  Test samples  = {test_qp.shape[0]}")
@@ -258,6 +264,18 @@ class TorchDelanTrainer:
         print(f"Training DeLaN | run={self.run_name} | type={self.model_choice} | dof={n_dof}")
         print(f"Loss normalization = {args.loss_norm}")
         print("################################################")
+
+        early_cfg = EarlyStopConfig(
+            enabled=bool(args.early_stop),
+            patience=int(args.early_stop_patience),
+            min_delta=float(args.early_stop_min_delta),
+            warmup_evals=int(args.early_stop_warmup_evals),
+            mode="min",
+        )
+        early_stopper = EarlyStopper(early_cfg)
+        best_state_dict = None
+        restored_best = False
+        monitor_split = "val"
 
         t0_start = time.perf_counter()
         epoch_i = 0
@@ -322,10 +340,12 @@ class TorchDelanTrainer:
                 )
 
             if args.eval_every > 0 and (epoch_i == 1 or (epoch_i % args.eval_every) == 0):
-                q_eval = test_qp
-                qd_eval = test_qv
-                qdd_eval = test_qa
-                tau_eval = test_tau
+                use_val = val_qp.shape[0] > 0
+                q_eval = val_qp if use_val else test_qp
+                qd_eval = val_qv if use_val else test_qv
+                qdd_eval = val_qa if use_val else test_qa
+                tau_eval = val_tau if use_val else test_tau
+                monitor_split = "val" if use_val else "test"
 
                 if args.eval_n and args.eval_n > 0:
                     n = min(int(args.eval_n), q_eval.shape[0])
@@ -340,24 +360,47 @@ class TorchDelanTrainer:
                     qddj = torch.from_numpy(qdd_eval).float().to(delan_model.device)
                     tauj = torch.from_numpy(tau_eval).float().to(delan_model.device)
                     pred_tau_eval = delan_model.inv_dyn(qj, qdj, qddj)
-                    test_mse = float(torch.sum((pred_tau_eval - tauj) ** 2) / qj.shape[0])
+                    eval_mse = float(torch.sum((pred_tau_eval - tauj) ** 2) / qj.shape[0])
 
-                self.train_run.record_test_point(epoch=epoch_i, mse=test_mse)
-                print(f"  [eval] test_mse={test_mse:.3e}  (n={qj.shape[0]})")
+                self.train_run.record_test_point(epoch=epoch_i, mse=eval_mse)
+                split_name = "val" if use_val else "test"
+                print(f"  [eval] {split_name}_mse={eval_mse:.3e}  (n={qj.shape[0]})")
+
+                should_stop, improved = early_stopper.update(metric=eval_mse, epoch=epoch_i)
+                if improved:
+                    best_state_dict = {k: v.detach().cpu().clone() for k, v in delan_model.state_dict().items()}
+                if should_stop:
+                    print(
+                        f"  [early_stop] stop at epoch={epoch_i} "
+                        f"(best_epoch={early_stopper.best_epoch}, best_{split_name}_mse={early_stopper.best_metric:.3e})"
+                    )
+                    break
+
+        if best_state_dict is not None and early_cfg.enabled:
+            delan_model.load_state_dict(best_state_dict)
+            restored_best = True
+
+        early_stop_metrics = early_stopper.to_dict(
+            monitor="val_mse",
+            restored_best=restored_best,
+            monitor_split=monitor_split,
+        )
 
         if self.save_model:
+            epoch_to_save = early_stopper.best_epoch if restored_best and early_stopper.best_epoch is not None else epoch_i
             torch.save(
                 {
-                    "epoch": epoch_i,
+                    "epoch": int(epoch_to_save),
                     "hyper": self.hyper,
                     "state_dict": delan_model.state_dict(),
                     "seed": self.seed,
+                    "early_stop": early_stop_metrics,
                 },
                 self.run_paths.ckpt_path,
             )
             print(f"Saved DeLaN checkpoint: {self.run_paths.ckpt_path}")
 
-        self.train_run.finalize_train_metrics(epochs_ran=epoch_i)
+        self.train_run.finalize_train_metrics(epochs_ran=epoch_i, early_stop=early_stop_metrics)
         self.train_run.save_training_artifacts(save_model=self.save_model)
 
         train_csv = self.train_run.metrics["artifacts"].get("train_history_csv")
@@ -487,6 +530,29 @@ def _build_arg_parser() -> argparse.ArgumentParser:
         type=int,
         default=0,
         help="If >0, evaluate only on first eval_n test samples for speed. 0 = full test set.",
+    )
+    parser.add_argument(
+        "--early_stop",
+        action="store_true",
+        help="Enable early stopping monitored on val_mse (evaluated every --eval_every epochs).",
+    )
+    parser.add_argument(
+        "--early_stop_patience",
+        type=int,
+        default=10,
+        help="Early stopping patience in evaluation events (not epochs).",
+    )
+    parser.add_argument(
+        "--early_stop_min_delta",
+        type=float,
+        default=0.0,
+        help="Minimum improvement required to reset patience.",
+    )
+    parser.add_argument(
+        "--early_stop_warmup_evals",
+        type=int,
+        default=0,
+        help="Ignore non-improving evals for the first N evaluation events.",
     )
     parser.add_argument(
         "--loss_norm",

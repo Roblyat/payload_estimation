@@ -281,6 +281,24 @@ class DelanTrainRun:
             self.metrics["train"]["elbow_mse_scaled_by_n_dof"] = True
             self.metrics["train"]["elbow_mse_scale"] = float(n_dof)
 
+        if len(self.history.test_epoch) > 0 and len(self.history.epoch) > 0:
+            test_epoch = np.asarray(self.history.test_epoch, dtype=float)
+            train_epoch = np.asarray(self.history.epoch, dtype=float)
+            train_loss = np.asarray(self.history.loss, dtype=float)
+            val_mse = np.asarray(elbow_mse, dtype=float)
+            interp_loss = np.interp(test_epoch, train_epoch, train_loss)
+            eps = 1e-12
+            rel_delta = np.abs(interp_loss - val_mse) / (np.abs(val_mse) + eps)
+            threshold = 0.02
+            exceeds = rel_delta > threshold
+            self.metrics["train"]["loss_vs_val_mse_delta"] = {
+                "rel_delta_threshold": float(threshold),
+                "rel_delta_exceeds_count": int(np.sum(exceeds)),
+                "rel_delta_max": float(np.max(rel_delta)),
+                "rel_delta_mean": float(np.mean(rel_delta)),
+                "rel_delta_exceeds_epochs": [int(e) for e in test_epoch[exceeds].tolist()],
+            }
+
         elbow_csv_path = os.path.join(self.run_paths.model_dir, f"{self.run_name}__elbow_history.csv")
         with open(elbow_csv_path, "w") as f:
             f.write("epoch,eval_mse\n")

@@ -52,14 +52,12 @@ def run_lstm_block(
     log_file.write("\n" + banner([f"BLOCK: H={H} feat={feat}"], char="#") + "\n")
 
     windows_npz_name = (
-        f"{base_id}__K{K}_tf{safe_tag(tf)}_vf{safe_tag(VAL_FRACTION)}__lstm_windows_H{H}"
-        f"__feat_{feat}__{best['delan_tag']}.npz"
+        f"{base_id}__K{K}__lstm_windows_H{H}__feat_{feat}__{best['delan_tag']}.npz"
     )
     win_out = f"{PROCESSED_DIR}/{windows_npz_name}"
 
     lstm_dir_name = (
-        f"{base_id}__K{K}_tf{safe_tag(tf)}_vf{safe_tag(VAL_FRACTION)}__{best['delan_tag']}"
-        f"__feat_{feat}__lstm_s{seed}_H{H}"
+        f"{base_id}__K{K}__{best['delan_tag']}__feat_{feat}__lstm_s{seed}_H{H}"
         f"_ep{LSTM_EPOCHS}_b{LSTM_BATCH}_u{LSTM_UNITS}_do{safe_tag(LSTM_DROPOUT)}"
     )
     lstm_out = f"{MODELS_LSTM_DIR}/{lstm_dir_name}"

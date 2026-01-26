@@ -44,10 +44,6 @@ def _resolve_npz_path(npz_path: str) -> str:
     return p
 
 
-def _safe_tag(x: Any) -> str:
-    return str(x).replace(".", "p")
-
-
 def _parse_delan_tag(run_name: str) -> str:
     if "__" in run_name:
         return run_name.split("__")[-1]
@@ -96,18 +92,13 @@ def _load_residual_npz(row: dict, metrics: dict) -> Optional[Dict[str, Any]]:
     dataset = row.get("dataset")
     run_tag = row.get("run_tag")
     K = int(row.get("K"))
-    tf = row.get("test_fraction")
-    vf = row.get("val_fraction")
-    if dataset is None or run_tag is None or tf is None or vf is None:
+    if dataset is None or run_tag is None:
         return None
 
     run_name = metrics.get("run_name", "")
     delan_tag = _parse_delan_tag(run_name)
     base_id = f"{dataset}__{run_tag}"
-    residual_name = (
-        f"{base_id}__K{K}_tf{_safe_tag(tf)}_vf{_safe_tag(vf)}"
-        f"__residual__{delan_tag}.npz"
-    )
+    residual_name = f"{base_id}__K{K}__residual__{delan_tag}.npz"
     residual_path = _resolve_npz_path(f"/workspace/shared/data/processed/{residual_name}")
     if not os.path.exists(residual_path):
         return None

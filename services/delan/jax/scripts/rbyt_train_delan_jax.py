@@ -576,7 +576,8 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--early_stop",
-        action="store_true",
+        type = bool,
+        default=True, 
         help="Enable early stopping monitored on val_mse (evaluated every --eval_every epochs).",
     )
     parser.add_argument(

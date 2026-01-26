@@ -88,7 +88,7 @@ def render_delan(st, cfg, paths, run, pad_button, log_view):
 
         d_early_stop = st.checkbox(
             "Early stopping (val_mse)",
-            value=False,
+            value=True,
             help="Stop training when val_mse hasn't improved for N evaluation events. Uses the same evaluation cadence as 'Eval every'.",
             key="d_early_stop",
         )
@@ -391,7 +391,7 @@ def render_delan(st, cfg, paths, run, pad_button, log_view):
                 f"--hp_preset {delan_preset} "
                 f"--eval_every {int(d_eval_every)} "
                 f"--log_every {int(d_log_every)} "
-                f"{(' --early_stop' if d_early_stop else '')} "
+                f"--early_stop {d_early_stop} "
                 f"--early_stop_patience {int(d_early_stop_patience)} "
                 f"--early_stop_min_delta {float(d_early_stop_min_delta)} "
                 f"--early_stop_warmup_evals {int(d_early_stop_warmup_evals)} "

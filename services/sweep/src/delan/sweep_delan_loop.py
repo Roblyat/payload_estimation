@@ -51,7 +51,7 @@ def comp_delan(*, npz_in: str, K: int, seed: int, log_file):
             f"--epochs {DELAN_EPOCHS} "
             f"--eval_every {DELAN_EVAL_EVERY} "
             f"--log_every {DELAN_LOG_EVERY} "
-            f"{'--early_stop ' if DELAN_EARLY_STOP else ''}"
+            f"--early_stop {DELAN_EARLY_STOP} "
             f"--early_stop_patience {DELAN_EARLY_STOP_PATIENCE} "
             f"--early_stop_min_delta {DELAN_EARLY_STOP_MIN_DELTA} "
             f"--early_stop_warmup_evals {DELAN_EARLY_STOP_WARMUP_EVALS} "

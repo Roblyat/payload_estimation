@@ -11,9 +11,6 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
 
     st.header("1) Preprocess")
 
-    def _safe_tag(x: float) -> str:
-        return str(x).replace(".", "p")
-
     p_col1, p_col2, p_col3, p_col4 = st.columns([2.0, 0.8, 1.2, 1.2])
 
     raw_data_path = "/workspace/shared/data/raw"
@@ -118,7 +115,7 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
     with p_col4:
         pad_button()
         if st.button("Preprocess DeLaN", use_container_width=True):
-            out_npz_name = f"delan_{dataset_name}_tf{_safe_tag(test_fraction)}_vf{_safe_tag(val_fraction)}_dataset.npz"
+            out_npz_name = f"delan_{dataset_name}_dataset.npz"
             out_npz_path = artifact_file(paths.preprocessed, Path(out_npz_name).stem, "npz")
             run(
                 f"{cfg.COMPOSE} exec -T preprocess bash -lc "
@@ -142,9 +139,7 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
     # File name textboxes (base path shown in label)
     delan_backend = st.session_state.get("delan_backend", "jax")
 
-    default_delan_npz_name = (
-        f"delan_{dataset_name}_tf{_safe_tag(test_fraction)}_vf{_safe_tag(val_fraction)}_dataset.npz"
-    )
+    default_delan_npz_name = f"delan_{dataset_name}_dataset.npz"
     default_windows_npz_name = f"{base_id}__lstm_windows_H{H}__feat_{feature_mode}__delan_{delan_backend}.npz"
 
     delan_npz_name = st.text_input(

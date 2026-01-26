@@ -62,7 +62,29 @@ def _pad_to_epochs(xs: List[int], ys: List[float], emax: int) -> np.ndarray:
     return arr
 
 
-def _median_iqr(curves: List[np.ndarray]) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def _align_curves(curves: List[np.ndarray], align: str) -> List[np.ndarray]:
+    if not curves:
+        return curves
+    lengths = [c.shape[0] for c in curves]
+    if len(set(lengths)) == 1:
+        return curves
+    if align == "min":
+        target = min(lengths)
+        return [c[:target] for c in curves]
+    target = max(lengths)
+    aligned: List[np.ndarray] = []
+    for c in curves:
+        if c.shape[0] == target:
+            aligned.append(c)
+            continue
+        pad = np.full((target,), np.nan, dtype=c.dtype)
+        pad[: c.shape[0]] = c
+        aligned.append(pad)
+    return aligned
+
+
+def _median_iqr(curves: List[np.ndarray], *, align: str = "max") -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    curves = _align_curves(curves, align)
     stack = np.stack(curves, axis=0)
     median = np.nanmedian(stack, axis=0)
     q25 = np.nanpercentile(stack, 25, axis=0)
@@ -100,6 +122,7 @@ def main() -> None:
     ap.add_argument("--summary_jsonl", required=True)
     ap.add_argument("--out_dir", required=True)
     ap.add_argument("--pad_to_epochs", type=int, default=None)
+    ap.add_argument("--align", choices=["max", "min"], default="max")
     ap.add_argument("--feature", type=str, default="")
     args = ap.parse_args()
 
@@ -153,9 +176,9 @@ def main() -> None:
                 val_curves.append(_pad_to_epochs(epochs, val_loss, int(emax)))
 
         if train_curves:
-            per_kh_seed_train[(K, H)][seed] = _median_iqr(train_curves)
+            per_kh_seed_train[(K, H)][seed] = _median_iqr(train_curves, align=args.align)
         if val_curves:
-            per_kh_seed_val[(K, H)][seed] = _median_iqr(val_curves)
+            per_kh_seed_val[(K, H)][seed] = _median_iqr(val_curves, align=args.align)
 
     per_kh_train: Dict[Tuple[int, int], Tuple[np.ndarray, np.ndarray, np.ndarray]] = {}
     per_kh_val: Dict[Tuple[int, int], Tuple[np.ndarray, np.ndarray, np.ndarray]] = {}
@@ -163,12 +186,12 @@ def main() -> None:
     for key, seed_map in per_kh_seed_train.items():
         seed_curves = [seed_map[s][0] for s in sorted(seed_map.keys()) if seed_map[s] is not None]
         if seed_curves:
-            per_kh_train[key] = _median_iqr(seed_curves)
+            per_kh_train[key] = _median_iqr(seed_curves, align=args.align)
 
     for key, seed_map in per_kh_seed_val.items():
         seed_curves = [seed_map[s][0] for s in sorted(seed_map.keys()) if seed_map[s] is not None]
         if seed_curves:
-            per_kh_val[key] = _median_iqr(seed_curves)
+            per_kh_val[key] = _median_iqr(seed_curves, align=args.align)
 
     hs = sorted({h for (_, h) in per_kh_train.keys()} | {h for (_, h) in per_kh_val.keys()})
     if not hs:

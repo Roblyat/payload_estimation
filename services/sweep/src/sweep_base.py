@@ -85,6 +85,9 @@ LSTM_EARLY_STOP_MIN_DELTA = CFG.lstm_early_stop_min_delta
 LSTM_EARLY_STOP_WARMUP_EVALS = CFG.lstm_early_stop_warmup_evals
 
 # Plot/cleanup behavior
+LOGS_DIR_HOST = CFG.logs_root_dir
+if not Path(LOGS_DIR_HOST).is_absolute():
+    LOGS_DIR_HOST = str(REPO_ROOT / LOGS_DIR_HOST)
 CLEANUP_NON_BEST_PLOTS = CFG.cleanup_non_best_plots
 DELAN_ELBOW_AGGREGATE = CFG.delan_elbow_aggregate
 DELAN_ELBOW_OUT_DIR = CFG.delan_elbow_out_dir
@@ -98,6 +101,10 @@ LSTM_AGGREGATE_OUT_DIR = CFG.lstm_aggregate_out_dir
 LSTM_AGGREGATE_BINS = CFG.lstm_aggregate_bins
 LSTM_AGGREGATE_K_VALUES = CFG.lstm_aggregate_k_values
 LSTM_AGGREGATE_FEATURE = CFG.lstm_aggregate_feature
+LSTM_AGGREGATE_PAD_TO_EPOCHS = CFG.lstm_aggregate_pad_to_epochs
+if LSTM_AGGREGATE_PAD_TO_EPOCHS is None:
+    LSTM_AGGREGATE_PAD_TO_EPOCHS = LSTM_EPOCHS
+LSTM_AGGREGATE_ALIGN = CFG.lstm_aggregate_align
 COMBINED_TORQUE_AGGREGATE = CFG.combined_torque_aggregate
 COMBINED_TORQUE_OUT_DIR = CFG.combined_torque_out_dir
 COMBINED_TORQUE_BINS = CFG.combined_torque_bins

@@ -11,20 +11,20 @@ class SweepConfig:
 
     # Dataset settings
     dataset_name: str = "UR3_Load0_cc"
-    run_tag: str = "sweep1"
+    run_tag: str = "sweepFinalTest"
     in_format: str = "csv"
     col_format: str = "wide"
     derive_qdd: bool = True
     lowpass_signals: bool = True
     lowpass_cutoff_hz: float = 10.0
     lowpass_order: int = 4
-    lowpass_qdd_values: List[bool] = field(default_factory=lambda: [False])
+    lowpass_qdd_values: bool = False
 
     # Sweep
-    traj_amounts: List[int] = field(default_factory=lambda: [8, 16, 32, 48, 64, 84, 122])
-    test_fractions: List[float] = field(default_factory=lambda: [0.2])
-    val_fraction: float = 0.1
-    seeds: List[int] = field(default_factory=lambda: [0, 1, 2])
+    traj_amounts: List[int] = field(default_factory=lambda: [48, 64])   #[8, 16, 32, 48, 64, 84, 122])
+    test_fractions = 0.2
+    val_fraction = 0.1
+    seeds: List[int] = field(default_factory=lambda: [0]) #[0, 1, 2])
 
     # Window sizes and feature modes
     h_list: List[int] = field(default_factory=lambda: [100])
@@ -34,11 +34,11 @@ class SweepConfig:
     delan_model_type: str = "structured"
     delan_hp_preset: str = "lutter_like_256"
     delan_hp_flags: str = ""
-    delan_seeds: List[int] = field(default_factory=lambda: [0, 1, 2, 3, 4])
+    delan_seeds: List[int] = field(default_factory=lambda: [0]) #[0, 1, 2, 3, 4])
     delan_epochs: int = 200
     delan_eval_every: int = 1
     delan_log_every: int = 1
-    delan_early_stop: bool = True
+    delan_early_stop = True
     delan_early_stop_patience: int = 10
     delan_early_stop_min_delta: float = 0.0
     delan_early_stop_warmup_evals: int = 0
@@ -54,10 +54,11 @@ class SweepConfig:
     lstm_early_stop: bool = True
     lstm_early_stop_patience: int = 10
     lstm_early_stop_min_delta: float = 0.0
-    lstm_early_stop_warmup_evals: int = 0
+    lstm_early_stop_warmup_evals: int = 5
 
     # Plot/cleanup behavior
-    cleanup_non_best_plots: bool = False
+    logs_root_dir: str = "shared/logs"
+    cleanup_non_best_plots: bool = True
     delan_elbow_aggregate: bool = True
     delan_elbow_out_dir: str = "/workspace/shared/evaluation/delan_elbows"
     delan_torque_aggregate: bool = True
@@ -70,6 +71,8 @@ class SweepConfig:
     lstm_aggregate_bins: int = 200
     lstm_aggregate_k_values: List[int] = field(default_factory=list)
     lstm_aggregate_feature: Optional[str] = None
+    lstm_aggregate_pad_to_epochs: Optional[int] = None
+    lstm_aggregate_align: str = "max"
     combined_torque_aggregate: bool = True
     combined_torque_out_dir: str = "/workspace/shared/evaluation/combined_torque"
     combined_torque_bins: int = 200

@@ -274,6 +274,19 @@ class DelanTrainRun:
             ):
                 f.write(f"{e},{ts},{lo},{inv},{fo},{en}\n")
 
+        elbow_mse = list(self.history.test_mse)
+        n_dof = self.metrics.get("n_dof", None)
+        if n_dof:
+            elbow_mse = [float(x) / float(n_dof) for x in elbow_mse]
+            self.metrics["train"]["elbow_mse_scaled_by_n_dof"] = True
+            self.metrics["train"]["elbow_mse_scale"] = float(n_dof)
+
+        elbow_csv_path = os.path.join(self.run_paths.model_dir, f"{self.run_name}__elbow_history.csv")
+        with open(elbow_csv_path, "w") as f:
+            f.write("epoch,eval_mse\n")
+            for e, mse in zip(self.history.test_epoch, elbow_mse):
+                f.write(f"{e},{mse}\n")
+
         loss_path = self.plotter.save_loss_curve(self.history.epoch, self.history.loss)
         comp_path = self.plotter.save_loss_components(
             self.history.epoch,
@@ -283,12 +296,13 @@ class DelanTrainRun:
         )
         elbow_path = self.plotter.save_elbow(
             self.history.test_epoch,
-            self.history.test_mse,
+            elbow_mse,
             self.history.epoch,
             self.history.loss,
         )
 
         self.metrics["artifacts"]["train_history_csv"] = csv_path
+        self.metrics["artifacts"]["elbow_history_csv"] = elbow_csv_path
         if loss_path is not None:
             self.metrics["artifacts"]["loss_curve_png"] = loss_path
         if comp_path is not None:
@@ -327,6 +341,15 @@ class DelanTrainRun:
         )
         if torque_plot_path is not None:
             self.metrics["artifacts"]["torque_plot_png"] = torque_plot_path
+
+        err = np.asarray(tau_pred) - np.asarray(tau_true)
+        rmse_time = np.sqrt(np.mean(err ** 2, axis=1))
+        rmse_time_npy = os.path.join(
+            self.run_paths.model_dir,
+            f"{self.run_name}__torque_rmse_time.npy",
+        )
+        np.save(rmse_time_npy, rmse_time.astype(np.float32))
+        self.metrics["artifacts"]["torque_rmse_time_npy"] = rmse_time_npy
 
         rmse_time_path = self.plotter.save_torque_rmse_time_curve(
             tau_gt=np.array(tau_true),

@@ -101,7 +101,7 @@ class DelanPlotter:
 
         ax2 = ax1.twinx()
         ax2.plot(hist_test_epoch, hist_test_mse, label="val_mse", color="C1")
-        ax2.set_ylabel("Val torque MSE", color="black")
+        ax2.set_ylabel("Val torque MSE (mean over joints)", color="black")
         ax2.tick_params(axis="y", labelcolor="black", color="black")
         ax2.tick_params(axis="x", bottom=False, labelbottom=False)
         ax2.xaxis.set_visible(False)

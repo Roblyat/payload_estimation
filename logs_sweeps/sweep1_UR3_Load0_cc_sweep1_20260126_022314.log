@@ -1,0 +1,22 @@
+######################################################################################################################################################################
+### Sweep1 started: 20260126_022314                                                                                                                                ###
+### dataset=UR3_Load0_cc run_tag=sweep1                                                                                                                            ###
+### raw_csv=/workspace/shared/data/raw/UR3_Load0_cc.csv                                                                                                            ###
+### col_format=wide derive_qdd=True                                                                                                                                ###
+### traj_amounts=[8, 16, 32, 48, 64, 84, 122] test_fracs=[0.2] seeds=[0, 1, 2]                                                                                     ###
+### val_fraction=0.1                                                                                                                                               ###
+### H=[100] feature_modes=['full']                                                                                                                                 ###
+### lowpass_signals=True cutoff_hz=10.0 order=4 lowpass_qdd=False                                                                                                  ###
+### DeLaN: backend=jax type=structured hp_preset=lutter_like_256 epochs=200                                                                                        ###
+### LSTM: epochs_max=120 batch=64 val_split=0.1                                                                                                                    ###
+### metrics_csv=/workspace/shared/evaluation/summary_metrics_sweep_1_20260126_022314.csv                                                                           ###
+### metrics_json=/workspace/shared/evaluation/summary_metrics_sweep_1_20260126_022314.jsonl                                                                        ###
+### delan_summary_csv(host)=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_delan_sweep_1_20260126_022314.csv    ###
+### delan_summary_json(host)=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_delan_sweep_1_20260126_022314.jsonl ###
+### lstm_summary_csv(host)=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_lstm_sweep_1_20260126_022314.csv      ###
+### lstm_summary_json(host)=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_lstm_sweep_1_20260126_022314.jsonl   ###
+######################################################################################################################################################################
+
+##########################################################
+### SUBSWEEP: lowpass_qdd=False  K=8 test_fraction=0.2 ###
+##########################################################

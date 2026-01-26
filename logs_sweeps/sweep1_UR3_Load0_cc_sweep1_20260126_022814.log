@@ -1,0 +1,127 @@
+######################################################################################################################################################################
+### Sweep1 started: 20260126_022814                                                                                                                                ###
+### dataset=UR3_Load0_cc run_tag=sweep1                                                                                                                            ###
+### raw_csv=/workspace/shared/data/raw/UR3_Load0_cc.csv                                                                                                            ###
+### col_format=wide derive_qdd=True                                                                                                                                ###
+### traj_amounts=[8, 16, 32, 48, 64, 84, 122] test_fracs=[0.2] seeds=[0, 1, 2]                                                                                     ###
+### val_fraction=0.1                                                                                                                                               ###
+### H=[100] feature_modes=['full']                                                                                                                                 ###
+### lowpass_signals=True cutoff_hz=10.0 order=4 lowpass_qdd=False                                                                                                  ###
+### DeLaN: backend=jax type=structured hp_preset=lutter_like_256 epochs=200                                                                                        ###
+### LSTM: epochs_max=120 batch=64 val_split=0.1                                                                                                                    ###
+### metrics_csv=/workspace/shared/evaluation/summary_metrics_sweep_1_20260126_022814.csv                                                                           ###
+### metrics_json=/workspace/shared/evaluation/summary_metrics_sweep_1_20260126_022814.jsonl                                                                        ###
+### delan_summary_csv(host)=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_delan_sweep_1_20260126_022814.csv    ###
+### delan_summary_json(host)=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_delan_sweep_1_20260126_022814.jsonl ###
+### lstm_summary_csv(host)=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_lstm_sweep_1_20260126_022814.csv      ###
+### lstm_summary_json(host)=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_lstm_sweep_1_20260126_022814.jsonl   ###
+######################################################################################################################################################################
+
+##########################################################
+### SUBSWEEP: lowpass_qdd=False  K=8 test_fraction=0.2 ###
+##########################################################
+
+[OK] lowpass_qdd=False K=8 tf=0.2 seed=0  log=logs_sweeps/run1_K8_tf0p2_seed0_20260126_022814.log
+
+[OK] lowpass_qdd=False K=8 tf=0.2 seed=1  log=logs_sweeps/run1_K8_tf0p2_seed1_20260126_022814.log
+
+[OK] lowpass_qdd=False K=8 tf=0.2 seed=2  log=logs_sweeps/run1_K8_tf0p2_seed2_20260126_022814.log
+
+###########################################################
+### SUBSWEEP: lowpass_qdd=False  K=16 test_fraction=0.2 ###
+###########################################################
+
+[OK] lowpass_qdd=False K=16 tf=0.2 seed=0  log=logs_sweeps/run1_K16_tf0p2_seed0_20260126_022814.log
+
+[OK] lowpass_qdd=False K=16 tf=0.2 seed=1  log=logs_sweeps/run1_K16_tf0p2_seed1_20260126_022814.log
+
+[OK] lowpass_qdd=False K=16 tf=0.2 seed=2  log=logs_sweeps/run1_K16_tf0p2_seed2_20260126_022814.log
+
+###########################################################
+### SUBSWEEP: lowpass_qdd=False  K=32 test_fraction=0.2 ###
+###########################################################
+
+[OK] lowpass_qdd=False K=32 tf=0.2 seed=0  log=logs_sweeps/run1_K32_tf0p2_seed0_20260126_022814.log
+
+[OK] lowpass_qdd=False K=32 tf=0.2 seed=1  log=logs_sweeps/run1_K32_tf0p2_seed1_20260126_022814.log
+
+[OK] lowpass_qdd=False K=32 tf=0.2 seed=2  log=logs_sweeps/run1_K32_tf0p2_seed2_20260126_022814.log
+
+###########################################################
+### SUBSWEEP: lowpass_qdd=False  K=48 test_fraction=0.2 ###
+###########################################################
+
+[OK] lowpass_qdd=False K=48 tf=0.2 seed=0  log=logs_sweeps/run1_K48_tf0p2_seed0_20260126_022814.log
+
+[OK] lowpass_qdd=False K=48 tf=0.2 seed=1  log=logs_sweeps/run1_K48_tf0p2_seed1_20260126_022814.log
+
+[OK] lowpass_qdd=False K=48 tf=0.2 seed=2  log=logs_sweeps/run1_K48_tf0p2_seed2_20260126_022814.log
+
+###########################################################
+### SUBSWEEP: lowpass_qdd=False  K=64 test_fraction=0.2 ###
+###########################################################
+
+[OK] lowpass_qdd=False K=64 tf=0.2 seed=0  log=logs_sweeps/run1_K64_tf0p2_seed0_20260126_022814.log
+
+[OK] lowpass_qdd=False K=64 tf=0.2 seed=1  log=logs_sweeps/run1_K64_tf0p2_seed1_20260126_022814.log
+
+[OK] lowpass_qdd=False K=64 tf=0.2 seed=2  log=logs_sweeps/run1_K64_tf0p2_seed2_20260126_022814.log
+
+###########################################################
+### SUBSWEEP: lowpass_qdd=False  K=84 test_fraction=0.2 ###
+###########################################################
+
+[OK] lowpass_qdd=False K=84 tf=0.2 seed=0  log=logs_sweeps/run1_K84_tf0p2_seed0_20260126_022814.log
+
+[OK] lowpass_qdd=False K=84 tf=0.2 seed=1  log=logs_sweeps/run1_K84_tf0p2_seed1_20260126_022814.log
+
+[OK] lowpass_qdd=False K=84 tf=0.2 seed=2  log=logs_sweeps/run1_K84_tf0p2_seed2_20260126_022814.log
+
+############################################################
+### SUBSWEEP: lowpass_qdd=False  K=122 test_fraction=0.2 ###
+############################################################
+
+[OK] lowpass_qdd=False K=122 tf=0.2 seed=0  log=logs_sweeps/run1_K122_tf0p2_seed0_20260126_022814.log
+
+[OK] lowpass_qdd=False K=122 tf=0.2 seed=1  log=logs_sweeps/run1_K122_tf0p2_seed1_20260126_022814.log
+
+[OK] lowpass_qdd=False K=122 tf=0.2 seed=2  log=logs_sweeps/run1_K122_tf0p2_seed2_20260126_022814.log
+
+###############################
+### Delan elbow aggregation ###
+###############################
+
+==============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/delan_training_dynamics_aggregate.py --summary_jsonl /workspace/shared/evaluation/summary_delan_sweep_1_20260126_022814.jsonl --out_dir /workspace/shared/evaluation/delan_elbows/UR3_Load0_cc__sweep1__20260126_022814 --pad_to_epochs 200 --write_best_overlays' ===
+==============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+
+
+#####################################
+### Delan torque RMSE aggregation ###
+#####################################
+
+==========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/delan_torque_rmse_aggregate.py --summary_jsonl /workspace/shared/evaluation/summary_delan_sweep_1_20260126_022814.jsonl --out_dir /workspace/shared/evaluation/delan_torque/UR3_Load0_cc__sweep1__20260126_022814 --bins 200 ' ===
+==========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+
+
+##########################################
+### LSTM training dynamics aggregation ###
+##########################################
+
+=====================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/lstm_training_dynamics_aggregate.py --summary_jsonl /workspace/shared/evaluation/summary_lstm_sweep_1_20260126_022814.jsonl --out_dir /workspace/shared/evaluation/lstm_aggregate/UR3_Load0_cc__sweep1__20260126_022814 ' ===
+=====================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Traceback (most recent call last):
+  File "/workspace/evaluation/scripts/lstm_training_dynamics_aggregate.py", line 216, in <module>
+    main()
+  File "/workspace/evaluation/scripts/lstm_training_dynamics_aggregate.py", line 166, in main
+    per_kh_train[key] = _median_iqr(seed_curves)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/evaluation/scripts/lstm_training_dynamics_aggregate.py", line 66, in _median_iqr
+    stack = np.stack(curves, axis=0)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/numpy/core/shape_base.py", line 449, in stack
+    raise ValueError('all input arrays must have the same shape')
+ValueError: all input arrays must have the same shape
+

@@ -78,17 +78,42 @@ class CurveSet:
     delan_seed: int
 
 
-def _plot_overlay(curves: List[CurveSet], title: str, ylabel: str, out_path: str) -> None:
+def _plot_overlay(
+    curves: List[CurveSet],
+    title: str,
+    ylabel: str,
+    out_path: str,
+    *,
+    yscale_full: str = "log",
+) -> None:
     if not curves:
         return
-    plt.figure(figsize=(8, 4), dpi=140)
+    max_epoch = max(int(max(c.epochs)) for c in curves if c.epochs)
+    zoom_end = min(60, max_epoch) if max_epoch > 0 else 0
+
+    fig = plt.figure(figsize=(12, 4), dpi=120)
+    ax_full = fig.add_subplot(1, 2, 1)
+    ax_zoom = fig.add_subplot(1, 2, 2)
+
     for c in sorted(curves, key=lambda x: x.delan_seed):
-        plt.plot(c.epochs, c.values, label=f"s{c.delan_seed}", linewidth=1.2, alpha=0.9)
-    plt.title(title)
-    plt.xlabel("Epoch")
-    plt.ylabel(ylabel)
-    plt.grid(True, alpha=0.25)
-    plt.legend(ncol=3, fontsize=8)
+        ax_full.plot(c.epochs, c.values, label=f"s{c.delan_seed}", linewidth=1.2, alpha=0.9)
+        ax_zoom.plot(c.epochs, c.values, label=f"s{c.delan_seed}", linewidth=1.2, alpha=0.9)
+
+    ax_full.set_title(f"{title} (full)")
+    ax_full.set_xlabel("Epoch")
+    ax_full.set_ylabel(ylabel)
+    if yscale_full:
+        ax_full.set_yscale(yscale_full)
+    ax_full.grid(True, alpha=0.25)
+    ax_full.legend(ncol=3, fontsize=8)
+
+    ax_zoom.set_title(f"{title} (0-{int(zoom_end)})")
+    ax_zoom.set_xlabel("Epoch")
+    ax_zoom.set_ylabel(ylabel)
+    ax_zoom.set_xlim(0, zoom_end)
+    ax_zoom.grid(True, alpha=0.25)
+    ax_zoom.legend(ncol=3, fontsize=8)
+
     plt.tight_layout()
     plt.savefig(out_path, dpi=180)
     plt.close()
@@ -183,6 +208,7 @@ def main() -> None:
                     title=f"{best_run_name} | Train loss by delan_seed",
                     ylabel="Train loss",
                     out_path=out_path,
+                    yscale_full="log",
                 )
             if overlay_val:
                 out_path = os.path.join(best_model_dir, f"{best_run_name}__val_mse_all_delan_seeds.png")
@@ -191,6 +217,7 @@ def main() -> None:
                     title=f"{best_run_name} | Val MSE by delan_seed",
                     ylabel="Val MSE",
                     out_path=out_path,
+                    yscale_full="linear",
                 )
 
     # Aggregate across dataset seeds to final per-K curves
@@ -211,17 +238,35 @@ def main() -> None:
     def _plot_by_k(data: Dict[int, Tuple[np.ndarray, np.ndarray, np.ndarray]], title: str, ylabel: str, out_name: str) -> None:
         if not data:
             return
-        plt.figure(figsize=(9, 5), dpi=160)
+        max_len = max(len(v[0]) for v in data.values())
+        zoom_end = min(60, max_len) if max_len > 0 else 0
+
+        fig = plt.figure(figsize=(12, 4), dpi=120)
+        ax_full = fig.add_subplot(1, 2, 1)
+        ax_zoom = fig.add_subplot(1, 2, 2)
+
         colors = plt.cm.tab10(np.linspace(0, 1, len(data)))
         for (K, (med, q25, q75)), color in zip(sorted(data.items(), key=lambda kv: kv[0]), colors):
             xs = np.arange(1, len(med) + 1)
-            plt.plot(xs, med, label=f"K={K}", color=color, linewidth=1.4)
-            plt.fill_between(xs, q25, q75, color=color, alpha=0.18)
-        plt.title(title)
-        plt.xlabel("Epoch")
-        plt.ylabel(ylabel)
-        plt.grid(True, alpha=0.25)
-        plt.legend(ncol=2, fontsize=8)
+            ax_full.plot(xs, med, label=f"K={K}", color=color, linewidth=1.4)
+            ax_full.fill_between(xs, q25, q75, color=color, alpha=0.18)
+            ax_zoom.plot(xs, med, label=f"K={K}", color=color, linewidth=1.4)
+            ax_zoom.fill_between(xs, q25, q75, color=color, alpha=0.18)
+
+        ax_full.set_title(f"{title} (full)")
+        ax_full.set_xlabel("Epoch")
+        ax_full.set_ylabel(ylabel)
+        ax_full.set_yscale("log")
+        ax_full.grid(True, alpha=0.25)
+        ax_full.legend(ncol=2, fontsize=8)
+
+        ax_zoom.set_title(f"{title} (0-{int(zoom_end)})")
+        ax_zoom.set_xlabel("Epoch")
+        ax_zoom.set_ylabel(ylabel)
+        ax_zoom.set_xlim(0, zoom_end)
+        ax_zoom.grid(True, alpha=0.25)
+        ax_zoom.legend(ncol=2, fontsize=8)
+
         plt.tight_layout()
         out_path = os.path.join(args.out_dir, out_name)
         plt.savefig(out_path, dpi=180)

@@ -37,6 +37,13 @@ MODELS_DELAN_DIR_HOST = str(REPO_ROOT / "shared" / "models" / "delan")
 MODELS_LSTM_DIR_HOST = str(REPO_ROOT / "shared" / "models" / "lstm")
 EVAL_DIR_HOST = str(REPO_ROOT / "shared" / "evaluation")
 
+# Best LSTM models dir (container + host)
+LSTM_BEST_MODELS_DIR = CFG.lstm_best_models_dir
+if LSTM_BEST_MODELS_DIR.startswith("/workspace/shared"):
+    LSTM_BEST_MODELS_DIR_HOST = str(REPO_ROOT / "shared") + LSTM_BEST_MODELS_DIR[len("/workspace/shared"):]
+else:
+    LSTM_BEST_MODELS_DIR_HOST = LSTM_BEST_MODELS_DIR
+
 # Dataset settings (your scenario)
 DATASET_NAME = CFG.dataset_name  # raw file: RAW_DIR/{DATASET_NAME}.csv
 RUN_TAG = CFG.run_tag
@@ -71,6 +78,21 @@ DELAN_EARLY_STOP_PATIENCE = CFG.delan_early_stop_patience
 DELAN_EARLY_STOP_MIN_DELTA = CFG.delan_early_stop_min_delta
 DELAN_EARLY_STOP_WARMUP_EVALS = CFG.delan_early_stop_warmup_evals
 
+# DeLaN best-model sweep
+DELAN_BEST_K_MAX = CFG.delan_best_k_max
+DELAN_BEST_DATASET_SEEDS = CFG.delan_best_dataset_seeds
+DELAN_BEST_HP_PRESETS = CFG.delan_best_hp_presets
+DELAN_BEST_SCORE_LAMBDA = CFG.delan_best_score_lambda
+DELAN_BEST_SCORE_PENALTY = CFG.delan_best_score_penalty
+DELAN_BEST_FOLD_PLOTS = CFG.delan_best_fold_plots
+DELAN_BEST_HP_CURVES = CFG.delan_best_hp_curves
+DELAN_BEST_SCATTER_PLOTS = CFG.delan_best_scatter_plots
+DELAN_BEST_TORQUE_AGGREGATE = CFG.delan_best_torque_aggregate
+DELAN_BEST_TORQUE_BINS = CFG.delan_best_torque_bins
+DELAN_BEST_TORQUE_SPLIT = CFG.delan_best_torque_split
+DELAN_BEST_TORQUE_HP_PRESETS = CFG.delan_best_torque_hp_presets
+DELAN_BEST_PLOTS_OUT_DIR = CFG.delan_best_plots_out_dir
+
 # LSTM hyperparams
 LSTM_EPOCHS = CFG.lstm_epochs
 LSTM_BATCH = CFG.lstm_batch
@@ -83,6 +105,23 @@ LSTM_EARLY_STOP = CFG.lstm_early_stop
 LSTM_EARLY_STOP_PATIENCE = CFG.lstm_early_stop_patience
 LSTM_EARLY_STOP_MIN_DELTA = CFG.lstm_early_stop_min_delta
 LSTM_EARLY_STOP_WARMUP_EVALS = CFG.lstm_early_stop_warmup_evals
+
+# LSTM best-model sweep
+LSTM_BEST_DATASET_SEEDS = CFG.lstm_best_dataset_seeds
+LSTM_BEST_FEATURE_MODES = CFG.lstm_best_feature_modes
+LSTM_BEST_H_LIST = CFG.lstm_best_h_list
+LSTM_BEST_SEEDS = CFG.lstm_best_seeds
+LSTM_BEST_SCORE_LAMBDA = CFG.lstm_best_score_lambda
+LSTM_BEST_SCORE_PENALTY = CFG.lstm_best_score_penalty
+LSTM_BEST_DELAN_HYPERS_JSONL = CFG.lstm_best_delan_hypers_jsonl
+LSTM_BEST_DELAN_FOLDS_JSONL = CFG.lstm_best_delan_folds_jsonl
+LSTM_BEST_DELAN_MODEL_JSON = CFG.lstm_best_delan_model_json
+LSTM_BEST_EVAL_SPLIT = CFG.lstm_best_eval_split
+LSTM_BEST_BINS = CFG.lstm_best_bins
+LSTM_BEST_RESIDUAL_AGGREGATE = CFG.lstm_best_residual_aggregate
+LSTM_BEST_COMBINED_AGGREGATE = CFG.lstm_best_combined_aggregate
+LSTM_BEST_BOXPLOTS = CFG.lstm_best_boxplots
+LSTM_BEST_PLOTS_OUT_DIR = CFG.lstm_best_plots_out_dir
 
 # Plot/cleanup behavior
 LOGS_DIR_HOST = CFG.logs_root_dir
@@ -120,6 +159,13 @@ SCRIPT_TRAIN_LSTM = "scripts/train_residual_lstm.py"
 SCRIPT_EVAL = "scripts/combined_evaluation.py"
 SCRIPT_DELAN_ELBOWS = "scripts/delan_training_dynamics_aggregate.py"
 SCRIPT_DELAN_TORQUE_AGG = "scripts/delan_torque_rmse_aggregate.py"
+SCRIPT_DELAN_BEST_FOLD_PLOTS = "scripts/delan_best_fold_plots.py"
+SCRIPT_DELAN_BEST_HP_CURVES = "scripts/delan_best_hp_curves.py"
+SCRIPT_DELAN_BEST_HYPER_SCATTER = "scripts/delan_best_hyper_scatter.py"
+SCRIPT_DELAN_BEST_TORQUE_AGG = "scripts/delan_best_torque_rmse_aggregate.py"
 SCRIPT_LSTM_TRAINING_AGG = "scripts/lstm_training_dynamics_aggregate.py"
 SCRIPT_LSTM_RESIDUAL_AGG = "scripts/lstm_residual_rmse_aggregate.py"
 SCRIPT_COMBINED_TORQUE_AGG = "scripts/combined_torque_rmse_aggregate.py"
+SCRIPT_LSTM_BEST_RESIDUAL_AGG = "scripts/lstm_best_residual_rmse_aggregate.py"
+SCRIPT_LSTM_BEST_COMBINED_AGG = "scripts/lstm_best_combined_torque_rmse_aggregate.py"
+SCRIPT_LSTM_METRICS_BOXPLOTS = "scripts/lstm_metrics_boxplots.py"

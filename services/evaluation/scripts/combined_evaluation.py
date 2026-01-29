@@ -95,6 +95,7 @@ def main():
     ap.add_argument("--K", type=int, default=None)
     ap.add_argument("--test_fraction", type=float, default=None)
     ap.add_argument("--seed", type=int, default=None)
+    ap.add_argument("--dataset_seed", type=int, default=None)
     ap.add_argument("--delan_seed", type=int, default=None)
     ap.add_argument("--delan_epochs", type=int, default=None)
     ap.add_argument("--hp_preset", type=str, default=None)
@@ -291,6 +292,7 @@ def main():
         "K": args.K,
         "test_fraction": args.test_fraction,
         "seed": args.seed,
+        "dataset_seed": args.dataset_seed,
         "delan_seed": args.delan_seed,
         "delan_epochs": args.delan_epochs,
         "hp_preset": args.hp_preset,

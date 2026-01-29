@@ -161,6 +161,16 @@ def main() -> None:
             for (K, (med, q25, q75)), color in zip(sorted(time_by_k.items(), key=lambda kv: kv[0]), colors):
                 plt.plot(xs, med, label=f"K={K}", color=color, linewidth=1.4)
                 plt.fill_between(xs, q25, q75, color=color, alpha=0.18)
+            max_median = None
+            for med, _, _ in time_by_k.values():
+                try:
+                    m = float(np.nanmax(med))
+                except Exception:
+                    continue
+                if np.isfinite(m):
+                    max_median = m if max_median is None else max(max_median, m)
+            if max_median is not None:
+                plt.ylim(0, max_median + 0.25)
             plt.title(f"LSTM residual RMSE over progress by K{title_h}")
             plt.xlabel("Progress (0 → 1)")
             plt.ylabel("Residual RMSE")
@@ -204,6 +214,16 @@ def main() -> None:
                 yerr = np.vstack([med - q25, q75 - med])
                 plt.bar(offsets, med, width=width, label=f"K={K}", alpha=0.9)
                 plt.errorbar(offsets, med, yerr=yerr, fmt="none", ecolor="k", elinewidth=0.9, capsize=2, alpha=0.8)
+            max_median = None
+            for med, _, _ in joint_by_k.values():
+                try:
+                    m = float(np.nanmax(med))
+                except Exception:
+                    continue
+                if np.isfinite(m):
+                    max_median = m if max_median is None else max(max_median, m)
+            if max_median is not None:
+                plt.ylim(0, max_median + 0.25)
 
             plt.title(f"LSTM residual RMSE per joint (median ± IQR){title_h}")
             plt.xlabel("Joint")

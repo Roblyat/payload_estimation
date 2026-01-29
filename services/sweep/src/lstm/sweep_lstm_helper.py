@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import shlex
 
@@ -68,3 +69,31 @@ def read_lstm_metrics(metrics_json_path: str) -> dict:
         }
     except Exception:
         return {"exists": False}
+
+
+def read_lstm_metrics_safe(metrics_json_path: str) -> dict:
+    if not os.path.exists(metrics_json_path):
+        return {"exists": False, "finite": False}
+    try:
+        with open(metrics_json_path, "r", encoding="utf-8") as f:
+            d = json.load(f)
+        train = d.get("train", {}) if isinstance(d, dict) else {}
+        eval_test = d.get("eval_test", {}) if isinstance(d, dict) else {}
+        rmse_total = eval_test.get("rmse_total")
+        finite = rmse_total is not None and math.isfinite(float(rmse_total))
+        history_csv = train.get("history_csv")
+        return {
+            "exists": True,
+            "finite": bool(finite),
+            "epochs_ran": train.get("epochs_ran"),
+            "best_epoch": train.get("best_epoch"),
+            "best_val_loss": train.get("best_val_loss"),
+            "final_train_loss": train.get("final_train_loss"),
+            "final_val_loss": train.get("final_val_loss"),
+            "rmse_total": rmse_total,
+            "mse_total": eval_test.get("mse_total"),
+            "best_model_path": eval_test.get("best_model_path"),
+            "history_csv": history_csv,
+        }
+    except Exception:
+        return {"exists": False, "finite": False}

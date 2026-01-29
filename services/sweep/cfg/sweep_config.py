@@ -11,7 +11,7 @@ class SweepConfig:
 
     # Dataset settings
     dataset_name: str = "UR3_Load0_cc"
-    run_tag: str = "trajKdom"
+    run_tag: str = "delanModelStory"
     in_format: str = "csv"
     col_format: str = "wide"
     derive_qdd: bool = True
@@ -43,6 +43,35 @@ class SweepConfig:
     delan_early_stop_min_delta: float = 0.0
     delan_early_stop_warmup_evals: int = 0
 
+    # DeLaN best-model sweep
+    delan_best_k_max: int = 84
+    delan_best_dataset_seeds: List[int] = field(default_factory=lambda: [0, 1, 2, 3, 4, 5])
+    delan_best_hp_presets: List[str] = field(default_factory=lambda: 
+                                         [
+        "lutter_like_128",
+        "lutter_like_256",
+        "lutter_like_256_d3",
+        "lutter_like_256_lr5e5",
+        "lutter_like_256_wd1e4",
+    ])
+    delan_best_score_lambda: float = 0.5
+    delan_best_score_penalty: float = 10.0
+    delan_best_fold_plots: bool = True
+    delan_best_hp_curves: bool = True
+    delan_best_scatter_plots: bool = True
+    delan_best_torque_aggregate: bool = True
+    delan_best_torque_bins: int = 200
+    delan_best_torque_split: str = "test"
+    # delan_best_torque_hp_presets: List[str] = field(default_factory=list)
+    delan_best_torque_hp_presets = [
+        "lutter_like_128",
+        "lutter_like_256",
+        "lutter_like_256_d3",
+        "lutter_like_256_lr5e5",
+        "lutter_like_256_wd1e4"
+        ]
+    delan_best_plots_out_dir: str = "/workspace/shared/evaluation/delan_best"
+
     # LSTM hyperparams
     lstm_epochs: int = 120
     lstm_batch: int = 64
@@ -54,7 +83,25 @@ class SweepConfig:
     lstm_early_stop: bool = True
     lstm_early_stop_patience: int = 20
     lstm_early_stop_min_delta: float = 0.0
-    lstm_early_stop_warmup_evals: int = 5
+    lstm_early_stop_warmup_evals: int = 10
+
+    # LSTM best-model sweep
+    lstm_best_dataset_seeds: List[int] = field(default_factory=lambda: [0, 1, 2])
+    lstm_best_feature_modes: List[str] = field(default_factory=lambda: ["full", "state", "tau_hat", "state_tauhat"])
+    lstm_best_h_list: List[int] = field(default_factory=lambda: [50, 100, 150])
+    lstm_best_seeds: List[int] = field(default_factory=lambda: [0, 1, 2])
+    lstm_best_score_lambda: float = 0.5
+    lstm_best_score_penalty: float = 10.0
+    lstm_best_delan_hypers_jsonl: str = "/workspace/shared/evaluation/summary_delan_best_hypers.jsonl"
+    lstm_best_delan_folds_jsonl: str = "/workspace/shared/evaluation/summary_delan_best_folds.jsonl"
+    lstm_best_delan_model_json: str = "/workspace/shared/evaluation/delan_best_model.json"
+    lstm_best_eval_split: str = "test"
+    lstm_best_bins: int = 200
+    lstm_best_residual_aggregate: bool = True
+    lstm_best_combined_aggregate: bool = True
+    lstm_best_boxplots: bool = True
+    lstm_best_models_dir: str = "/workspace/shared/models/lstm/best"
+    lstm_best_plots_out_dir: str = "/workspace/shared/evaluation/lstm_best"
 
     # Plot/cleanup behavior
     logs_root_dir: str = "shared/logs"

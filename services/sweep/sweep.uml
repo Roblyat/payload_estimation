@@ -1,0 +1,49 @@
+@startuml
+title Sweep loop service flow (GUI ignored)
+
+|Sweep controller (host)|
+start
+:Load sweep config\n(K, seeds, H, features);
+note right
+Orchestrates services via docker compose exec.
+Shared data lives in /workspace/shared.
+end note
+:Loop over K in TRAJ_AMOUNTS\nand seed in SEEDS;
+
+|preprocess (container)|
+:build_delan_dataset.py\nraw_csv -> preprocessed npz;
+
+|delan_jax (container)|
+:train DeLaN (for each delan_seed)\npreprocessed npz -> metrics.json + ckpt;
+
+|Sweep controller (host)|
+:Select best DeLaN by val RMSE;
+
+|delan_jax (container)|
+:export_delan_residuals_jax.py\npreprocessed npz + best ckpt -> residual npz;
+
+|Sweep controller (host)|
+:Loop over H in H_LIST\nand feature in FEATURE_MODES;
+
+|preprocess (container)|
+:build_lstm_windows.py\nresidual npz -> windows npz;
+
+|lstm (container)|
+:train_residual_lstm.py\nwindows npz -> model + scalers + metrics;
+
+|evaluation (container)|
+:combined_evaluation.py\nresidual + model -> eval metrics + pred npz;
+
+|Sweep controller (host)|
+:Append sweep summaries\n(CSV/JSONL) and continue loops;
+
+if (Aggregation enabled?) then (yes)
+  |evaluation (container)|
+  :delan_*_aggregate.py;
+  :lstm_*_aggregate.py;
+  :combined_torque_aggregate.py;
+endif
+
+|Sweep controller (host)|
+stop
+@enduml

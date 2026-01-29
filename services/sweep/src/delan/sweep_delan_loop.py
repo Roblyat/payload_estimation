@@ -19,7 +19,7 @@ from sweep_base import (
     DELAN_EARLY_STOP_WARMUP_EVALS,
     SCRIPT_TRAIN_DELAN_JAX,
 )
-from sweep_helper import compose_exec, run_cmd, banner
+from sweep_helper import compose_exec, run_cmd, banner, safe_tag
 from .sweep_delan_helper import hp_suffix_from_preset, read_delan_rmse_pair
 
 
@@ -28,7 +28,8 @@ def comp_delan(*, npz_in: str, K: int, seed: int, log_file):
     delan_candidates = []
     for delan_seed in DELAN_SEEDS:
         model_short = "struct"
-        delan_tag = f"delan_jax_{model_short}_s{delan_seed}_ep{DELAN_EPOCHS}_{hp_suffix}"
+        hp_tag = f"hp_{safe_tag(DELAN_HP_PRESET)}"
+        delan_tag = f"delan_jax_{model_short}_s{delan_seed}_ep{DELAN_EPOCHS}_{hp_tag}_{hp_suffix}"
         delan_id = f"{DATASET_NAME}__{RUN_TAG}__K{K}__seed{seed}__{delan_tag}"
         delan_run_dir = f"{MODELS_DELAN_DIR}/{delan_id}"
         ckpt = f"{delan_run_dir}/{delan_id}.jax"

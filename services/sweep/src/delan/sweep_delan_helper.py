@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 import os
 import shlex
 import shutil
@@ -57,7 +58,11 @@ def hp_suffix_from_preset(preset: str, hp_flags: str) -> str:
         "fast_debug": {"n_minibatch": 256, "n_width": 64, "n_depth": 2, "learning_rate": 3e-4},
         "long_train": {"n_minibatch": 512, "n_width": 128, "n_depth": 3, "learning_rate": 1e-4, "weight_decay": 1e-5},
         "lutter_like": {"activation": "softplus", "n_minibatch": 1024, "n_width": 128, "n_depth": 2, "learning_rate": 1e-4, "weight_decay": 1e-5},
+        "lutter_like_128": {"activation": "softplus", "n_minibatch": 1024, "n_width": 128, "n_depth": 2, "learning_rate": 1e-4, "weight_decay": 1e-5},
         "lutter_like_256": {"activation": "softplus", "n_minibatch": 1024, "n_width": 256, "n_depth": 2, "learning_rate": 1e-4, "weight_decay": 1e-5},
+        "lutter_like_256_d3": {"activation": "softplus", "n_minibatch": 1024, "n_width": 256, "n_depth": 3, "learning_rate": 1e-4, "weight_decay": 1e-5},
+        "lutter_like_256_wd1e4": {"activation": "softplus", "n_minibatch": 1024, "n_width": 256, "n_depth": 2, "learning_rate": 1e-4, "weight_decay": 1e-4},
+        "lutter_like_256_lr5e5": {"activation": "softplus", "n_minibatch": 1024, "n_width": 256, "n_depth": 2, "learning_rate": 5e-5, "weight_decay": 1e-5},
     }
     hp = dict(base)
     hp.update(presets.get(preset, {}))
@@ -97,6 +102,37 @@ def read_delan_metrics(metrics_json_path: str) -> dict:
         }
     except Exception:
         return {"exists": False}
+
+
+def read_delan_metrics_safe(metrics_json_path: str) -> dict:
+    if not os.path.exists(metrics_json_path):
+        return {"exists": False, "finite": False}
+    try:
+        with open(metrics_json_path, "r", encoding="utf-8") as f:
+            d = json.load(f)
+        val_rmse = float(d.get("eval_val", {}).get("torque_rmse", float("inf")))
+        val_mse = float(d.get("eval_val", {}).get("torque_mse", float("inf")))
+        test_rmse = float(d.get("eval_test", {}).get("torque_rmse", float("inf")))
+        test_mse = float(d.get("eval_test", {}).get("torque_mse", float("inf")))
+        early = d.get("train", {}).get("early_stop", {}) or {}
+        best_epoch = early.get("best_epoch")
+        artifacts = d.get("artifacts", {}) or {}
+        train_history_csv = artifacts.get("train_history_csv")
+        elbow_history_csv = artifacts.get("elbow_history_csv")
+        finite = math.isfinite(val_rmse) and math.isfinite(test_rmse)
+        return {
+            "exists": True,
+            "finite": bool(finite),
+            "val_rmse": val_rmse,
+            "val_mse": val_mse,
+            "test_rmse": test_rmse,
+            "test_mse": test_mse,
+            "best_epoch": best_epoch,
+            "train_history_csv": train_history_csv,
+            "elbow_history_csv": elbow_history_csv,
+        }
+    except Exception:
+        return {"exists": False, "finite": False}
 
 
 def cleanup_non_best_plots(best_delan_id: str, delan_candidates: list[dict]) -> None:

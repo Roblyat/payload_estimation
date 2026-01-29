@@ -1,0 +1,1430 @@
+################################################################################################################################
+### RUN: hp_preset=lutter_like_256_d3 K=84 test_fraction=0.2 val_fraction=0.1                                                ###
+### dataset_seed=2                                                                                                           ###
+### npz_in=/workspace/shared/data/preprocessed/delan_UR3_Load0_cc_K84_seed2_dataset/delan_UR3_Load0_cc_K84_seed2_dataset.npz ###
+################################################################################################################################
+
+#####################
+### 1) PREPROCESS ###
+#####################
+
+==============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T preprocess bash -lc 'python3 scripts/build_delan_dataset.py --derive_qdd_from_qd True --col_format wide --trajectory_amount 84 --test_fraction 0.2 --val_fraction 0.1 --seed 2 --lowpass_signals True --lowpass_cutoff_hz 10.0 --lowpass_order 4 --lowpass_qdd False --raw_csv /workspace/shared/data/raw/UR3_Load0_cc.csv --out_npz /workspace/shared/data/preprocessed/delan_UR3_Load0_cc_K84_seed2_dataset/delan_UR3_Load0_cc_K84_seed2_dataset.npz' ===
+==============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Saved: /workspace/shared/data/preprocessed/delan_UR3_Load0_cc_K84_seed2_dataset/delan_UR3_Load0_cc_K84_seed2_dataset.npz
+Saved: /workspace/shared/data/preprocessed/delan_UR3_Load0_cc_K84_seed2_dataset/delan_UR3_Load0_cc_K84_seed2_dataset.json
+Trajectories: train=59 val=8 test=17
+Exists: True
+
+#####################################################################################################################################################################################################################################################################################################################
+### DELAN VARIANT: hp_preset=lutter_like_256_d3 delan_seed=0                                                                                                                                                                                                                                                      ###
+### ckpt=/workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax ###
+#####################################################################################################################################################################################################################################################################################################################
+
+######################
+### 2) DELAN TRAIN ###
+######################
+
+========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T delan_jax bash -lc 'python3 /workspace/delan_jax/scripts/rbyt_train_delan_jax.py --npz /workspace/shared/data/preprocessed/delan_UR3_Load0_cc_K84_seed2_dataset/delan_UR3_Load0_cc_K84_seed2_dataset.npz -t structured -s 0 -r 0 --hp_preset lutter_like_256_d3 --epochs 200 --eval_every 1 --log_every 1 --early_stop True --early_stop_patience 10 --early_stop_min_delta 0.0 --early_stop_warmup_evals 0 --save_path /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax' ===
+========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+mkdir -p failed for path /.config/matplotlib: [Errno 13] Permission denied: '/.config'
+Matplotlib created a temporary cache directory at /tmp/matplotlib-lf4pcv9b because there was an issue with the default path (/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+Final hyper: {'dataset': 'UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3', 'n_width': 256, 'n_depth': 3, 'n_minibatch': 1024, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'softplus', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 200, 'lagrangian_type': <function structured_lagrangian_fn at 0x7e77d2f7e8c0>}
+
+
+################################################
+DeLaN run: UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  model_dir = /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  ckpt_path = /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+  type = structured
+  hp_preset = lutter_like_256_d3
+################################################
+
+
+################################################
+Dataset: delan_UR3_Load0_cc_K84_seed2_dataset.npz
+  npz = /workspace/shared/data/preprocessed/delan_UR3_Load0_cc_K84_seed2_dataset/delan_UR3_Load0_cc_K84_seed2_dataset.npz
+   dt ≈ 0.01721744349298553
+  dof = 6
+  Train trajectories = 59
+  Val trajectories   = 8
+  Test trajectories  = 17
+  Train samples = 72196
+  Test samples  = 13697
+################################################
+
+2026-01-29 15:18:46.584588: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-29 15:18:48.632658: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+################################################
+Training DeLaN | run=UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3 | type=structured | dof=6
+################################################
+Epoch 00001: Time=   4.6s, Loss=2.37e+03, Inv=2.37e+03, For=5.35e+00, Power=3.05e+02
+  [eval] val_mse=4.353e+01  (n=7498)
+Epoch 00002: Time=   6.4s, Loss=6.17e+01, Inv=6.17e+01, For=4.96e+00, Power=1.23e+01
+  [eval] val_mse=1.652e+01  (n=7498)
+Epoch 00003: Time=   6.5s, Loss=2.64e+01, Inv=2.64e+01, For=5.06e+00, Power=5.13e+00
+  [eval] val_mse=9.299e+00  (n=7498)
+Epoch 00004: Time=   6.7s, Loss=1.56e+01, Inv=1.56e+01, For=5.30e+00, Power=3.10e+00
+  [eval] val_mse=6.108e+00  (n=7498)
+Epoch 00005: Time=   6.8s, Loss=1.09e+01, Inv=1.09e+01, For=5.51e+00, Power=2.31e+00
+  [eval] val_mse=4.422e+00  (n=7498)
+Epoch 00006: Time=   6.9s, Loss=8.48e+00, Inv=8.48e+00, For=5.76e+00, Power=1.92e+00
+  [eval] val_mse=3.434e+00  (n=7498)
+Epoch 00007: Time=   7.0s, Loss=7.08e+00, Inv=7.08e+00, For=6.15e+00, Power=1.71e+00
+  [eval] val_mse=2.852e+00  (n=7498)
+Epoch 00008: Time=   7.1s, Loss=6.19e+00, Inv=6.19e+00, For=6.68e+00, Power=1.58e+00
+  [eval] val_mse=2.445e+00  (n=7498)
+Epoch 00009: Time=   7.2s, Loss=5.59e+00, Inv=5.59e+00, For=7.32e+00, Power=1.49e+00
+  [eval] val_mse=2.181e+00  (n=7498)
+Epoch 00010: Time=   7.3s, Loss=5.17e+00, Inv=5.17e+00, For=7.91e+00, Power=1.43e+00
+  [eval] val_mse=1.955e+00  (n=7498)
+Epoch 00011: Time=   7.4s, Loss=4.87e+00, Inv=4.87e+00, For=8.62e+00, Power=1.40e+00
+  [eval] val_mse=1.791e+00  (n=7498)
+Epoch 00012: Time=   7.6s, Loss=4.64e+00, Inv=4.64e+00, For=9.33e+00, Power=1.37e+00
+  [eval] val_mse=1.661e+00  (n=7498)
+Epoch 00013: Time=   7.7s, Loss=4.46e+00, Inv=4.46e+00, For=1.01e+01, Power=1.35e+00
+  [eval] val_mse=1.563e+00  (n=7498)
+Epoch 00014: Time=   7.8s, Loss=4.33e+00, Inv=4.33e+00, For=1.09e+01, Power=1.35e+00
+  [eval] val_mse=1.492e+00  (n=7498)
+Epoch 00015: Time=   7.9s, Loss=4.22e+00, Inv=4.22e+00, For=1.16e+01, Power=1.34e+00
+  [eval] val_mse=1.420e+00  (n=7498)
+Epoch 00016: Time=   8.0s, Loss=4.13e+00, Inv=4.13e+00, For=1.24e+01, Power=1.33e+00
+  [eval] val_mse=1.370e+00  (n=7498)
+Epoch 00017: Time=   8.1s, Loss=4.06e+00, Inv=4.06e+00, For=1.30e+01, Power=1.33e+00
+  [eval] val_mse=1.317e+00  (n=7498)
+Epoch 00018: Time=   8.3s, Loss=4.00e+00, Inv=4.00e+00, For=1.39e+01, Power=1.32e+00
+  [eval] val_mse=1.269e+00  (n=7498)
+Epoch 00019: Time=   8.4s, Loss=3.95e+00, Inv=3.95e+00, For=1.46e+01, Power=1.32e+00
+  [eval] val_mse=1.230e+00  (n=7498)
+Epoch 00020: Time=   8.5s, Loss=3.90e+00, Inv=3.90e+00, For=1.54e+01, Power=1.32e+00
+  [eval] val_mse=1.214e+00  (n=7498)
+Epoch 00021: Time=   8.6s, Loss=3.87e+00, Inv=3.87e+00, For=1.61e+01, Power=1.32e+00
+  [eval] val_mse=1.181e+00  (n=7498)
+Epoch 00022: Time=   8.7s, Loss=3.84e+00, Inv=3.84e+00, For=1.68e+01, Power=1.32e+00
+  [eval] val_mse=1.145e+00  (n=7498)
+Epoch 00023: Time=   8.8s, Loss=3.81e+00, Inv=3.81e+00, For=1.77e+01, Power=1.32e+00
+  [eval] val_mse=1.134e+00  (n=7498)
+Epoch 00024: Time=   8.9s, Loss=3.79e+00, Inv=3.79e+00, For=1.83e+01, Power=1.32e+00
+  [eval] val_mse=1.109e+00  (n=7498)
+Epoch 00025: Time=   9.1s, Loss=3.76e+00, Inv=3.76e+00, For=1.90e+01, Power=1.32e+00
+  [eval] val_mse=1.084e+00  (n=7498)
+Epoch 00026: Time=   9.2s, Loss=3.74e+00, Inv=3.74e+00, For=1.97e+01, Power=1.32e+00
+  [eval] val_mse=1.067e+00  (n=7498)
+Epoch 00027: Time=   9.3s, Loss=3.72e+00, Inv=3.72e+00, For=2.06e+01, Power=1.31e+00
+  [eval] val_mse=1.057e+00  (n=7498)
+Epoch 00028: Time=   9.4s, Loss=3.70e+00, Inv=3.70e+00, For=2.13e+01, Power=1.31e+00
+  [eval] val_mse=1.049e+00  (n=7498)
+Epoch 00029: Time=   9.5s, Loss=3.69e+00, Inv=3.69e+00, For=2.19e+01, Power=1.31e+00
+  [eval] val_mse=1.031e+00  (n=7498)
+Epoch 00030: Time=   9.6s, Loss=3.67e+00, Inv=3.67e+00, For=2.27e+01, Power=1.31e+00
+  [eval] val_mse=1.014e+00  (n=7498)
+Epoch 00031: Time=   9.7s, Loss=3.66e+00, Inv=3.66e+00, For=2.34e+01, Power=1.31e+00
+  [eval] val_mse=1.002e+00  (n=7498)
+Epoch 00032: Time=   9.9s, Loss=3.65e+00, Inv=3.65e+00, For=2.40e+01, Power=1.31e+00
+  [eval] val_mse=1.001e+00  (n=7498)
+Epoch 00033: Time=  10.0s, Loss=3.63e+00, Inv=3.63e+00, For=2.50e+01, Power=1.31e+00
+  [eval] val_mse=9.801e-01  (n=7498)
+Epoch 00034: Time=  10.1s, Loss=3.62e+00, Inv=3.62e+00, For=2.55e+01, Power=1.31e+00
+  [eval] val_mse=9.690e-01  (n=7498)
+Epoch 00035: Time=  10.2s, Loss=3.61e+00, Inv=3.61e+00, For=2.63e+01, Power=1.31e+00
+  [eval] val_mse=9.674e-01  (n=7498)
+Epoch 00036: Time=  10.3s, Loss=3.60e+00, Inv=3.60e+00, For=2.71e+01, Power=1.31e+00
+  [eval] val_mse=9.536e-01  (n=7498)
+Epoch 00037: Time=  10.4s, Loss=3.59e+00, Inv=3.59e+00, For=2.77e+01, Power=1.31e+00
+  [eval] val_mse=9.521e-01  (n=7498)
+Epoch 00038: Time=  10.5s, Loss=3.59e+00, Inv=3.59e+00, For=2.87e+01, Power=1.31e+00
+  [eval] val_mse=9.427e-01  (n=7498)
+Epoch 00039: Time=  10.7s, Loss=3.58e+00, Inv=3.58e+00, For=2.93e+01, Power=1.31e+00
+  [eval] val_mse=9.345e-01  (n=7498)
+Epoch 00040: Time=  10.8s, Loss=3.57e+00, Inv=3.57e+00, For=3.01e+01, Power=1.31e+00
+  [eval] val_mse=9.270e-01  (n=7498)
+Epoch 00041: Time=  10.9s, Loss=3.56e+00, Inv=3.56e+00, For=3.08e+01, Power=1.30e+00
+  [eval] val_mse=9.179e-01  (n=7498)
+Epoch 00042: Time=  11.0s, Loss=3.55e+00, Inv=3.55e+00, For=3.17e+01, Power=1.31e+00
+  [eval] val_mse=9.152e-01  (n=7498)
+Epoch 00043: Time=  11.1s, Loss=3.55e+00, Inv=3.55e+00, For=3.25e+01, Power=1.30e+00
+  [eval] val_mse=9.132e-01  (n=7498)
+Epoch 00044: Time=  11.2s, Loss=3.54e+00, Inv=3.54e+00, For=3.33e+01, Power=1.30e+00
+  [eval] val_mse=9.095e-01  (n=7498)
+Epoch 00045: Time=  11.3s, Loss=3.53e+00, Inv=3.53e+00, For=3.39e+01, Power=1.30e+00
+  [eval] val_mse=9.006e-01  (n=7498)
+Epoch 00046: Time=  11.5s, Loss=3.53e+00, Inv=3.53e+00, For=3.47e+01, Power=1.30e+00
+  [eval] val_mse=8.991e-01  (n=7498)
+Epoch 00047: Time=  11.6s, Loss=3.52e+00, Inv=3.52e+00, For=3.58e+01, Power=1.30e+00
+  [eval] val_mse=8.946e-01  (n=7498)
+Epoch 00048: Time=  11.7s, Loss=3.51e+00, Inv=3.51e+00, For=3.63e+01, Power=1.30e+00
+  [eval] val_mse=8.800e-01  (n=7498)
+Epoch 00049: Time=  11.8s, Loss=3.51e+00, Inv=3.51e+00, For=3.74e+01, Power=1.30e+00
+  [eval] val_mse=8.857e-01  (n=7498)
+Epoch 00050: Time=  11.9s, Loss=3.51e+00, Inv=3.51e+00, For=3.79e+01, Power=1.30e+00
+  [eval] val_mse=8.834e-01  (n=7498)
+Epoch 00051: Time=  12.0s, Loss=3.50e+00, Inv=3.50e+00, For=3.91e+01, Power=1.30e+00
+  [eval] val_mse=8.753e-01  (n=7498)
+Epoch 00052: Time=  12.2s, Loss=3.49e+00, Inv=3.49e+00, For=3.99e+01, Power=1.30e+00
+  [eval] val_mse=8.766e-01  (n=7498)
+Epoch 00053: Time=  12.3s, Loss=3.49e+00, Inv=3.49e+00, For=4.06e+01, Power=1.30e+00
+  [eval] val_mse=8.725e-01  (n=7498)
+Epoch 00054: Time=  12.4s, Loss=3.49e+00, Inv=3.49e+00, For=4.15e+01, Power=1.30e+00
+  [eval] val_mse=8.629e-01  (n=7498)
+Epoch 00055: Time=  12.5s, Loss=3.48e+00, Inv=3.48e+00, For=4.23e+01, Power=1.30e+00
+  [eval] val_mse=8.623e-01  (n=7498)
+Epoch 00056: Time=  12.6s, Loss=3.48e+00, Inv=3.48e+00, For=4.31e+01, Power=1.30e+00
+  [eval] val_mse=8.615e-01  (n=7498)
+Epoch 00057: Time=  12.7s, Loss=3.47e+00, Inv=3.47e+00, For=4.43e+01, Power=1.30e+00
+  [eval] val_mse=8.564e-01  (n=7498)
+Epoch 00058: Time=  12.8s, Loss=3.47e+00, Inv=3.47e+00, For=4.52e+01, Power=1.30e+00
+  [eval] val_mse=8.561e-01  (n=7498)
+Epoch 00059: Time=  13.0s, Loss=3.46e+00, Inv=3.46e+00, For=4.60e+01, Power=1.30e+00
+  [eval] val_mse=8.545e-01  (n=7498)
+Epoch 00060: Time=  13.1s, Loss=3.46e+00, Inv=3.46e+00, For=4.70e+01, Power=1.30e+00
+  [eval] val_mse=8.418e-01  (n=7498)
+Epoch 00061: Time=  13.2s, Loss=3.46e+00, Inv=3.46e+00, For=4.79e+01, Power=1.30e+00
+  [eval] val_mse=8.471e-01  (n=7498)
+Epoch 00062: Time=  13.3s, Loss=3.45e+00, Inv=3.45e+00, For=4.87e+01, Power=1.30e+00
+  [eval] val_mse=8.460e-01  (n=7498)
+Epoch 00063: Time=  13.4s, Loss=3.45e+00, Inv=3.45e+00, For=4.98e+01, Power=1.30e+00
+  [eval] val_mse=8.438e-01  (n=7498)
+Epoch 00064: Time=  13.5s, Loss=3.45e+00, Inv=3.45e+00, For=5.07e+01, Power=1.30e+00
+  [eval] val_mse=8.328e-01  (n=7498)
+Epoch 00065: Time=  13.6s, Loss=3.44e+00, Inv=3.44e+00, For=5.17e+01, Power=1.30e+00
+  [eval] val_mse=8.294e-01  (n=7498)
+Epoch 00066: Time=  13.8s, Loss=3.44e+00, Inv=3.44e+00, For=5.30e+01, Power=1.30e+00
+  [eval] val_mse=8.290e-01  (n=7498)
+Epoch 00067: Time=  13.9s, Loss=3.44e+00, Inv=3.44e+00, For=5.36e+01, Power=1.30e+00
+  [eval] val_mse=8.294e-01  (n=7498)
+Epoch 00068: Time=  14.0s, Loss=3.43e+00, Inv=3.43e+00, For=5.49e+01, Power=1.30e+00
+  [eval] val_mse=8.268e-01  (n=7498)
+Epoch 00069: Time=  14.1s, Loss=3.43e+00, Inv=3.43e+00, For=5.59e+01, Power=1.30e+00
+  [eval] val_mse=8.265e-01  (n=7498)
+Epoch 00070: Time=  14.2s, Loss=3.43e+00, Inv=3.43e+00, For=5.69e+01, Power=1.30e+00
+  [eval] val_mse=8.242e-01  (n=7498)
+Epoch 00071: Time=  14.3s, Loss=3.43e+00, Inv=3.43e+00, For=5.83e+01, Power=1.30e+00
+  [eval] val_mse=8.184e-01  (n=7498)
+Epoch 00072: Time=  14.4s, Loss=3.42e+00, Inv=3.42e+00, For=5.93e+01, Power=1.29e+00
+  [eval] val_mse=8.108e-01  (n=7498)
+Epoch 00073: Time=  14.6s, Loss=3.42e+00, Inv=3.42e+00, For=6.06e+01, Power=1.30e+00
+  [eval] val_mse=8.206e-01  (n=7498)
+Epoch 00074: Time=  14.7s, Loss=3.42e+00, Inv=3.42e+00, For=6.12e+01, Power=1.30e+00
+  [eval] val_mse=8.045e-01  (n=7498)
+Epoch 00075: Time=  14.8s, Loss=3.41e+00, Inv=3.41e+00, For=6.29e+01, Power=1.30e+00
+  [eval] val_mse=8.089e-01  (n=7498)
+Epoch 00076: Time=  14.9s, Loss=3.41e+00, Inv=3.41e+00, For=6.37e+01, Power=1.30e+00
+  [eval] val_mse=8.072e-01  (n=7498)
+Epoch 00077: Time=  15.0s, Loss=3.41e+00, Inv=3.41e+00, For=6.53e+01, Power=1.29e+00
+  [eval] val_mse=8.069e-01  (n=7498)
+Epoch 00078: Time=  15.1s, Loss=3.40e+00, Inv=3.40e+00, For=6.65e+01, Power=1.30e+00
+  [eval] val_mse=7.956e-01  (n=7498)
+Epoch 00079: Time=  15.2s, Loss=3.40e+00, Inv=3.40e+00, For=6.77e+01, Power=1.30e+00
+  [eval] val_mse=8.013e-01  (n=7498)
+Epoch 00080: Time=  15.4s, Loss=3.40e+00, Inv=3.40e+00, For=6.90e+01, Power=1.30e+00
+  [eval] val_mse=7.932e-01  (n=7498)
+Epoch 00081: Time=  15.5s, Loss=3.40e+00, Inv=3.40e+00, For=7.09e+01, Power=1.30e+00
+  [eval] val_mse=7.882e-01  (n=7498)
+Epoch 00082: Time=  15.6s, Loss=3.39e+00, Inv=3.39e+00, For=7.13e+01, Power=1.29e+00
+  [eval] val_mse=7.899e-01  (n=7498)
+Epoch 00083: Time=  15.7s, Loss=3.39e+00, Inv=3.39e+00, For=7.31e+01, Power=1.30e+00
+  [eval] val_mse=7.985e-01  (n=7498)
+Epoch 00084: Time=  15.8s, Loss=3.39e+00, Inv=3.39e+00, For=7.46e+01, Power=1.30e+00
+  [eval] val_mse=7.873e-01  (n=7498)
+Epoch 00085: Time=  15.9s, Loss=3.39e+00, Inv=3.39e+00, For=7.57e+01, Power=1.30e+00
+  [eval] val_mse=7.910e-01  (n=7498)
+Epoch 00086: Time=  16.1s, Loss=3.38e+00, Inv=3.38e+00, For=7.67e+01, Power=1.29e+00
+  [eval] val_mse=7.919e-01  (n=7498)
+Epoch 00087: Time=  16.2s, Loss=3.38e+00, Inv=3.38e+00, For=7.86e+01, Power=1.29e+00
+  [eval] val_mse=7.763e-01  (n=7498)
+Epoch 00088: Time=  16.3s, Loss=3.38e+00, Inv=3.38e+00, For=8.06e+01, Power=1.30e+00
+  [eval] val_mse=7.815e-01  (n=7498)
+Epoch 00089: Time=  16.4s, Loss=3.38e+00, Inv=3.38e+00, For=8.15e+01, Power=1.30e+00
+  [eval] val_mse=7.782e-01  (n=7498)
+Epoch 00090: Time=  16.5s, Loss=3.38e+00, Inv=3.38e+00, For=8.29e+01, Power=1.30e+00
+  [eval] val_mse=7.720e-01  (n=7498)
+Epoch 00091: Time=  16.6s, Loss=3.38e+00, Inv=3.38e+00, For=8.58e+01, Power=1.29e+00
+  [eval] val_mse=7.708e-01  (n=7498)
+Epoch 00092: Time=  16.8s, Loss=3.38e+00, Inv=3.38e+00, For=8.66e+01, Power=1.30e+00
+  [eval] val_mse=7.726e-01  (n=7498)
+Epoch 00093: Time=  16.9s, Loss=3.37e+00, Inv=3.37e+00, For=8.69e+01, Power=1.29e+00
+  [eval] val_mse=7.721e-01  (n=7498)
+Epoch 00094: Time=  17.0s, Loss=3.37e+00, Inv=3.37e+00, For=8.87e+01, Power=1.30e+00
+  [eval] val_mse=7.665e-01  (n=7498)
+Epoch 00095: Time=  17.1s, Loss=3.36e+00, Inv=3.36e+00, For=9.01e+01, Power=1.30e+00
+  [eval] val_mse=7.674e-01  (n=7498)
+Epoch 00096: Time=  17.2s, Loss=3.37e+00, Inv=3.37e+00, For=9.10e+01, Power=1.30e+00
+  [eval] val_mse=7.637e-01  (n=7498)
+Epoch 00097: Time=  17.3s, Loss=3.37e+00, Inv=3.37e+00, For=9.32e+01, Power=1.30e+00
+  [eval] val_mse=7.628e-01  (n=7498)
+Epoch 00098: Time=  17.4s, Loss=3.36e+00, Inv=3.36e+00, For=9.37e+01, Power=1.30e+00
+  [eval] val_mse=7.628e-01  (n=7498)
+Epoch 00099: Time=  17.6s, Loss=3.36e+00, Inv=3.36e+00, For=9.66e+01, Power=1.29e+00
+  [eval] val_mse=7.580e-01  (n=7498)
+Epoch 00100: Time=  17.7s, Loss=3.36e+00, Inv=3.36e+00, For=9.74e+01, Power=1.30e+00
+  [eval] val_mse=7.566e-01  (n=7498)
+Epoch 00101: Time=  17.8s, Loss=3.36e+00, Inv=3.36e+00, For=9.89e+01, Power=1.29e+00
+  [eval] val_mse=7.575e-01  (n=7498)
+Epoch 00102: Time=  17.9s, Loss=3.35e+00, Inv=3.35e+00, For=9.97e+01, Power=1.30e+00
+  [eval] val_mse=7.617e-01  (n=7498)
+Epoch 00103: Time=  18.0s, Loss=3.35e+00, Inv=3.35e+00, For=1.03e+02, Power=1.30e+00
+  [eval] val_mse=7.529e-01  (n=7498)
+Epoch 00104: Time=  18.1s, Loss=3.35e+00, Inv=3.35e+00, For=1.02e+02, Power=1.30e+00
+  [eval] val_mse=7.538e-01  (n=7498)
+Epoch 00105: Time=  18.3s, Loss=3.35e+00, Inv=3.35e+00, For=1.04e+02, Power=1.30e+00
+  [eval] val_mse=7.550e-01  (n=7498)
+Epoch 00106: Time=  18.4s, Loss=3.35e+00, Inv=3.35e+00, For=1.08e+02, Power=1.30e+00
+  [eval] val_mse=7.545e-01  (n=7498)
+Epoch 00107: Time=  18.5s, Loss=3.35e+00, Inv=3.35e+00, For=1.08e+02, Power=1.29e+00
+  [eval] val_mse=7.575e-01  (n=7498)
+Epoch 00108: Time=  18.6s, Loss=3.35e+00, Inv=3.35e+00, For=1.07e+02, Power=1.30e+00
+  [eval] val_mse=7.555e-01  (n=7498)
+Epoch 00109: Time=  18.7s, Loss=3.34e+00, Inv=3.34e+00, For=1.11e+02, Power=1.30e+00
+  [eval] val_mse=7.587e-01  (n=7498)
+Epoch 00110: Time=  18.8s, Loss=3.36e+00, Inv=3.36e+00, For=1.14e+02, Power=1.30e+00
+  [eval] val_mse=7.632e-01  (n=7498)
+Epoch 00111: Time=  18.9s, Loss=3.35e+00, Inv=3.35e+00, For=1.14e+02, Power=1.30e+00
+  [eval] val_mse=7.605e-01  (n=7498)
+Epoch 00112: Time=  19.1s, Loss=3.34e+00, Inv=3.34e+00, For=1.13e+02, Power=1.29e+00
+  [eval] val_mse=7.535e-01  (n=7498)
+Epoch 00113: Time=  19.2s, Loss=3.34e+00, Inv=3.34e+00, For=1.14e+02, Power=1.30e+00
+  [eval] val_mse=7.572e-01  (n=7498)
+  [early_stop] stop at epoch=113 (best_epoch=103, best_val_mse=7.529e-01)
+Saved DeLaN checkpoint: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+Saved training history: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3__train_history.csv
+
+################################################
+Evaluating DeLaN | run=UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  [val] Torque RMSE = 3.542e-01
+Torque MSE  = 1.058e-01
+Torque RMSE = 3.252e-01
+Per-joint MSE : 1.395e-01 2.157e-01 9.270e-02 6.805e-02 5.803e-02 6.050e-02
+Per-joint RMSE: 3.736e-01 4.645e-01 3.045e-01 2.609e-01 2.409e-01 2.460e-01
+Comp Time per Sample = 1.517e-04s / 6591.2Hz
+Saved metrics TXT: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics_test.txt
+Saved metrics JSON: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics.json
+
+#####################################################################################################################################################################################################################################################################################################################
+### DELAN VARIANT: hp_preset=lutter_like_256_d3 delan_seed=1                                                                                                                                                                                                                                                      ###
+### ckpt=/workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax ###
+#####################################################################################################################################################################################################################################################################################################################
+
+######################
+### 2) DELAN TRAIN ###
+######################
+
+========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T delan_jax bash -lc 'python3 /workspace/delan_jax/scripts/rbyt_train_delan_jax.py --npz /workspace/shared/data/preprocessed/delan_UR3_Load0_cc_K84_seed2_dataset/delan_UR3_Load0_cc_K84_seed2_dataset.npz -t structured -s 1 -r 0 --hp_preset lutter_like_256_d3 --epochs 200 --eval_every 1 --log_every 1 --early_stop True --early_stop_patience 10 --early_stop_min_delta 0.0 --early_stop_warmup_evals 0 --save_path /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax' ===
+========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+mkdir -p failed for path /.config/matplotlib: [Errno 13] Permission denied: '/.config'
+Matplotlib created a temporary cache directory at /tmp/matplotlib-0jggxw7r because there was an issue with the default path (/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+Final hyper: {'dataset': 'UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3', 'n_width': 256, 'n_depth': 3, 'n_minibatch': 1024, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'softplus', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 200, 'lagrangian_type': <function structured_lagrangian_fn at 0x7225aa56e8c0>}
+
+
+################################################
+DeLaN run: UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  model_dir = /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  ckpt_path = /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+  type = structured
+  hp_preset = lutter_like_256_d3
+################################################
+
+
+################################################
+Dataset: delan_UR3_Load0_cc_K84_seed2_dataset.npz
+  npz = /workspace/shared/data/preprocessed/delan_UR3_Load0_cc_K84_seed2_dataset/delan_UR3_Load0_cc_K84_seed2_dataset.npz
+   dt ≈ 0.01721744349298553
+  dof = 6
+  Train trajectories = 59
+  Val trajectories   = 8
+  Test trajectories  = 17
+  Train samples = 72196
+  Test samples  = 13697
+################################################
+
+2026-01-29 15:19:17.295824: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-29 15:19:19.431345: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+################################################
+Training DeLaN | run=UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3 | type=structured | dof=6
+################################################
+Epoch 00001: Time=   4.5s, Loss=3.47e+03, Inv=3.47e+03, For=5.40e+00, Power=4.51e+02
+  [eval] val_mse=7.686e+01  (n=7498)
+Epoch 00002: Time=   6.2s, Loss=1.11e+02, Inv=1.11e+02, For=5.00e+00, Power=2.32e+01
+  [eval] val_mse=2.388e+01  (n=7498)
+Epoch 00003: Time=   6.3s, Loss=4.57e+01, Inv=4.57e+01, For=4.89e+00, Power=9.46e+00
+  [eval] val_mse=1.188e+01  (n=7498)
+Epoch 00004: Time=   6.4s, Loss=2.59e+01, Inv=2.59e+01, For=4.94e+00, Power=5.29e+00
+  [eval] val_mse=7.319e+00  (n=7498)
+Epoch 00005: Time=   6.5s, Loss=1.73e+01, Inv=1.73e+01, For=5.05e+00, Power=3.55e+00
+  [eval] val_mse=5.006e+00  (n=7498)
+Epoch 00006: Time=   6.6s, Loss=1.28e+01, Inv=1.28e+01, For=5.22e+00, Power=2.71e+00
+  [eval] val_mse=3.686e+00  (n=7498)
+Epoch 00007: Time=   6.8s, Loss=1.01e+01, Inv=1.01e+01, For=5.46e+00, Power=2.25e+00
+  [eval] val_mse=2.921e+00  (n=7498)
+Epoch 00008: Time=   6.9s, Loss=8.44e+00, Inv=8.44e+00, For=5.88e+00, Power=1.97e+00
+  [eval] val_mse=2.427e+00  (n=7498)
+Epoch 00009: Time=   7.0s, Loss=7.32e+00, Inv=7.32e+00, For=6.40e+00, Power=1.77e+00
+  [eval] val_mse=2.117e+00  (n=7498)
+Epoch 00010: Time=   7.1s, Loss=6.53e+00, Inv=6.53e+00, For=6.97e+00, Power=1.65e+00
+  [eval] val_mse=1.891e+00  (n=7498)
+Epoch 00011: Time=   7.2s, Loss=5.94e+00, Inv=5.94e+00, For=7.60e+00, Power=1.56e+00
+  [eval] val_mse=1.726e+00  (n=7498)
+Epoch 00012: Time=   7.3s, Loss=5.51e+00, Inv=5.51e+00, For=8.35e+00, Power=1.50e+00
+  [eval] val_mse=1.598e+00  (n=7498)
+Epoch 00013: Time=   7.4s, Loss=5.18e+00, Inv=5.18e+00, For=9.10e+00, Power=1.45e+00
+  [eval] val_mse=1.501e+00  (n=7498)
+Epoch 00014: Time=   7.6s, Loss=4.92e+00, Inv=4.92e+00, For=9.80e+00, Power=1.43e+00
+  [eval] val_mse=1.421e+00  (n=7498)
+Epoch 00015: Time=   7.7s, Loss=4.71e+00, Inv=4.71e+00, For=1.07e+01, Power=1.40e+00
+  [eval] val_mse=1.353e+00  (n=7498)
+Epoch 00016: Time=   7.8s, Loss=4.56e+00, Inv=4.56e+00, For=1.15e+01, Power=1.39e+00
+  [eval] val_mse=1.300e+00  (n=7498)
+Epoch 00017: Time=   7.9s, Loss=4.43e+00, Inv=4.43e+00, For=1.24e+01, Power=1.38e+00
+  [eval] val_mse=1.264e+00  (n=7498)
+Epoch 00018: Time=   8.0s, Loss=4.31e+00, Inv=4.31e+00, For=1.32e+01, Power=1.37e+00
+  [eval] val_mse=1.222e+00  (n=7498)
+Epoch 00019: Time=   8.2s, Loss=4.22e+00, Inv=4.22e+00, For=1.39e+01, Power=1.36e+00
+  [eval] val_mse=1.182e+00  (n=7498)
+Epoch 00020: Time=   8.3s, Loss=4.14e+00, Inv=4.14e+00, For=1.48e+01, Power=1.35e+00
+  [eval] val_mse=1.158e+00  (n=7498)
+Epoch 00021: Time=   8.4s, Loss=4.08e+00, Inv=4.08e+00, For=1.58e+01, Power=1.35e+00
+  [eval] val_mse=1.127e+00  (n=7498)
+Epoch 00022: Time=   8.5s, Loss=4.02e+00, Inv=4.02e+00, For=1.65e+01, Power=1.34e+00
+  [eval] val_mse=1.108e+00  (n=7498)
+Epoch 00023: Time=   8.6s, Loss=3.97e+00, Inv=3.97e+00, For=1.73e+01, Power=1.34e+00
+  [eval] val_mse=1.081e+00  (n=7498)
+Epoch 00024: Time=   8.7s, Loss=3.92e+00, Inv=3.92e+00, For=1.82e+01, Power=1.34e+00
+  [eval] val_mse=1.062e+00  (n=7498)
+Epoch 00025: Time=   8.9s, Loss=3.88e+00, Inv=3.88e+00, For=1.91e+01, Power=1.33e+00
+  [eval] val_mse=1.043e+00  (n=7498)
+Epoch 00026: Time=   9.0s, Loss=3.85e+00, Inv=3.85e+00, For=2.00e+01, Power=1.33e+00
+  [eval] val_mse=1.027e+00  (n=7498)
+Epoch 00027: Time=   9.1s, Loss=3.82e+00, Inv=3.82e+00, For=2.09e+01, Power=1.33e+00
+  [eval] val_mse=1.009e+00  (n=7498)
+Epoch 00028: Time=   9.2s, Loss=3.79e+00, Inv=3.79e+00, For=2.19e+01, Power=1.33e+00
+  [eval] val_mse=1.000e+00  (n=7498)
+Epoch 00029: Time=   9.3s, Loss=3.77e+00, Inv=3.77e+00, For=2.27e+01, Power=1.33e+00
+  [eval] val_mse=9.897e-01  (n=7498)
+Epoch 00030: Time=   9.4s, Loss=3.74e+00, Inv=3.74e+00, For=2.37e+01, Power=1.32e+00
+  [eval] val_mse=9.751e-01  (n=7498)
+Epoch 00031: Time=   9.6s, Loss=3.72e+00, Inv=3.72e+00, For=2.47e+01, Power=1.32e+00
+  [eval] val_mse=9.644e-01  (n=7498)
+Epoch 00032: Time=   9.7s, Loss=3.70e+00, Inv=3.70e+00, For=2.56e+01, Power=1.32e+00
+  [eval] val_mse=9.519e-01  (n=7498)
+Epoch 00033: Time=   9.8s, Loss=3.68e+00, Inv=3.68e+00, For=2.67e+01, Power=1.32e+00
+  [eval] val_mse=9.402e-01  (n=7498)
+Epoch 00034: Time=   9.9s, Loss=3.67e+00, Inv=3.67e+00, For=2.78e+01, Power=1.32e+00
+  [eval] val_mse=9.381e-01  (n=7498)
+Epoch 00035: Time=  10.0s, Loss=3.65e+00, Inv=3.65e+00, For=2.88e+01, Power=1.32e+00
+  [eval] val_mse=9.221e-01  (n=7498)
+Epoch 00036: Time=  10.1s, Loss=3.64e+00, Inv=3.64e+00, For=3.00e+01, Power=1.31e+00
+  [eval] val_mse=9.226e-01  (n=7498)
+Epoch 00037: Time=  10.3s, Loss=3.63e+00, Inv=3.63e+00, For=3.12e+01, Power=1.31e+00
+  [eval] val_mse=9.102e-01  (n=7498)
+Epoch 00038: Time=  10.4s, Loss=3.62e+00, Inv=3.62e+00, For=3.22e+01, Power=1.31e+00
+  [eval] val_mse=9.014e-01  (n=7498)
+Epoch 00039: Time=  10.5s, Loss=3.60e+00, Inv=3.60e+00, For=3.34e+01, Power=1.31e+00
+  [eval] val_mse=8.995e-01  (n=7498)
+Epoch 00040: Time=  10.6s, Loss=3.59e+00, Inv=3.59e+00, For=3.47e+01, Power=1.31e+00
+  [eval] val_mse=8.937e-01  (n=7498)
+Epoch 00041: Time=  10.7s, Loss=3.58e+00, Inv=3.58e+00, For=3.58e+01, Power=1.31e+00
+  [eval] val_mse=8.840e-01  (n=7498)
+Epoch 00042: Time=  10.8s, Loss=3.58e+00, Inv=3.58e+00, For=3.73e+01, Power=1.31e+00
+  [eval] val_mse=8.788e-01  (n=7498)
+Epoch 00043: Time=  11.0s, Loss=3.57e+00, Inv=3.57e+00, For=3.83e+01, Power=1.31e+00
+  [eval] val_mse=8.823e-01  (n=7498)
+Epoch 00044: Time=  11.1s, Loss=3.56e+00, Inv=3.56e+00, For=3.98e+01, Power=1.30e+00
+  [eval] val_mse=8.668e-01  (n=7498)
+Epoch 00045: Time=  11.2s, Loss=3.55e+00, Inv=3.55e+00, For=4.11e+01, Power=1.30e+00
+  [eval] val_mse=8.672e-01  (n=7498)
+Epoch 00046: Time=  11.3s, Loss=3.54e+00, Inv=3.54e+00, For=4.24e+01, Power=1.30e+00
+  [eval] val_mse=8.640e-01  (n=7498)
+Epoch 00047: Time=  11.4s, Loss=3.54e+00, Inv=3.54e+00, For=4.35e+01, Power=1.31e+00
+  [eval] val_mse=8.608e-01  (n=7498)
+Epoch 00048: Time=  11.5s, Loss=3.53e+00, Inv=3.53e+00, For=4.52e+01, Power=1.30e+00
+  [eval] val_mse=8.619e-01  (n=7498)
+Epoch 00049: Time=  11.7s, Loss=3.52e+00, Inv=3.52e+00, For=4.66e+01, Power=1.30e+00
+  [eval] val_mse=8.546e-01  (n=7498)
+Epoch 00050: Time=  11.8s, Loss=3.52e+00, Inv=3.52e+00, For=4.82e+01, Power=1.30e+00
+  [eval] val_mse=8.509e-01  (n=7498)
+Epoch 00051: Time=  11.9s, Loss=3.51e+00, Inv=3.51e+00, For=4.94e+01, Power=1.30e+00
+  [eval] val_mse=8.494e-01  (n=7498)
+Epoch 00052: Time=  12.0s, Loss=3.51e+00, Inv=3.51e+00, For=5.07e+01, Power=1.30e+00
+  [eval] val_mse=8.497e-01  (n=7498)
+Epoch 00053: Time=  12.1s, Loss=3.50e+00, Inv=3.50e+00, For=5.25e+01, Power=1.30e+00
+  [eval] val_mse=8.450e-01  (n=7498)
+Epoch 00054: Time=  12.2s, Loss=3.49e+00, Inv=3.49e+00, For=5.39e+01, Power=1.30e+00
+  [eval] val_mse=8.435e-01  (n=7498)
+Epoch 00055: Time=  12.4s, Loss=3.49e+00, Inv=3.49e+00, For=5.55e+01, Power=1.30e+00
+  [eval] val_mse=8.385e-01  (n=7498)
+Epoch 00056: Time=  12.5s, Loss=3.48e+00, Inv=3.48e+00, For=5.70e+01, Power=1.30e+00
+  [eval] val_mse=8.380e-01  (n=7498)
+Epoch 00057: Time=  12.6s, Loss=3.48e+00, Inv=3.48e+00, For=5.87e+01, Power=1.30e+00
+  [eval] val_mse=8.334e-01  (n=7498)
+Epoch 00058: Time=  12.7s, Loss=3.48e+00, Inv=3.48e+00, For=6.00e+01, Power=1.30e+00
+  [eval] val_mse=8.312e-01  (n=7498)
+Epoch 00059: Time=  12.8s, Loss=3.47e+00, Inv=3.47e+00, For=6.16e+01, Power=1.30e+00
+  [eval] val_mse=8.294e-01  (n=7498)
+Epoch 00060: Time=  12.9s, Loss=3.47e+00, Inv=3.47e+00, For=6.34e+01, Power=1.30e+00
+  [eval] val_mse=8.259e-01  (n=7498)
+Epoch 00061: Time=  13.1s, Loss=3.46e+00, Inv=3.46e+00, For=6.48e+01, Power=1.30e+00
+  [eval] val_mse=8.222e-01  (n=7498)
+Epoch 00062: Time=  13.2s, Loss=3.46e+00, Inv=3.46e+00, For=6.69e+01, Power=1.30e+00
+  [eval] val_mse=8.238e-01  (n=7498)
+Epoch 00063: Time=  13.3s, Loss=3.46e+00, Inv=3.46e+00, For=6.84e+01, Power=1.30e+00
+  [eval] val_mse=8.232e-01  (n=7498)
+Epoch 00064: Time=  13.4s, Loss=3.46e+00, Inv=3.46e+00, For=6.97e+01, Power=1.30e+00
+  [eval] val_mse=8.230e-01  (n=7498)
+Epoch 00065: Time=  13.5s, Loss=3.45e+00, Inv=3.45e+00, For=7.18e+01, Power=1.30e+00
+  [eval] val_mse=8.199e-01  (n=7498)
+Epoch 00066: Time=  13.6s, Loss=3.45e+00, Inv=3.45e+00, For=7.36e+01, Power=1.30e+00
+  [eval] val_mse=8.108e-01  (n=7498)
+Epoch 00067: Time=  13.8s, Loss=3.44e+00, Inv=3.44e+00, For=7.49e+01, Power=1.30e+00
+  [eval] val_mse=8.096e-01  (n=7498)
+Epoch 00068: Time=  13.9s, Loss=3.44e+00, Inv=3.44e+00, For=7.71e+01, Power=1.30e+00
+  [eval] val_mse=8.209e-01  (n=7498)
+Epoch 00069: Time=  14.0s, Loss=3.44e+00, Inv=3.44e+00, For=7.90e+01, Power=1.30e+00
+  [eval] val_mse=8.136e-01  (n=7498)
+Epoch 00070: Time=  14.1s, Loss=3.43e+00, Inv=3.43e+00, For=8.08e+01, Power=1.30e+00
+  [eval] val_mse=8.069e-01  (n=7498)
+Epoch 00071: Time=  14.2s, Loss=3.43e+00, Inv=3.43e+00, For=8.25e+01, Power=1.30e+00
+  [eval] val_mse=8.076e-01  (n=7498)
+Epoch 00072: Time=  14.3s, Loss=3.43e+00, Inv=3.43e+00, For=8.44e+01, Power=1.30e+00
+  [eval] val_mse=8.039e-01  (n=7498)
+Epoch 00073: Time=  14.5s, Loss=3.43e+00, Inv=3.43e+00, For=8.67e+01, Power=1.30e+00
+  [eval] val_mse=7.977e-01  (n=7498)
+Epoch 00074: Time=  14.6s, Loss=3.43e+00, Inv=3.43e+00, For=8.84e+01, Power=1.30e+00
+  [eval] val_mse=8.030e-01  (n=7498)
+Epoch 00075: Time=  14.7s, Loss=3.42e+00, Inv=3.42e+00, For=9.00e+01, Power=1.30e+00
+  [eval] val_mse=7.975e-01  (n=7498)
+Epoch 00076: Time=  14.8s, Loss=3.42e+00, Inv=3.42e+00, For=9.24e+01, Power=1.30e+00
+  [eval] val_mse=7.949e-01  (n=7498)
+Epoch 00077: Time=  14.9s, Loss=3.41e+00, Inv=3.41e+00, For=9.37e+01, Power=1.30e+00
+  [eval] val_mse=7.921e-01  (n=7498)
+Epoch 00078: Time=  15.0s, Loss=3.41e+00, Inv=3.41e+00, For=9.63e+01, Power=1.30e+00
+  [eval] val_mse=7.953e-01  (n=7498)
+Epoch 00079: Time=  15.2s, Loss=3.41e+00, Inv=3.41e+00, For=9.92e+01, Power=1.30e+00
+  [eval] val_mse=7.899e-01  (n=7498)
+Epoch 00080: Time=  15.3s, Loss=3.41e+00, Inv=3.41e+00, For=1.01e+02, Power=1.30e+00
+  [eval] val_mse=7.850e-01  (n=7498)
+Epoch 00081: Time=  15.4s, Loss=3.41e+00, Inv=3.41e+00, For=1.02e+02, Power=1.30e+00
+  [eval] val_mse=7.866e-01  (n=7498)
+Epoch 00082: Time=  15.5s, Loss=3.41e+00, Inv=3.41e+00, For=1.06e+02, Power=1.29e+00
+  [eval] val_mse=7.913e-01  (n=7498)
+Epoch 00083: Time=  15.6s, Loss=3.40e+00, Inv=3.40e+00, For=1.08e+02, Power=1.30e+00
+  [eval] val_mse=7.837e-01  (n=7498)
+Epoch 00084: Time=  15.8s, Loss=3.40e+00, Inv=3.40e+00, For=1.10e+02, Power=1.30e+00
+  [eval] val_mse=7.863e-01  (n=7498)
+Epoch 00085: Time=  15.9s, Loss=3.40e+00, Inv=3.40e+00, For=1.13e+02, Power=1.30e+00
+  [eval] val_mse=7.881e-01  (n=7498)
+Epoch 00086: Time=  16.0s, Loss=3.39e+00, Inv=3.39e+00, For=1.14e+02, Power=1.30e+00
+  [eval] val_mse=7.800e-01  (n=7498)
+Epoch 00087: Time=  16.1s, Loss=3.39e+00, Inv=3.39e+00, For=1.18e+02, Power=1.30e+00
+  [eval] val_mse=7.740e-01  (n=7498)
+Epoch 00088: Time=  16.2s, Loss=3.39e+00, Inv=3.39e+00, For=1.20e+02, Power=1.30e+00
+  [eval] val_mse=7.811e-01  (n=7498)
+Epoch 00089: Time=  16.3s, Loss=3.39e+00, Inv=3.39e+00, For=1.22e+02, Power=1.30e+00
+  [eval] val_mse=7.758e-01  (n=7498)
+Epoch 00090: Time=  16.5s, Loss=3.38e+00, Inv=3.38e+00, For=1.26e+02, Power=1.29e+00
+  [eval] val_mse=7.695e-01  (n=7498)
+Epoch 00091: Time=  16.6s, Loss=3.38e+00, Inv=3.38e+00, For=1.29e+02, Power=1.30e+00
+  [eval] val_mse=7.827e-01  (n=7498)
+Epoch 00092: Time=  16.7s, Loss=3.38e+00, Inv=3.38e+00, For=1.31e+02, Power=1.30e+00
+  [eval] val_mse=7.824e-01  (n=7498)
+Epoch 00093: Time=  16.8s, Loss=3.38e+00, Inv=3.38e+00, For=1.34e+02, Power=1.30e+00
+  [eval] val_mse=7.594e-01  (n=7498)
+Epoch 00094: Time=  16.9s, Loss=3.38e+00, Inv=3.38e+00, For=1.38e+02, Power=1.29e+00
+  [eval] val_mse=7.675e-01  (n=7498)
+Epoch 00095: Time=  17.0s, Loss=3.38e+00, Inv=3.38e+00, For=1.42e+02, Power=1.30e+00
+  [eval] val_mse=7.691e-01  (n=7498)
+Epoch 00096: Time=  17.2s, Loss=3.38e+00, Inv=3.38e+00, For=1.44e+02, Power=1.30e+00
+  [eval] val_mse=7.642e-01  (n=7498)
+Epoch 00097: Time=  17.3s, Loss=3.37e+00, Inv=3.37e+00, For=1.48e+02, Power=1.29e+00
+  [eval] val_mse=7.612e-01  (n=7498)
+Epoch 00098: Time=  17.4s, Loss=3.37e+00, Inv=3.37e+00, For=1.49e+02, Power=1.30e+00
+  [eval] val_mse=7.660e-01  (n=7498)
+Epoch 00099: Time=  17.5s, Loss=3.37e+00, Inv=3.37e+00, For=1.56e+02, Power=1.30e+00
+  [eval] val_mse=7.689e-01  (n=7498)
+Epoch 00100: Time=  17.6s, Loss=3.37e+00, Inv=3.37e+00, For=1.58e+02, Power=1.30e+00
+  [eval] val_mse=7.585e-01  (n=7498)
+Epoch 00101: Time=  17.7s, Loss=3.36e+00, Inv=3.36e+00, For=1.61e+02, Power=1.29e+00
+  [eval] val_mse=7.558e-01  (n=7498)
+Epoch 00102: Time=  17.9s, Loss=3.36e+00, Inv=3.36e+00, For=1.65e+02, Power=1.30e+00
+  [eval] val_mse=7.680e-01  (n=7498)
+Epoch 00103: Time=  18.0s, Loss=3.36e+00, Inv=3.36e+00, For=1.69e+02, Power=1.30e+00
+  [eval] val_mse=7.568e-01  (n=7498)
+Epoch 00104: Time=  18.1s, Loss=3.36e+00, Inv=3.36e+00, For=1.77e+02, Power=1.30e+00
+  [eval] val_mse=7.618e-01  (n=7498)
+Epoch 00105: Time=  18.2s, Loss=3.36e+00, Inv=3.36e+00, For=1.76e+02, Power=1.30e+00
+  [eval] val_mse=7.564e-01  (n=7498)
+Epoch 00106: Time=  18.3s, Loss=3.36e+00, Inv=3.36e+00, For=1.84e+02, Power=1.30e+00
+  [eval] val_mse=7.647e-01  (n=7498)
+Epoch 00107: Time=  18.4s, Loss=3.36e+00, Inv=3.36e+00, For=1.85e+02, Power=1.30e+00
+  [eval] val_mse=7.570e-01  (n=7498)
+Epoch 00108: Time=  18.6s, Loss=3.35e+00, Inv=3.35e+00, For=1.93e+02, Power=1.30e+00
+  [eval] val_mse=7.582e-01  (n=7498)
+Epoch 00109: Time=  18.7s, Loss=3.35e+00, Inv=3.35e+00, For=1.96e+02, Power=1.30e+00
+  [eval] val_mse=7.521e-01  (n=7498)
+Epoch 00110: Time=  18.8s, Loss=3.35e+00, Inv=3.35e+00, For=2.01e+02, Power=1.30e+00
+  [eval] val_mse=7.487e-01  (n=7498)
+Epoch 00111: Time=  18.9s, Loss=3.35e+00, Inv=3.35e+00, For=2.05e+02, Power=1.30e+00
+  [eval] val_mse=7.485e-01  (n=7498)
+Epoch 00112: Time=  19.0s, Loss=3.35e+00, Inv=3.35e+00, For=2.11e+02, Power=1.30e+00
+  [eval] val_mse=7.506e-01  (n=7498)
+Epoch 00113: Time=  19.1s, Loss=3.35e+00, Inv=3.35e+00, For=2.18e+02, Power=1.30e+00
+  [eval] val_mse=7.514e-01  (n=7498)
+Epoch 00114: Time=  19.3s, Loss=3.35e+00, Inv=3.35e+00, For=2.20e+02, Power=1.30e+00
+  [eval] val_mse=7.474e-01  (n=7498)
+Epoch 00115: Time=  19.4s, Loss=3.34e+00, Inv=3.34e+00, For=2.29e+02, Power=1.29e+00
+  [eval] val_mse=7.526e-01  (n=7498)
+Epoch 00116: Time=  19.5s, Loss=3.34e+00, Inv=3.34e+00, For=2.29e+02, Power=1.30e+00
+  [eval] val_mse=7.418e-01  (n=7498)
+Epoch 00117: Time=  19.6s, Loss=3.34e+00, Inv=3.34e+00, For=2.38e+02, Power=1.30e+00
+  [eval] val_mse=7.434e-01  (n=7498)
+Epoch 00118: Time=  19.7s, Loss=3.34e+00, Inv=3.34e+00, For=2.47e+02, Power=1.30e+00
+  [eval] val_mse=7.532e-01  (n=7498)
+Epoch 00119: Time=  19.8s, Loss=3.34e+00, Inv=3.34e+00, For=2.49e+02, Power=1.30e+00
+  [eval] val_mse=7.498e-01  (n=7498)
+Epoch 00120: Time=  20.0s, Loss=3.34e+00, Inv=3.34e+00, For=2.53e+02, Power=1.30e+00
+  [eval] val_mse=7.426e-01  (n=7498)
+Epoch 00121: Time=  20.1s, Loss=3.34e+00, Inv=3.34e+00, For=2.56e+02, Power=1.30e+00
+  [eval] val_mse=7.484e-01  (n=7498)
+Epoch 00122: Time=  20.2s, Loss=3.33e+00, Inv=3.33e+00, For=2.65e+02, Power=1.30e+00
+  [eval] val_mse=7.514e-01  (n=7498)
+Epoch 00123: Time=  20.3s, Loss=3.34e+00, Inv=3.34e+00, For=2.62e+02, Power=1.30e+00
+  [eval] val_mse=7.454e-01  (n=7498)
+Epoch 00124: Time=  20.4s, Loss=3.33e+00, Inv=3.33e+00, For=2.73e+02, Power=1.30e+00
+  [eval] val_mse=7.418e-01  (n=7498)
+Epoch 00125: Time=  20.5s, Loss=3.33e+00, Inv=3.33e+00, For=2.79e+02, Power=1.30e+00
+  [eval] val_mse=7.405e-01  (n=7498)
+Epoch 00126: Time=  20.7s, Loss=3.33e+00, Inv=3.33e+00, For=2.85e+02, Power=1.30e+00
+  [eval] val_mse=7.409e-01  (n=7498)
+Epoch 00127: Time=  20.8s, Loss=3.33e+00, Inv=3.33e+00, For=2.90e+02, Power=1.30e+00
+  [eval] val_mse=7.426e-01  (n=7498)
+Epoch 00128: Time=  20.9s, Loss=3.32e+00, Inv=3.32e+00, For=2.95e+02, Power=1.30e+00
+  [eval] val_mse=7.410e-01  (n=7498)
+Epoch 00129: Time=  21.0s, Loss=3.32e+00, Inv=3.32e+00, For=2.92e+02, Power=1.30e+00
+  [eval] val_mse=7.439e-01  (n=7498)
+Epoch 00130: Time=  21.1s, Loss=3.32e+00, Inv=3.32e+00, For=3.05e+02, Power=1.30e+00
+  [eval] val_mse=7.502e-01  (n=7498)
+Epoch 00131: Time=  21.2s, Loss=3.32e+00, Inv=3.32e+00, For=3.16e+02, Power=1.30e+00
+  [eval] val_mse=7.426e-01  (n=7498)
+Epoch 00132: Time=  21.4s, Loss=3.32e+00, Inv=3.32e+00, For=3.19e+02, Power=1.30e+00
+  [eval] val_mse=7.425e-01  (n=7498)
+Epoch 00133: Time=  21.5s, Loss=3.32e+00, Inv=3.32e+00, For=3.29e+02, Power=1.30e+00
+  [eval] val_mse=7.496e-01  (n=7498)
+Epoch 00134: Time=  21.6s, Loss=3.32e+00, Inv=3.32e+00, For=3.30e+02, Power=1.30e+00
+  [eval] val_mse=7.439e-01  (n=7498)
+Epoch 00135: Time=  21.7s, Loss=3.32e+00, Inv=3.32e+00, For=3.29e+02, Power=1.30e+00
+  [eval] val_mse=7.425e-01  (n=7498)
+  [early_stop] stop at epoch=135 (best_epoch=125, best_val_mse=7.405e-01)
+Saved DeLaN checkpoint: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+Saved training history: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3__train_history.csv
+
+################################################
+Evaluating DeLaN | run=UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  [val] Torque RMSE = 3.513e-01
+Torque MSE  = 1.053e-01
+Torque RMSE = 3.245e-01
+Per-joint MSE : 1.385e-01 2.158e-01 9.201e-02 6.751e-02 5.781e-02 6.031e-02
+Per-joint RMSE: 3.721e-01 4.645e-01 3.033e-01 2.598e-01 2.404e-01 2.456e-01
+Comp Time per Sample = 1.653e-04s / 6050.3Hz
+Saved metrics TXT: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics_test.txt
+Saved metrics JSON: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics.json
+
+#####################################################################################################################################################################################################################################################################################################################
+### DELAN VARIANT: hp_preset=lutter_like_256_d3 delan_seed=2                                                                                                                                                                                                                                                      ###
+### ckpt=/workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax ###
+#####################################################################################################################################################################################################################################################################################################################
+
+######################
+### 2) DELAN TRAIN ###
+######################
+
+========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T delan_jax bash -lc 'python3 /workspace/delan_jax/scripts/rbyt_train_delan_jax.py --npz /workspace/shared/data/preprocessed/delan_UR3_Load0_cc_K84_seed2_dataset/delan_UR3_Load0_cc_K84_seed2_dataset.npz -t structured -s 2 -r 0 --hp_preset lutter_like_256_d3 --epochs 200 --eval_every 1 --log_every 1 --early_stop True --early_stop_patience 10 --early_stop_min_delta 0.0 --early_stop_warmup_evals 0 --save_path /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax' ===
+========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+mkdir -p failed for path /.config/matplotlib: [Errno 13] Permission denied: '/.config'
+Matplotlib created a temporary cache directory at /tmp/matplotlib-8pkokhwj because there was an issue with the default path (/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+Final hyper: {'dataset': 'UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3', 'n_width': 256, 'n_depth': 3, 'n_minibatch': 1024, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'softplus', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 200, 'lagrangian_type': <function structured_lagrangian_fn at 0x7026c41b28c0>}
+
+
+################################################
+DeLaN run: UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  model_dir = /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  ckpt_path = /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+  type = structured
+  hp_preset = lutter_like_256_d3
+################################################
+
+
+################################################
+Dataset: delan_UR3_Load0_cc_K84_seed2_dataset.npz
+  npz = /workspace/shared/data/preprocessed/delan_UR3_Load0_cc_K84_seed2_dataset/delan_UR3_Load0_cc_K84_seed2_dataset.npz
+   dt ≈ 0.01721744349298553
+  dof = 6
+  Train trajectories = 59
+  Val trajectories   = 8
+  Test trajectories  = 17
+  Train samples = 72196
+  Test samples  = 13697
+################################################
+
+2026-01-29 15:19:50.619842: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-29 15:19:52.685202: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+################################################
+Training DeLaN | run=UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3 | type=structured | dof=6
+################################################
+Epoch 00001: Time=   4.7s, Loss=8.54e+02, Inv=8.54e+02, For=5.22e+00, Power=1.61e+02
+  [eval] val_mse=1.676e+01  (n=7498)
+Epoch 00002: Time=   6.6s, Loss=2.87e+01, Inv=2.87e+01, For=5.26e+00, Power=5.56e+00
+  [eval] val_mse=6.874e+00  (n=7498)
+Epoch 00003: Time=   6.7s, Loss=1.45e+01, Inv=1.45e+01, For=5.92e+00, Power=2.91e+00
+  [eval] val_mse=4.053e+00  (n=7498)
+Epoch 00004: Time=   6.8s, Loss=9.67e+00, Inv=9.67e+00, For=6.75e+00, Power=2.12e+00
+  [eval] val_mse=2.703e+00  (n=7498)
+Epoch 00005: Time=   6.9s, Loss=7.45e+00, Inv=7.45e+00, For=7.77e+00, Power=1.79e+00
+  [eval] val_mse=2.094e+00  (n=7498)
+Epoch 00006: Time=   7.0s, Loss=6.26e+00, Inv=6.26e+00, For=9.06e+00, Power=1.61e+00
+  [eval] val_mse=1.736e+00  (n=7498)
+Epoch 00007: Time=   7.1s, Loss=5.56e+00, Inv=5.56e+00, For=1.05e+01, Power=1.52e+00
+  [eval] val_mse=1.531e+00  (n=7498)
+Epoch 00008: Time=   7.2s, Loss=5.10e+00, Inv=5.10e+00, For=1.22e+01, Power=1.46e+00
+  [eval] val_mse=1.396e+00  (n=7498)
+Epoch 00009: Time=   7.3s, Loss=4.78e+00, Inv=4.78e+00, For=1.38e+01, Power=1.42e+00
+  [eval] val_mse=1.283e+00  (n=7498)
+Epoch 00010: Time=   7.4s, Loss=4.54e+00, Inv=4.54e+00, For=1.56e+01, Power=1.40e+00
+  [eval] val_mse=1.213e+00  (n=7498)
+Epoch 00011: Time=   7.5s, Loss=4.37e+00, Inv=4.37e+00, For=1.71e+01, Power=1.38e+00
+  [eval] val_mse=1.144e+00  (n=7498)
+Epoch 00012: Time=   7.6s, Loss=4.23e+00, Inv=4.23e+00, For=1.89e+01, Power=1.37e+00
+  [eval] val_mse=1.105e+00  (n=7498)
+Epoch 00013: Time=   7.7s, Loss=4.13e+00, Inv=4.13e+00, For=2.07e+01, Power=1.36e+00
+  [eval] val_mse=1.057e+00  (n=7498)
+Epoch 00014: Time=   7.8s, Loss=4.05e+00, Inv=4.05e+00, For=2.22e+01, Power=1.36e+00
+  [eval] val_mse=1.026e+00  (n=7498)
+Epoch 00015: Time=   7.9s, Loss=3.98e+00, Inv=3.98e+00, For=2.39e+01, Power=1.35e+00
+  [eval] val_mse=1.003e+00  (n=7498)
+Epoch 00016: Time=   8.1s, Loss=3.93e+00, Inv=3.93e+00, For=2.56e+01, Power=1.35e+00
+  [eval] val_mse=9.748e-01  (n=7498)
+Epoch 00017: Time=   8.2s, Loss=3.89e+00, Inv=3.89e+00, For=2.70e+01, Power=1.35e+00
+  [eval] val_mse=9.526e-01  (n=7498)
+Epoch 00018: Time=   8.3s, Loss=3.85e+00, Inv=3.85e+00, For=2.84e+01, Power=1.35e+00
+  [eval] val_mse=9.381e-01  (n=7498)
+Epoch 00019: Time=   8.4s, Loss=3.82e+00, Inv=3.82e+00, For=2.98e+01, Power=1.34e+00
+  [eval] val_mse=9.117e-01  (n=7498)
+Epoch 00020: Time=   8.5s, Loss=3.79e+00, Inv=3.79e+00, For=3.14e+01, Power=1.34e+00
+  [eval] val_mse=8.977e-01  (n=7498)
+Epoch 00021: Time=   8.6s, Loss=3.76e+00, Inv=3.76e+00, For=3.25e+01, Power=1.34e+00
+  [eval] val_mse=8.924e-01  (n=7498)
+Epoch 00022: Time=   8.7s, Loss=3.74e+00, Inv=3.74e+00, For=3.37e+01, Power=1.34e+00
+  [eval] val_mse=8.776e-01  (n=7498)
+Epoch 00023: Time=   8.8s, Loss=3.72e+00, Inv=3.72e+00, For=3.49e+01, Power=1.34e+00
+  [eval] val_mse=8.674e-01  (n=7498)
+Epoch 00024: Time=   8.9s, Loss=3.71e+00, Inv=3.71e+00, For=3.61e+01, Power=1.33e+00
+  [eval] val_mse=8.518e-01  (n=7498)
+Epoch 00025: Time=   9.0s, Loss=3.69e+00, Inv=3.69e+00, For=3.73e+01, Power=1.33e+00
+  [eval] val_mse=8.409e-01  (n=7498)
+Epoch 00026: Time=   9.1s, Loss=3.67e+00, Inv=3.67e+00, For=3.81e+01, Power=1.33e+00
+  [eval] val_mse=8.364e-01  (n=7498)
+Epoch 00027: Time=   9.2s, Loss=3.66e+00, Inv=3.66e+00, For=3.96e+01, Power=1.33e+00
+  [eval] val_mse=8.306e-01  (n=7498)
+Epoch 00028: Time=   9.3s, Loss=3.64e+00, Inv=3.64e+00, For=4.04e+01, Power=1.32e+00
+  [eval] val_mse=8.226e-01  (n=7498)
+Epoch 00029: Time=   9.4s, Loss=3.63e+00, Inv=3.63e+00, For=4.15e+01, Power=1.32e+00
+  [eval] val_mse=8.123e-01  (n=7498)
+Epoch 00030: Time=   9.5s, Loss=3.62e+00, Inv=3.62e+00, For=4.28e+01, Power=1.32e+00
+  [eval] val_mse=8.120e-01  (n=7498)
+Epoch 00031: Time=   9.6s, Loss=3.61e+00, Inv=3.61e+00, For=4.36e+01, Power=1.32e+00
+  [eval] val_mse=7.998e-01  (n=7498)
+Epoch 00032: Time=   9.7s, Loss=3.60e+00, Inv=3.60e+00, For=4.49e+01, Power=1.32e+00
+  [eval] val_mse=7.945e-01  (n=7498)
+Epoch 00033: Time=   9.8s, Loss=3.59e+00, Inv=3.59e+00, For=4.59e+01, Power=1.32e+00
+  [eval] val_mse=7.891e-01  (n=7498)
+Epoch 00034: Time=   9.9s, Loss=3.58e+00, Inv=3.58e+00, For=4.71e+01, Power=1.31e+00
+  [eval] val_mse=7.878e-01  (n=7498)
+Epoch 00035: Time=  10.0s, Loss=3.57e+00, Inv=3.57e+00, For=4.81e+01, Power=1.31e+00
+  [eval] val_mse=7.783e-01  (n=7498)
+Epoch 00036: Time=  10.1s, Loss=3.56e+00, Inv=3.56e+00, For=4.96e+01, Power=1.31e+00
+  [eval] val_mse=7.766e-01  (n=7498)
+Epoch 00037: Time=  10.2s, Loss=3.55e+00, Inv=3.55e+00, For=5.05e+01, Power=1.31e+00
+  [eval] val_mse=7.702e-01  (n=7498)
+Epoch 00038: Time=  10.3s, Loss=3.54e+00, Inv=3.54e+00, For=5.16e+01, Power=1.31e+00
+  [eval] val_mse=7.674e-01  (n=7498)
+Epoch 00039: Time=  10.4s, Loss=3.54e+00, Inv=3.54e+00, For=5.29e+01, Power=1.31e+00
+  [eval] val_mse=7.667e-01  (n=7498)
+Epoch 00040: Time=  10.5s, Loss=3.53e+00, Inv=3.53e+00, For=5.42e+01, Power=1.31e+00
+  [eval] val_mse=7.648e-01  (n=7498)
+Epoch 00041: Time=  10.6s, Loss=3.52e+00, Inv=3.52e+00, For=5.51e+01, Power=1.30e+00
+  [eval] val_mse=7.636e-01  (n=7498)
+Epoch 00042: Time=  10.7s, Loss=3.52e+00, Inv=3.52e+00, For=5.60e+01, Power=1.31e+00
+  [eval] val_mse=7.628e-01  (n=7498)
+Epoch 00043: Time=  10.8s, Loss=3.51e+00, Inv=3.51e+00, For=5.76e+01, Power=1.30e+00
+  [eval] val_mse=7.548e-01  (n=7498)
+Epoch 00044: Time=  10.9s, Loss=3.50e+00, Inv=3.50e+00, For=5.88e+01, Power=1.30e+00
+  [eval] val_mse=7.572e-01  (n=7498)
+Epoch 00045: Time=  11.0s, Loss=3.50e+00, Inv=3.50e+00, For=6.00e+01, Power=1.30e+00
+  [eval] val_mse=7.531e-01  (n=7498)
+Epoch 00046: Time=  11.1s, Loss=3.50e+00, Inv=3.50e+00, For=6.13e+01, Power=1.30e+00
+  [eval] val_mse=7.487e-01  (n=7498)
+Epoch 00047: Time=  11.2s, Loss=3.49e+00, Inv=3.49e+00, For=6.18e+01, Power=1.30e+00
+  [eval] val_mse=7.480e-01  (n=7498)
+Epoch 00048: Time=  11.3s, Loss=3.49e+00, Inv=3.49e+00, For=6.36e+01, Power=1.30e+00
+  [eval] val_mse=7.461e-01  (n=7498)
+Epoch 00049: Time=  11.4s, Loss=3.48e+00, Inv=3.48e+00, For=6.45e+01, Power=1.30e+00
+  [eval] val_mse=7.476e-01  (n=7498)
+Epoch 00050: Time=  11.6s, Loss=3.47e+00, Inv=3.47e+00, For=6.54e+01, Power=1.30e+00
+  [eval] val_mse=7.466e-01  (n=7498)
+Epoch 00051: Time=  11.7s, Loss=3.47e+00, Inv=3.47e+00, For=6.68e+01, Power=1.30e+00
+  [eval] val_mse=7.416e-01  (n=7498)
+Epoch 00052: Time=  11.8s, Loss=3.46e+00, Inv=3.46e+00, For=6.83e+01, Power=1.30e+00
+  [eval] val_mse=7.405e-01  (n=7498)
+Epoch 00053: Time=  11.9s, Loss=3.46e+00, Inv=3.46e+00, For=6.92e+01, Power=1.30e+00
+  [eval] val_mse=7.447e-01  (n=7498)
+Epoch 00054: Time=  12.0s, Loss=3.46e+00, Inv=3.46e+00, For=7.07e+01, Power=1.30e+00
+  [eval] val_mse=7.403e-01  (n=7498)
+Epoch 00055: Time=  12.1s, Loss=3.45e+00, Inv=3.45e+00, For=7.18e+01, Power=1.30e+00
+  [eval] val_mse=7.386e-01  (n=7498)
+Epoch 00056: Time=  12.3s, Loss=3.45e+00, Inv=3.45e+00, For=7.32e+01, Power=1.30e+00
+  [eval] val_mse=7.369e-01  (n=7498)
+Epoch 00057: Time=  12.4s, Loss=3.44e+00, Inv=3.44e+00, For=7.36e+01, Power=1.30e+00
+  [eval] val_mse=7.371e-01  (n=7498)
+Epoch 00058: Time=  12.5s, Loss=3.44e+00, Inv=3.44e+00, For=7.55e+01, Power=1.30e+00
+  [eval] val_mse=7.397e-01  (n=7498)
+Epoch 00059: Time=  12.6s, Loss=3.44e+00, Inv=3.44e+00, For=7.59e+01, Power=1.30e+00
+  [eval] val_mse=7.413e-01  (n=7498)
+Epoch 00060: Time=  12.7s, Loss=3.44e+00, Inv=3.44e+00, For=7.81e+01, Power=1.30e+00
+  [eval] val_mse=7.356e-01  (n=7498)
+Epoch 00061: Time=  12.8s, Loss=3.43e+00, Inv=3.43e+00, For=7.89e+01, Power=1.30e+00
+  [eval] val_mse=7.349e-01  (n=7498)
+Epoch 00062: Time=  12.9s, Loss=3.42e+00, Inv=3.42e+00, For=8.04e+01, Power=1.30e+00
+  [eval] val_mse=7.371e-01  (n=7498)
+Epoch 00063: Time=  13.0s, Loss=3.42e+00, Inv=3.42e+00, For=8.12e+01, Power=1.30e+00
+  [eval] val_mse=7.353e-01  (n=7498)
+Epoch 00064: Time=  13.1s, Loss=3.42e+00, Inv=3.42e+00, For=8.27e+01, Power=1.30e+00
+  [eval] val_mse=7.360e-01  (n=7498)
+Epoch 00065: Time=  13.2s, Loss=3.41e+00, Inv=3.41e+00, For=8.41e+01, Power=1.30e+00
+  [eval] val_mse=7.387e-01  (n=7498)
+Epoch 00066: Time=  13.3s, Loss=3.41e+00, Inv=3.41e+00, For=8.63e+01, Power=1.30e+00
+  [eval] val_mse=7.365e-01  (n=7498)
+Epoch 00067: Time=  13.4s, Loss=3.41e+00, Inv=3.41e+00, For=8.74e+01, Power=1.30e+00
+  [eval] val_mse=7.442e-01  (n=7498)
+Epoch 00068: Time=  13.5s, Loss=3.41e+00, Inv=3.41e+00, For=8.80e+01, Power=1.30e+00
+  [eval] val_mse=7.346e-01  (n=7498)
+Epoch 00069: Time=  13.6s, Loss=3.41e+00, Inv=3.41e+00, For=8.99e+01, Power=1.30e+00
+  [eval] val_mse=7.357e-01  (n=7498)
+Epoch 00070: Time=  13.7s, Loss=3.40e+00, Inv=3.40e+00, For=9.15e+01, Power=1.29e+00
+  [eval] val_mse=7.386e-01  (n=7498)
+Epoch 00071: Time=  13.8s, Loss=3.40e+00, Inv=3.40e+00, For=9.26e+01, Power=1.29e+00
+  [eval] val_mse=7.332e-01  (n=7498)
+Epoch 00072: Time=  13.9s, Loss=3.40e+00, Inv=3.40e+00, For=9.47e+01, Power=1.29e+00
+  [eval] val_mse=7.334e-01  (n=7498)
+Epoch 00073: Time=  14.0s, Loss=3.40e+00, Inv=3.40e+00, For=9.56e+01, Power=1.30e+00
+  [eval] val_mse=7.335e-01  (n=7498)
+Epoch 00074: Time=  14.1s, Loss=3.40e+00, Inv=3.40e+00, For=9.69e+01, Power=1.30e+00
+  [eval] val_mse=7.321e-01  (n=7498)
+Epoch 00075: Time=  14.2s, Loss=3.39e+00, Inv=3.39e+00, For=9.98e+01, Power=1.30e+00
+  [eval] val_mse=7.383e-01  (n=7498)
+Epoch 00076: Time=  14.3s, Loss=3.39e+00, Inv=3.39e+00, For=9.97e+01, Power=1.30e+00
+  [eval] val_mse=7.359e-01  (n=7498)
+Epoch 00077: Time=  14.4s, Loss=3.39e+00, Inv=3.39e+00, For=1.01e+02, Power=1.30e+00
+  [eval] val_mse=7.381e-01  (n=7498)
+Epoch 00078: Time=  14.5s, Loss=3.39e+00, Inv=3.39e+00, For=1.04e+02, Power=1.30e+00
+  [eval] val_mse=7.327e-01  (n=7498)
+Epoch 00079: Time=  14.6s, Loss=3.38e+00, Inv=3.38e+00, For=1.04e+02, Power=1.30e+00
+  [eval] val_mse=7.348e-01  (n=7498)
+Epoch 00080: Time=  14.7s, Loss=3.38e+00, Inv=3.38e+00, For=1.07e+02, Power=1.30e+00
+  [eval] val_mse=7.390e-01  (n=7498)
+Epoch 00081: Time=  14.8s, Loss=3.38e+00, Inv=3.38e+00, For=1.08e+02, Power=1.29e+00
+  [eval] val_mse=7.368e-01  (n=7498)
+Epoch 00082: Time=  14.9s, Loss=3.37e+00, Inv=3.37e+00, For=1.09e+02, Power=1.29e+00
+  [eval] val_mse=7.335e-01  (n=7498)
+Epoch 00083: Time=  15.1s, Loss=3.38e+00, Inv=3.38e+00, For=1.11e+02, Power=1.30e+00
+  [eval] val_mse=7.360e-01  (n=7498)
+Epoch 00084: Time=  15.2s, Loss=3.38e+00, Inv=3.38e+00, For=1.12e+02, Power=1.30e+00
+  [eval] val_mse=7.405e-01  (n=7498)
+  [early_stop] stop at epoch=84 (best_epoch=74, best_val_mse=7.321e-01)
+Saved DeLaN checkpoint: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+Saved training history: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3__train_history.csv
+
+################################################
+Evaluating DeLaN | run=UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  [val] Torque RMSE = 3.493e-01
+Torque MSE  = 1.037e-01
+Torque RMSE = 3.221e-01
+Per-joint MSE : 1.408e-01 2.036e-01 8.876e-02 6.954e-02 5.877e-02 6.104e-02
+Per-joint RMSE: 3.752e-01 4.513e-01 2.979e-01 2.637e-01 2.424e-01 2.471e-01
+Comp Time per Sample = 1.427e-04s / 7005.3Hz
+Saved metrics TXT: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics_test.txt
+Saved metrics JSON: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics.json
+
+#####################################################################################################################################################################################################################################################################################################################
+### DELAN VARIANT: hp_preset=lutter_like_256_d3 delan_seed=3                                                                                                                                                                                                                                                      ###
+### ckpt=/workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax ###
+#####################################################################################################################################################################################################################################################################################################################
+
+######################
+### 2) DELAN TRAIN ###
+######################
+
+========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T delan_jax bash -lc 'python3 /workspace/delan_jax/scripts/rbyt_train_delan_jax.py --npz /workspace/shared/data/preprocessed/delan_UR3_Load0_cc_K84_seed2_dataset/delan_UR3_Load0_cc_K84_seed2_dataset.npz -t structured -s 3 -r 0 --hp_preset lutter_like_256_d3 --epochs 200 --eval_every 1 --log_every 1 --early_stop True --early_stop_patience 10 --early_stop_min_delta 0.0 --early_stop_warmup_evals 0 --save_path /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax' ===
+========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+mkdir -p failed for path /.config/matplotlib: [Errno 13] Permission denied: '/.config'
+Matplotlib created a temporary cache directory at /tmp/matplotlib-vt48aclg because there was an issue with the default path (/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+Final hyper: {'dataset': 'UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3', 'n_width': 256, 'n_depth': 3, 'n_minibatch': 1024, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'softplus', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 200, 'lagrangian_type': <function structured_lagrangian_fn at 0x729e4f2828c0>}
+
+
+################################################
+DeLaN run: UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  model_dir = /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  ckpt_path = /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+  type = structured
+  hp_preset = lutter_like_256_d3
+################################################
+
+
+################################################
+Dataset: delan_UR3_Load0_cc_K84_seed2_dataset.npz
+  npz = /workspace/shared/data/preprocessed/delan_UR3_Load0_cc_K84_seed2_dataset/delan_UR3_Load0_cc_K84_seed2_dataset.npz
+   dt ≈ 0.01721744349298553
+  dof = 6
+  Train trajectories = 59
+  Val trajectories   = 8
+  Test trajectories  = 17
+  Train samples = 72196
+  Test samples  = 13697
+################################################
+
+2026-01-29 15:20:17.096738: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-29 15:20:19.131220: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+################################################
+Training DeLaN | run=UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3 | type=structured | dof=6
+################################################
+Epoch 00001: Time=   4.5s, Loss=2.17e+03, Inv=2.17e+03, For=5.42e+00, Power=4.08e+02
+  [eval] val_mse=4.016e+01  (n=7498)
+Epoch 00002: Time=   6.3s, Loss=6.74e+01, Inv=6.74e+01, For=4.95e+00, Power=1.14e+01
+  [eval] val_mse=1.260e+01  (n=7498)
+Epoch 00003: Time=   6.4s, Loss=2.75e+01, Inv=2.75e+01, For=4.84e+00, Power=4.41e+00
+  [eval] val_mse=6.934e+00  (n=7498)
+Epoch 00004: Time=   6.5s, Loss=1.61e+01, Inv=1.61e+01, For=4.97e+00, Power=2.74e+00
+  [eval] val_mse=4.654e+00  (n=7498)
+Epoch 00005: Time=   6.6s, Loss=1.14e+01, Inv=1.14e+01, For=5.17e+00, Power=2.14e+00
+  [eval] val_mse=3.513e+00  (n=7498)
+Epoch 00006: Time=   6.7s, Loss=8.98e+00, Inv=8.98e+00, For=5.52e+00, Power=1.85e+00
+  [eval] val_mse=2.898e+00  (n=7498)
+Epoch 00007: Time=   6.8s, Loss=7.55e+00, Inv=7.55e+00, For=5.96e+00, Power=1.69e+00
+  [eval] val_mse=2.472e+00  (n=7498)
+Epoch 00008: Time=   6.9s, Loss=6.63e+00, Inv=6.63e+00, For=6.48e+00, Power=1.58e+00
+  [eval] val_mse=2.187e+00  (n=7498)
+Epoch 00009: Time=   7.0s, Loss=6.01e+00, Inv=6.01e+00, For=7.08e+00, Power=1.51e+00
+  [eval] val_mse=1.959e+00  (n=7498)
+Epoch 00010: Time=   7.1s, Loss=5.55e+00, Inv=5.55e+00, For=7.65e+00, Power=1.46e+00
+  [eval] val_mse=1.804e+00  (n=7498)
+Epoch 00011: Time=   7.2s, Loss=5.20e+00, Inv=5.20e+00, For=8.26e+00, Power=1.43e+00
+  [eval] val_mse=1.662e+00  (n=7498)
+Epoch 00012: Time=   7.3s, Loss=4.93e+00, Inv=4.93e+00, For=8.87e+00, Power=1.40e+00
+  [eval] val_mse=1.552e+00  (n=7498)
+Epoch 00013: Time=   7.4s, Loss=4.71e+00, Inv=4.71e+00, For=9.56e+00, Power=1.38e+00
+  [eval] val_mse=1.481e+00  (n=7498)
+Epoch 00014: Time=   7.5s, Loss=4.55e+00, Inv=4.55e+00, For=1.01e+01, Power=1.37e+00
+  [eval] val_mse=1.399e+00  (n=7498)
+Epoch 00015: Time=   7.6s, Loss=4.41e+00, Inv=4.41e+00, For=1.08e+01, Power=1.36e+00
+  [eval] val_mse=1.349e+00  (n=7498)
+Epoch 00016: Time=   7.7s, Loss=4.30e+00, Inv=4.30e+00, For=1.14e+01, Power=1.35e+00
+  [eval] val_mse=1.299e+00  (n=7498)
+Epoch 00017: Time=   7.8s, Loss=4.21e+00, Inv=4.21e+00, For=1.21e+01, Power=1.35e+00
+  [eval] val_mse=1.254e+00  (n=7498)
+Epoch 00018: Time=   7.9s, Loss=4.14e+00, Inv=4.14e+00, For=1.26e+01, Power=1.35e+00
+  [eval] val_mse=1.221e+00  (n=7498)
+Epoch 00019: Time=   8.0s, Loss=4.07e+00, Inv=4.07e+00, For=1.33e+01, Power=1.34e+00
+  [eval] val_mse=1.190e+00  (n=7498)
+Epoch 00020: Time=   8.1s, Loss=4.02e+00, Inv=4.02e+00, For=1.39e+01, Power=1.34e+00
+  [eval] val_mse=1.156e+00  (n=7498)
+Epoch 00021: Time=   8.2s, Loss=3.97e+00, Inv=3.97e+00, For=1.45e+01, Power=1.34e+00
+  [eval] val_mse=1.131e+00  (n=7498)
+Epoch 00022: Time=   8.3s, Loss=3.93e+00, Inv=3.93e+00, For=1.51e+01, Power=1.33e+00
+  [eval] val_mse=1.108e+00  (n=7498)
+Epoch 00023: Time=   8.4s, Loss=3.89e+00, Inv=3.89e+00, For=1.56e+01, Power=1.33e+00
+  [eval] val_mse=1.095e+00  (n=7498)
+Epoch 00024: Time=   8.5s, Loss=3.86e+00, Inv=3.86e+00, For=1.62e+01, Power=1.33e+00
+  [eval] val_mse=1.071e+00  (n=7498)
+Epoch 00025: Time=   8.6s, Loss=3.83e+00, Inv=3.83e+00, For=1.69e+01, Power=1.33e+00
+  [eval] val_mse=1.056e+00  (n=7498)
+Epoch 00026: Time=   8.8s, Loss=3.81e+00, Inv=3.81e+00, For=1.73e+01, Power=1.33e+00
+  [eval] val_mse=1.037e+00  (n=7498)
+Epoch 00027: Time=   8.9s, Loss=3.78e+00, Inv=3.78e+00, For=1.79e+01, Power=1.32e+00
+  [eval] val_mse=1.031e+00  (n=7498)
+Epoch 00028: Time=   9.0s, Loss=3.76e+00, Inv=3.76e+00, For=1.85e+01, Power=1.33e+00
+  [eval] val_mse=1.014e+00  (n=7498)
+Epoch 00029: Time=   9.1s, Loss=3.74e+00, Inv=3.74e+00, For=1.90e+01, Power=1.32e+00
+  [eval] val_mse=1.005e+00  (n=7498)
+Epoch 00030: Time=   9.2s, Loss=3.72e+00, Inv=3.72e+00, For=1.96e+01, Power=1.32e+00
+  [eval] val_mse=9.921e-01  (n=7498)
+Epoch 00031: Time=   9.3s, Loss=3.71e+00, Inv=3.71e+00, For=2.03e+01, Power=1.32e+00
+  [eval] val_mse=9.853e-01  (n=7498)
+Epoch 00032: Time=   9.4s, Loss=3.69e+00, Inv=3.69e+00, For=2.09e+01, Power=1.32e+00
+  [eval] val_mse=9.689e-01  (n=7498)
+Epoch 00033: Time=   9.5s, Loss=3.68e+00, Inv=3.68e+00, For=2.15e+01, Power=1.32e+00
+  [eval] val_mse=9.647e-01  (n=7498)
+Epoch 00034: Time=   9.6s, Loss=3.66e+00, Inv=3.66e+00, For=2.22e+01, Power=1.31e+00
+  [eval] val_mse=9.530e-01  (n=7498)
+Epoch 00035: Time=   9.7s, Loss=3.65e+00, Inv=3.65e+00, For=2.28e+01, Power=1.31e+00
+  [eval] val_mse=9.450e-01  (n=7498)
+Epoch 00036: Time=   9.8s, Loss=3.64e+00, Inv=3.64e+00, For=2.36e+01, Power=1.31e+00
+  [eval] val_mse=9.307e-01  (n=7498)
+Epoch 00037: Time=   9.9s, Loss=3.63e+00, Inv=3.63e+00, For=2.42e+01, Power=1.31e+00
+  [eval] val_mse=9.328e-01  (n=7498)
+Epoch 00038: Time=  10.0s, Loss=3.62e+00, Inv=3.62e+00, For=2.50e+01, Power=1.31e+00
+  [eval] val_mse=9.270e-01  (n=7498)
+Epoch 00039: Time=  10.1s, Loss=3.61e+00, Inv=3.61e+00, For=2.58e+01, Power=1.31e+00
+  [eval] val_mse=9.224e-01  (n=7498)
+Epoch 00040: Time=  10.2s, Loss=3.60e+00, Inv=3.60e+00, For=2.63e+01, Power=1.31e+00
+  [eval] val_mse=9.147e-01  (n=7498)
+Epoch 00041: Time=  10.3s, Loss=3.59e+00, Inv=3.59e+00, For=2.71e+01, Power=1.31e+00
+  [eval] val_mse=9.133e-01  (n=7498)
+Epoch 00042: Time=  10.4s, Loss=3.58e+00, Inv=3.58e+00, For=2.80e+01, Power=1.31e+00
+  [eval] val_mse=8.985e-01  (n=7498)
+Epoch 00043: Time=  10.5s, Loss=3.57e+00, Inv=3.57e+00, For=2.88e+01, Power=1.31e+00
+  [eval] val_mse=8.956e-01  (n=7498)
+Epoch 00044: Time=  10.6s, Loss=3.57e+00, Inv=3.57e+00, For=2.96e+01, Power=1.30e+00
+  [eval] val_mse=8.909e-01  (n=7498)
+Epoch 00045: Time=  10.7s, Loss=3.55e+00, Inv=3.55e+00, For=3.03e+01, Power=1.30e+00
+  [eval] val_mse=8.878e-01  (n=7498)
+Epoch 00046: Time=  10.8s, Loss=3.55e+00, Inv=3.55e+00, For=3.13e+01, Power=1.30e+00
+  [eval] val_mse=8.838e-01  (n=7498)
+Epoch 00047: Time=  10.9s, Loss=3.54e+00, Inv=3.54e+00, For=3.19e+01, Power=1.30e+00
+  [eval] val_mse=8.807e-01  (n=7498)
+Epoch 00048: Time=  11.0s, Loss=3.54e+00, Inv=3.54e+00, For=3.30e+01, Power=1.30e+00
+  [eval] val_mse=8.688e-01  (n=7498)
+Epoch 00049: Time=  11.1s, Loss=3.53e+00, Inv=3.53e+00, For=3.37e+01, Power=1.30e+00
+  [eval] val_mse=8.691e-01  (n=7498)
+Epoch 00050: Time=  11.2s, Loss=3.52e+00, Inv=3.52e+00, For=3.47e+01, Power=1.30e+00
+  [eval] val_mse=8.681e-01  (n=7498)
+Epoch 00051: Time=  11.3s, Loss=3.51e+00, Inv=3.51e+00, For=3.54e+01, Power=1.30e+00
+  [eval] val_mse=8.580e-01  (n=7498)
+Epoch 00052: Time=  11.4s, Loss=3.51e+00, Inv=3.51e+00, For=3.65e+01, Power=1.30e+00
+  [eval] val_mse=8.667e-01  (n=7498)
+Epoch 00053: Time=  11.5s, Loss=3.51e+00, Inv=3.51e+00, For=3.74e+01, Power=1.30e+00
+  [eval] val_mse=8.467e-01  (n=7498)
+Epoch 00054: Time=  11.6s, Loss=3.50e+00, Inv=3.50e+00, For=3.81e+01, Power=1.30e+00
+  [eval] val_mse=8.555e-01  (n=7498)
+Epoch 00055: Time=  11.7s, Loss=3.49e+00, Inv=3.49e+00, For=3.95e+01, Power=1.30e+00
+  [eval] val_mse=8.420e-01  (n=7498)
+Epoch 00056: Time=  11.8s, Loss=3.49e+00, Inv=3.49e+00, For=4.02e+01, Power=1.30e+00
+  [eval] val_mse=8.427e-01  (n=7498)
+Epoch 00057: Time=  11.9s, Loss=3.48e+00, Inv=3.48e+00, For=4.10e+01, Power=1.30e+00
+  [eval] val_mse=8.352e-01  (n=7498)
+Epoch 00058: Time=  12.0s, Loss=3.48e+00, Inv=3.48e+00, For=4.24e+01, Power=1.30e+00
+  [eval] val_mse=8.353e-01  (n=7498)
+Epoch 00059: Time=  12.1s, Loss=3.47e+00, Inv=3.47e+00, For=4.31e+01, Power=1.30e+00
+  [eval] val_mse=8.249e-01  (n=7498)
+Epoch 00060: Time=  12.2s, Loss=3.47e+00, Inv=3.47e+00, For=4.40e+01, Power=1.30e+00
+  [eval] val_mse=8.191e-01  (n=7498)
+Epoch 00061: Time=  12.3s, Loss=3.47e+00, Inv=3.47e+00, For=4.51e+01, Power=1.30e+00
+  [eval] val_mse=8.302e-01  (n=7498)
+Epoch 00062: Time=  12.4s, Loss=3.46e+00, Inv=3.46e+00, For=4.63e+01, Power=1.30e+00
+  [eval] val_mse=8.285e-01  (n=7498)
+Epoch 00063: Time=  12.5s, Loss=3.46e+00, Inv=3.46e+00, For=4.73e+01, Power=1.30e+00
+  [eval] val_mse=8.234e-01  (n=7498)
+Epoch 00064: Time=  12.6s, Loss=3.45e+00, Inv=3.45e+00, For=4.81e+01, Power=1.30e+00
+  [eval] val_mse=8.148e-01  (n=7498)
+Epoch 00065: Time=  12.7s, Loss=3.45e+00, Inv=3.45e+00, For=4.92e+01, Power=1.30e+00
+  [eval] val_mse=8.107e-01  (n=7498)
+Epoch 00066: Time=  12.8s, Loss=3.45e+00, Inv=3.45e+00, For=5.06e+01, Power=1.29e+00
+  [eval] val_mse=8.115e-01  (n=7498)
+Epoch 00067: Time=  12.9s, Loss=3.44e+00, Inv=3.44e+00, For=5.14e+01, Power=1.29e+00
+  [eval] val_mse=8.079e-01  (n=7498)
+Epoch 00068: Time=  13.0s, Loss=3.44e+00, Inv=3.44e+00, For=5.27e+01, Power=1.30e+00
+  [eval] val_mse=8.017e-01  (n=7498)
+Epoch 00069: Time=  13.1s, Loss=3.44e+00, Inv=3.44e+00, For=5.34e+01, Power=1.29e+00
+  [eval] val_mse=8.011e-01  (n=7498)
+Epoch 00070: Time=  13.3s, Loss=3.44e+00, Inv=3.44e+00, For=5.45e+01, Power=1.29e+00
+  [eval] val_mse=7.892e-01  (n=7498)
+Epoch 00071: Time=  13.4s, Loss=3.43e+00, Inv=3.43e+00, For=5.59e+01, Power=1.29e+00
+  [eval] val_mse=7.934e-01  (n=7498)
+Epoch 00072: Time=  13.5s, Loss=3.43e+00, Inv=3.43e+00, For=5.72e+01, Power=1.29e+00
+  [eval] val_mse=7.938e-01  (n=7498)
+Epoch 00073: Time=  13.6s, Loss=3.43e+00, Inv=3.43e+00, For=5.81e+01, Power=1.29e+00
+  [eval] val_mse=7.860e-01  (n=7498)
+Epoch 00074: Time=  13.7s, Loss=3.42e+00, Inv=3.42e+00, For=5.92e+01, Power=1.29e+00
+  [eval] val_mse=7.832e-01  (n=7498)
+Epoch 00075: Time=  13.8s, Loss=3.42e+00, Inv=3.42e+00, For=6.03e+01, Power=1.30e+00
+  [eval] val_mse=7.764e-01  (n=7498)
+Epoch 00076: Time=  13.9s, Loss=3.42e+00, Inv=3.42e+00, For=6.18e+01, Power=1.30e+00
+  [eval] val_mse=7.768e-01  (n=7498)
+Epoch 00077: Time=  14.0s, Loss=3.42e+00, Inv=3.42e+00, For=6.25e+01, Power=1.29e+00
+  [eval] val_mse=7.776e-01  (n=7498)
+Epoch 00078: Time=  14.1s, Loss=3.41e+00, Inv=3.41e+00, For=6.39e+01, Power=1.29e+00
+  [eval] val_mse=7.715e-01  (n=7498)
+Epoch 00079: Time=  14.2s, Loss=3.41e+00, Inv=3.41e+00, For=6.52e+01, Power=1.30e+00
+  [eval] val_mse=7.718e-01  (n=7498)
+Epoch 00080: Time=  14.3s, Loss=3.41e+00, Inv=3.41e+00, For=6.69e+01, Power=1.30e+00
+  [eval] val_mse=7.716e-01  (n=7498)
+Epoch 00081: Time=  14.4s, Loss=3.40e+00, Inv=3.40e+00, For=6.76e+01, Power=1.30e+00
+  [eval] val_mse=7.617e-01  (n=7498)
+Epoch 00082: Time=  14.5s, Loss=3.40e+00, Inv=3.40e+00, For=6.89e+01, Power=1.29e+00
+  [eval] val_mse=7.645e-01  (n=7498)
+Epoch 00083: Time=  14.6s, Loss=3.40e+00, Inv=3.40e+00, For=7.10e+01, Power=1.29e+00
+  [eval] val_mse=7.612e-01  (n=7498)
+Epoch 00084: Time=  14.7s, Loss=3.40e+00, Inv=3.40e+00, For=7.19e+01, Power=1.29e+00
+  [eval] val_mse=7.609e-01  (n=7498)
+Epoch 00085: Time=  14.8s, Loss=3.39e+00, Inv=3.39e+00, For=7.31e+01, Power=1.29e+00
+  [eval] val_mse=7.675e-01  (n=7498)
+Epoch 00086: Time=  14.9s, Loss=3.39e+00, Inv=3.39e+00, For=7.51e+01, Power=1.29e+00
+  [eval] val_mse=7.673e-01  (n=7498)
+Epoch 00087: Time=  15.0s, Loss=3.39e+00, Inv=3.39e+00, For=7.64e+01, Power=1.29e+00
+  [eval] val_mse=7.721e-01  (n=7498)
+Epoch 00088: Time=  15.1s, Loss=3.39e+00, Inv=3.39e+00, For=7.72e+01, Power=1.30e+00
+  [eval] val_mse=7.533e-01  (n=7498)
+Epoch 00089: Time=  15.2s, Loss=3.40e+00, Inv=3.40e+00, For=7.99e+01, Power=1.30e+00
+  [eval] val_mse=7.549e-01  (n=7498)
+Epoch 00090: Time=  15.3s, Loss=3.39e+00, Inv=3.39e+00, For=8.05e+01, Power=1.30e+00
+  [eval] val_mse=7.559e-01  (n=7498)
+Epoch 00091: Time=  15.4s, Loss=3.38e+00, Inv=3.38e+00, For=8.18e+01, Power=1.30e+00
+  [eval] val_mse=7.509e-01  (n=7498)
+Epoch 00092: Time=  15.5s, Loss=3.38e+00, Inv=3.38e+00, For=8.31e+01, Power=1.30e+00
+  [eval] val_mse=7.544e-01  (n=7498)
+Epoch 00093: Time=  15.6s, Loss=3.39e+00, Inv=3.39e+00, For=8.46e+01, Power=1.30e+00
+  [eval] val_mse=7.508e-01  (n=7498)
+Epoch 00094: Time=  15.8s, Loss=3.38e+00, Inv=3.38e+00, For=8.60e+01, Power=1.30e+00
+  [eval] val_mse=7.420e-01  (n=7498)
+Epoch 00095: Time=  15.9s, Loss=3.38e+00, Inv=3.38e+00, For=8.81e+01, Power=1.29e+00
+  [eval] val_mse=7.540e-01  (n=7498)
+Epoch 00096: Time=  16.0s, Loss=3.38e+00, Inv=3.38e+00, For=8.95e+01, Power=1.29e+00
+  [eval] val_mse=7.513e-01  (n=7498)
+Epoch 00097: Time=  16.1s, Loss=3.37e+00, Inv=3.37e+00, For=9.10e+01, Power=1.30e+00
+  [eval] val_mse=7.475e-01  (n=7498)
+Epoch 00098: Time=  16.2s, Loss=3.37e+00, Inv=3.37e+00, For=9.17e+01, Power=1.30e+00
+  [eval] val_mse=7.491e-01  (n=7498)
+Epoch 00099: Time=  16.3s, Loss=3.37e+00, Inv=3.37e+00, For=9.39e+01, Power=1.30e+00
+  [eval] val_mse=7.459e-01  (n=7498)
+Epoch 00100: Time=  16.4s, Loss=3.39e+00, Inv=3.39e+00, For=1.02e+02, Power=1.30e+00
+  [eval] val_mse=7.456e-01  (n=7498)
+Epoch 00101: Time=  16.5s, Loss=3.37e+00, Inv=3.37e+00, For=9.70e+01, Power=1.30e+00
+  [eval] val_mse=7.426e-01  (n=7498)
+Epoch 00102: Time=  16.6s, Loss=3.37e+00, Inv=3.37e+00, For=9.73e+01, Power=1.29e+00
+  [eval] val_mse=7.442e-01  (n=7498)
+Epoch 00103: Time=  16.7s, Loss=3.36e+00, Inv=3.36e+00, For=9.89e+01, Power=1.30e+00
+  [eval] val_mse=7.479e-01  (n=7498)
+Epoch 00104: Time=  16.8s, Loss=3.37e+00, Inv=3.37e+00, For=1.05e+02, Power=1.30e+00
+  [eval] val_mse=7.504e-01  (n=7498)
+  [early_stop] stop at epoch=104 (best_epoch=94, best_val_mse=7.420e-01)
+Saved DeLaN checkpoint: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+Saved training history: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3__train_history.csv
+
+################################################
+Evaluating DeLaN | run=UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  [val] Torque RMSE = 3.517e-01
+Torque MSE  = 1.048e-01
+Torque RMSE = 3.237e-01
+Per-joint MSE : 1.405e-01 2.082e-01 9.201e-02 6.876e-02 5.777e-02 6.161e-02
+Per-joint RMSE: 3.748e-01 4.563e-01 3.033e-01 2.622e-01 2.403e-01 2.482e-01
+Comp Time per Sample = 1.588e-04s / 6297.4Hz
+Saved metrics TXT: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics_test.txt
+Saved metrics JSON: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics.json
+
+#####################################################################################################################################################################################################################################################################################################################
+### DELAN VARIANT: hp_preset=lutter_like_256_d3 delan_seed=4                                                                                                                                                                                                                                                      ###
+### ckpt=/workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax ###
+#####################################################################################################################################################################################################################################################################################################################
+
+######################
+### 2) DELAN TRAIN ###
+######################
+
+========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T delan_jax bash -lc 'python3 /workspace/delan_jax/scripts/rbyt_train_delan_jax.py --npz /workspace/shared/data/preprocessed/delan_UR3_Load0_cc_K84_seed2_dataset/delan_UR3_Load0_cc_K84_seed2_dataset.npz -t structured -s 4 -r 0 --hp_preset lutter_like_256_d3 --epochs 200 --eval_every 1 --log_every 1 --early_stop True --early_stop_patience 10 --early_stop_min_delta 0.0 --early_stop_warmup_evals 0 --save_path /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax' ===
+========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+mkdir -p failed for path /.config/matplotlib: [Errno 13] Permission denied: '/.config'
+Matplotlib created a temporary cache directory at /tmp/matplotlib-4h760vze because there was an issue with the default path (/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+Final hyper: {'dataset': 'UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3', 'n_width': 256, 'n_depth': 3, 'n_minibatch': 1024, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'softplus', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 200, 'lagrangian_type': <function structured_lagrangian_fn at 0x77b58e6828c0>}
+
+
+################################################
+DeLaN run: UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  model_dir = /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  ckpt_path = /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+  type = structured
+  hp_preset = lutter_like_256_d3
+################################################
+
+
+################################################
+Dataset: delan_UR3_Load0_cc_K84_seed2_dataset.npz
+  npz = /workspace/shared/data/preprocessed/delan_UR3_Load0_cc_K84_seed2_dataset/delan_UR3_Load0_cc_K84_seed2_dataset.npz
+   dt ≈ 0.01721744349298553
+  dof = 6
+  Train trajectories = 59
+  Val trajectories   = 8
+  Test trajectories  = 17
+  Train samples = 72196
+  Test samples  = 13697
+################################################
+
+2026-01-29 15:20:45.181728: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-29 15:20:47.187010: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+################################################
+Training DeLaN | run=UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3 | type=structured | dof=6
+################################################
+Epoch 00001: Time=   4.4s, Loss=5.49e+03, Inv=5.49e+03, For=5.50e+00, Power=9.55e+02
+  [eval] val_mse=7.845e+01  (n=7498)
+Epoch 00002: Time=   6.1s, Loss=1.18e+02, Inv=1.18e+02, For=5.00e+00, Power=2.48e+01
+  [eval] val_mse=2.596e+01  (n=7498)
+Epoch 00003: Time=   6.2s, Loss=4.98e+01, Inv=4.98e+01, For=4.74e+00, Power=9.20e+00
+  [eval] val_mse=1.452e+01  (n=7498)
+Epoch 00004: Time=   6.3s, Loss=2.88e+01, Inv=2.88e+01, For=4.71e+00, Power=5.07e+00
+  [eval] val_mse=9.656e+00  (n=7498)
+Epoch 00005: Time=   6.4s, Loss=1.95e+01, Inv=1.95e+01, For=4.77e+00, Power=3.48e+00
+  [eval] val_mse=7.060e+00  (n=7498)
+Epoch 00006: Time=   6.5s, Loss=1.45e+01, Inv=1.45e+01, For=4.95e+00, Power=2.73e+00
+  [eval] val_mse=5.493e+00  (n=7498)
+Epoch 00007: Time=   6.6s, Loss=1.16e+01, Inv=1.16e+01, For=5.23e+00, Power=2.31e+00
+  [eval] val_mse=4.543e+00  (n=7498)
+Epoch 00008: Time=   6.7s, Loss=9.64e+00, Inv=9.64e+00, For=5.72e+00, Power=2.04e+00
+  [eval] val_mse=3.831e+00  (n=7498)
+Epoch 00009: Time=   6.8s, Loss=8.33e+00, Inv=8.33e+00, For=6.30e+00, Power=1.87e+00
+  [eval] val_mse=3.370e+00  (n=7498)
+Epoch 00010: Time=   6.9s, Loss=7.39e+00, Inv=7.39e+00, For=7.01e+00, Power=1.74e+00
+  [eval] val_mse=3.041e+00  (n=7498)
+Epoch 00011: Time=   7.0s, Loss=6.71e+00, Inv=6.71e+00, For=7.86e+00, Power=1.66e+00
+  [eval] val_mse=2.763e+00  (n=7498)
+Epoch 00012: Time=   7.1s, Loss=6.18e+00, Inv=6.18e+00, For=8.78e+00, Power=1.60e+00
+  [eval] val_mse=2.578e+00  (n=7498)
+Epoch 00013: Time=   7.2s, Loss=5.78e+00, Inv=5.78e+00, For=9.84e+00, Power=1.55e+00
+  [eval] val_mse=2.395e+00  (n=7498)
+Epoch 00014: Time=   7.3s, Loss=5.46e+00, Inv=5.46e+00, For=1.08e+01, Power=1.52e+00
+  [eval] val_mse=2.269e+00  (n=7498)
+Epoch 00015: Time=   7.4s, Loss=5.20e+00, Inv=5.20e+00, For=1.21e+01, Power=1.49e+00
+  [eval] val_mse=2.147e+00  (n=7498)
+Epoch 00016: Time=   7.5s, Loss=4.99e+00, Inv=4.99e+00, For=1.31e+01, Power=1.47e+00
+  [eval] val_mse=2.060e+00  (n=7498)
+Epoch 00017: Time=   7.6s, Loss=4.82e+00, Inv=4.82e+00, For=1.46e+01, Power=1.46e+00
+  [eval] val_mse=1.953e+00  (n=7498)
+Epoch 00018: Time=   7.7s, Loss=4.68e+00, Inv=4.68e+00, For=1.55e+01, Power=1.44e+00
+  [eval] val_mse=1.887e+00  (n=7498)
+Epoch 00019: Time=   7.8s, Loss=4.56e+00, Inv=4.56e+00, For=1.69e+01, Power=1.44e+00
+  [eval] val_mse=1.824e+00  (n=7498)
+Epoch 00020: Time=   7.9s, Loss=4.46e+00, Inv=4.46e+00, For=1.81e+01, Power=1.43e+00
+  [eval] val_mse=1.764e+00  (n=7498)
+Epoch 00021: Time=   8.0s, Loss=4.37e+00, Inv=4.37e+00, For=1.93e+01, Power=1.42e+00
+  [eval] val_mse=1.713e+00  (n=7498)
+Epoch 00022: Time=   8.1s, Loss=4.30e+00, Inv=4.30e+00, For=2.04e+01, Power=1.42e+00
+  [eval] val_mse=1.674e+00  (n=7498)
+Epoch 00023: Time=   8.2s, Loss=4.23e+00, Inv=4.23e+00, For=2.15e+01, Power=1.41e+00
+  [eval] val_mse=1.638e+00  (n=7498)
+Epoch 00024: Time=   8.4s, Loss=4.17e+00, Inv=4.17e+00, For=2.26e+01, Power=1.40e+00
+  [eval] val_mse=1.588e+00  (n=7498)
+Epoch 00025: Time=   8.5s, Loss=4.12e+00, Inv=4.12e+00, For=2.35e+01, Power=1.40e+00
+  [eval] val_mse=1.551e+00  (n=7498)
+Epoch 00026: Time=   8.6s, Loss=4.08e+00, Inv=4.08e+00, For=2.44e+01, Power=1.40e+00
+  [eval] val_mse=1.532e+00  (n=7498)
+Epoch 00027: Time=   8.7s, Loss=4.04e+00, Inv=4.04e+00, For=2.54e+01, Power=1.39e+00
+  [eval] val_mse=1.482e+00  (n=7498)
+Epoch 00028: Time=   8.8s, Loss=4.00e+00, Inv=4.00e+00, For=2.63e+01, Power=1.39e+00
+  [eval] val_mse=1.448e+00  (n=7498)
+Epoch 00029: Time=   8.9s, Loss=3.97e+00, Inv=3.97e+00, For=2.70e+01, Power=1.39e+00
+  [eval] val_mse=1.427e+00  (n=7498)
+Epoch 00030: Time=   9.0s, Loss=3.94e+00, Inv=3.94e+00, For=2.75e+01, Power=1.38e+00
+  [eval] val_mse=1.403e+00  (n=7498)
+Epoch 00031: Time=   9.1s, Loss=3.91e+00, Inv=3.91e+00, For=2.82e+01, Power=1.38e+00
+  [eval] val_mse=1.388e+00  (n=7498)
+Epoch 00032: Time=   9.2s, Loss=3.89e+00, Inv=3.89e+00, For=2.88e+01, Power=1.38e+00
+  [eval] val_mse=1.359e+00  (n=7498)
+Epoch 00033: Time=   9.3s, Loss=3.87e+00, Inv=3.87e+00, For=2.94e+01, Power=1.37e+00
+  [eval] val_mse=1.329e+00  (n=7498)
+Epoch 00034: Time=   9.4s, Loss=3.85e+00, Inv=3.85e+00, For=2.95e+01, Power=1.37e+00
+  [eval] val_mse=1.326e+00  (n=7498)
+Epoch 00035: Time=   9.5s, Loss=3.83e+00, Inv=3.83e+00, For=3.00e+01, Power=1.37e+00
+  [eval] val_mse=1.297e+00  (n=7498)
+Epoch 00036: Time=   9.6s, Loss=3.81e+00, Inv=3.81e+00, For=3.05e+01, Power=1.37e+00
+  [eval] val_mse=1.272e+00  (n=7498)
+Epoch 00037: Time=   9.7s, Loss=3.79e+00, Inv=3.79e+00, For=3.05e+01, Power=1.36e+00
+  [eval] val_mse=1.248e+00  (n=7498)
+Epoch 00038: Time=   9.8s, Loss=3.78e+00, Inv=3.78e+00, For=3.06e+01, Power=1.36e+00
+  [eval] val_mse=1.241e+00  (n=7498)
+Epoch 00039: Time=   9.9s, Loss=3.76e+00, Inv=3.76e+00, For=3.08e+01, Power=1.36e+00
+  [eval] val_mse=1.229e+00  (n=7498)
+Epoch 00040: Time=  10.0s, Loss=3.74e+00, Inv=3.74e+00, For=3.08e+01, Power=1.36e+00
+  [eval] val_mse=1.203e+00  (n=7498)
+Epoch 00041: Time=  10.1s, Loss=3.73e+00, Inv=3.73e+00, For=3.09e+01, Power=1.35e+00
+  [eval] val_mse=1.196e+00  (n=7498)
+Epoch 00042: Time=  10.2s, Loss=3.72e+00, Inv=3.72e+00, For=3.10e+01, Power=1.36e+00
+  [eval] val_mse=1.164e+00  (n=7498)
+Epoch 00043: Time=  10.3s, Loss=3.70e+00, Inv=3.70e+00, For=3.09e+01, Power=1.35e+00
+  [eval] val_mse=1.170e+00  (n=7498)
+Epoch 00044: Time=  10.4s, Loss=3.69e+00, Inv=3.69e+00, For=3.11e+01, Power=1.35e+00
+  [eval] val_mse=1.150e+00  (n=7498)
+Epoch 00045: Time=  10.5s, Loss=3.68e+00, Inv=3.68e+00, For=3.09e+01, Power=1.35e+00
+  [eval] val_mse=1.124e+00  (n=7498)
+Epoch 00046: Time=  10.6s, Loss=3.67e+00, Inv=3.67e+00, For=3.08e+01, Power=1.34e+00
+  [eval] val_mse=1.118e+00  (n=7498)
+Epoch 00047: Time=  10.7s, Loss=3.66e+00, Inv=3.66e+00, For=3.08e+01, Power=1.34e+00
+  [eval] val_mse=1.096e+00  (n=7498)
+Epoch 00048: Time=  10.8s, Loss=3.65e+00, Inv=3.65e+00, For=3.08e+01, Power=1.34e+00
+  [eval] val_mse=1.098e+00  (n=7498)
+Epoch 00049: Time=  10.9s, Loss=3.64e+00, Inv=3.64e+00, For=3.06e+01, Power=1.34e+00
+  [eval] val_mse=1.078e+00  (n=7498)
+Epoch 00050: Time=  11.0s, Loss=3.63e+00, Inv=3.63e+00, For=3.06e+01, Power=1.33e+00
+  [eval] val_mse=1.063e+00  (n=7498)
+Epoch 00051: Time=  11.1s, Loss=3.62e+00, Inv=3.62e+00, For=3.06e+01, Power=1.33e+00
+  [eval] val_mse=1.050e+00  (n=7498)
+Epoch 00052: Time=  11.2s, Loss=3.61e+00, Inv=3.61e+00, For=3.06e+01, Power=1.33e+00
+  [eval] val_mse=1.036e+00  (n=7498)
+Epoch 00053: Time=  11.3s, Loss=3.60e+00, Inv=3.60e+00, For=3.06e+01, Power=1.33e+00
+  [eval] val_mse=1.027e+00  (n=7498)
+Epoch 00054: Time=  11.4s, Loss=3.60e+00, Inv=3.60e+00, For=3.05e+01, Power=1.33e+00
+  [eval] val_mse=1.010e+00  (n=7498)
+Epoch 00055: Time=  11.5s, Loss=3.59e+00, Inv=3.59e+00, For=3.06e+01, Power=1.33e+00
+  [eval] val_mse=1.007e+00  (n=7498)
+Epoch 00056: Time=  11.6s, Loss=3.58e+00, Inv=3.58e+00, For=3.07e+01, Power=1.32e+00
+  [eval] val_mse=9.895e-01  (n=7498)
+Epoch 00057: Time=  11.7s, Loss=3.57e+00, Inv=3.57e+00, For=3.06e+01, Power=1.32e+00
+  [eval] val_mse=9.771e-01  (n=7498)
+Epoch 00058: Time=  11.8s, Loss=3.57e+00, Inv=3.57e+00, For=3.09e+01, Power=1.32e+00
+  [eval] val_mse=9.779e-01  (n=7498)
+Epoch 00059: Time=  11.9s, Loss=3.56e+00, Inv=3.56e+00, For=3.08e+01, Power=1.32e+00
+  [eval] val_mse=9.659e-01  (n=7498)
+Epoch 00060: Time=  12.0s, Loss=3.55e+00, Inv=3.55e+00, For=3.11e+01, Power=1.32e+00
+  [eval] val_mse=9.475e-01  (n=7498)
+Epoch 00061: Time=  12.1s, Loss=3.55e+00, Inv=3.55e+00, For=3.13e+01, Power=1.32e+00
+  [eval] val_mse=9.427e-01  (n=7498)
+Epoch 00062: Time=  12.2s, Loss=3.54e+00, Inv=3.54e+00, For=3.14e+01, Power=1.31e+00
+  [eval] val_mse=9.384e-01  (n=7498)
+Epoch 00063: Time=  12.3s, Loss=3.54e+00, Inv=3.54e+00, For=3.17e+01, Power=1.31e+00
+  [eval] val_mse=9.315e-01  (n=7498)
+Epoch 00064: Time=  12.4s, Loss=3.53e+00, Inv=3.53e+00, For=3.21e+01, Power=1.31e+00
+  [eval] val_mse=9.243e-01  (n=7498)
+Epoch 00065: Time=  12.5s, Loss=3.52e+00, Inv=3.52e+00, For=3.23e+01, Power=1.31e+00
+  [eval] val_mse=9.065e-01  (n=7498)
+Epoch 00066: Time=  12.6s, Loss=3.52e+00, Inv=3.52e+00, For=3.26e+01, Power=1.31e+00
+  [eval] val_mse=9.018e-01  (n=7498)
+Epoch 00067: Time=  12.7s, Loss=3.51e+00, Inv=3.51e+00, For=3.29e+01, Power=1.31e+00
+  [eval] val_mse=8.991e-01  (n=7498)
+Epoch 00068: Time=  12.9s, Loss=3.51e+00, Inv=3.51e+00, For=3.34e+01, Power=1.31e+00
+  [eval] val_mse=8.882e-01  (n=7498)
+Epoch 00069: Time=  13.0s, Loss=3.50e+00, Inv=3.50e+00, For=3.38e+01, Power=1.31e+00
+  [eval] val_mse=8.804e-01  (n=7498)
+Epoch 00070: Time=  13.1s, Loss=3.49e+00, Inv=3.49e+00, For=3.43e+01, Power=1.31e+00
+  [eval] val_mse=8.756e-01  (n=7498)
+Epoch 00071: Time=  13.2s, Loss=3.49e+00, Inv=3.49e+00, For=3.48e+01, Power=1.31e+00
+  [eval] val_mse=8.697e-01  (n=7498)
+Epoch 00072: Time=  13.3s, Loss=3.49e+00, Inv=3.49e+00, For=3.51e+01, Power=1.31e+00
+  [eval] val_mse=8.660e-01  (n=7498)
+Epoch 00073: Time=  13.4s, Loss=3.48e+00, Inv=3.48e+00, For=3.59e+01, Power=1.31e+00
+  [eval] val_mse=8.625e-01  (n=7498)
+Epoch 00074: Time=  13.5s, Loss=3.48e+00, Inv=3.48e+00, For=3.63e+01, Power=1.30e+00
+  [eval] val_mse=8.624e-01  (n=7498)
+Epoch 00075: Time=  13.6s, Loss=3.47e+00, Inv=3.47e+00, For=3.71e+01, Power=1.30e+00
+  [eval] val_mse=8.511e-01  (n=7498)
+Epoch 00076: Time=  13.7s, Loss=3.47e+00, Inv=3.47e+00, For=3.77e+01, Power=1.30e+00
+  [eval] val_mse=8.474e-01  (n=7498)
+Epoch 00077: Time=  13.8s, Loss=3.47e+00, Inv=3.47e+00, For=3.85e+01, Power=1.30e+00
+  [eval] val_mse=8.474e-01  (n=7498)
+Epoch 00078: Time=  13.9s, Loss=3.46e+00, Inv=3.46e+00, For=3.89e+01, Power=1.30e+00
+  [eval] val_mse=8.378e-01  (n=7498)
+Epoch 00079: Time=  14.0s, Loss=3.46e+00, Inv=3.46e+00, For=3.99e+01, Power=1.30e+00
+  [eval] val_mse=8.291e-01  (n=7498)
+Epoch 00080: Time=  14.1s, Loss=3.45e+00, Inv=3.45e+00, For=4.03e+01, Power=1.30e+00
+  [eval] val_mse=8.257e-01  (n=7498)
+Epoch 00081: Time=  14.2s, Loss=3.45e+00, Inv=3.45e+00, For=4.13e+01, Power=1.30e+00
+  [eval] val_mse=8.270e-01  (n=7498)
+Epoch 00082: Time=  14.3s, Loss=3.44e+00, Inv=3.44e+00, For=4.18e+01, Power=1.30e+00
+  [eval] val_mse=8.161e-01  (n=7498)
+Epoch 00083: Time=  14.4s, Loss=3.45e+00, Inv=3.45e+00, For=4.27e+01, Power=1.30e+00
+  [eval] val_mse=8.172e-01  (n=7498)
+Epoch 00084: Time=  14.5s, Loss=3.44e+00, Inv=3.44e+00, For=4.36e+01, Power=1.30e+00
+  [eval] val_mse=8.154e-01  (n=7498)
+Epoch 00085: Time=  14.6s, Loss=3.44e+00, Inv=3.44e+00, For=4.45e+01, Power=1.30e+00
+  [eval] val_mse=8.098e-01  (n=7498)
+Epoch 00086: Time=  14.7s, Loss=3.43e+00, Inv=3.43e+00, For=4.53e+01, Power=1.30e+00
+  [eval] val_mse=8.134e-01  (n=7498)
+Epoch 00087: Time=  14.8s, Loss=3.43e+00, Inv=3.43e+00, For=4.64e+01, Power=1.30e+00
+  [eval] val_mse=8.077e-01  (n=7498)
+Epoch 00088: Time=  14.9s, Loss=3.43e+00, Inv=3.43e+00, For=4.72e+01, Power=1.30e+00
+  [eval] val_mse=8.044e-01  (n=7498)
+Epoch 00089: Time=  15.0s, Loss=3.43e+00, Inv=3.43e+00, For=4.80e+01, Power=1.30e+00
+  [eval] val_mse=8.050e-01  (n=7498)
+Epoch 00090: Time=  15.1s, Loss=3.43e+00, Inv=3.43e+00, For=4.93e+01, Power=1.30e+00
+  [eval] val_mse=8.005e-01  (n=7498)
+Epoch 00091: Time=  15.2s, Loss=3.42e+00, Inv=3.42e+00, For=5.00e+01, Power=1.30e+00
+  [eval] val_mse=7.939e-01  (n=7498)
+Epoch 00092: Time=  15.3s, Loss=3.42e+00, Inv=3.42e+00, For=5.12e+01, Power=1.30e+00
+  [eval] val_mse=7.953e-01  (n=7498)
+Epoch 00093: Time=  15.4s, Loss=3.41e+00, Inv=3.41e+00, For=5.20e+01, Power=1.30e+00
+  [eval] val_mse=8.025e-01  (n=7498)
+Epoch 00094: Time=  15.5s, Loss=3.41e+00, Inv=3.41e+00, For=5.31e+01, Power=1.30e+00
+  [eval] val_mse=7.930e-01  (n=7498)
+Epoch 00095: Time=  15.6s, Loss=3.41e+00, Inv=3.41e+00, For=5.43e+01, Power=1.30e+00
+  [eval] val_mse=7.917e-01  (n=7498)
+Epoch 00096: Time=  15.7s, Loss=3.41e+00, Inv=3.41e+00, For=5.53e+01, Power=1.30e+00
+  [eval] val_mse=7.910e-01  (n=7498)
+Epoch 00097: Time=  15.8s, Loss=3.40e+00, Inv=3.40e+00, For=5.61e+01, Power=1.30e+00
+  [eval] val_mse=7.817e-01  (n=7498)
+Epoch 00098: Time=  15.9s, Loss=3.40e+00, Inv=3.40e+00, For=5.73e+01, Power=1.30e+00
+  [eval] val_mse=7.778e-01  (n=7498)
+Epoch 00099: Time=  16.0s, Loss=3.40e+00, Inv=3.40e+00, For=5.87e+01, Power=1.30e+00
+  [eval] val_mse=7.817e-01  (n=7498)
+Epoch 00100: Time=  16.1s, Loss=3.41e+00, Inv=3.41e+00, For=6.00e+01, Power=1.30e+00
+  [eval] val_mse=7.905e-01  (n=7498)
+Epoch 00101: Time=  16.2s, Loss=3.40e+00, Inv=3.40e+00, For=6.05e+01, Power=1.30e+00
+  [eval] val_mse=7.869e-01  (n=7498)
+Epoch 00102: Time=  16.3s, Loss=3.39e+00, Inv=3.39e+00, For=6.17e+01, Power=1.30e+00
+  [eval] val_mse=7.772e-01  (n=7498)
+Epoch 00103: Time=  16.4s, Loss=3.39e+00, Inv=3.39e+00, For=6.28e+01, Power=1.30e+00
+  [eval] val_mse=7.766e-01  (n=7498)
+Epoch 00104: Time=  16.5s, Loss=3.39e+00, Inv=3.39e+00, For=6.38e+01, Power=1.30e+00
+  [eval] val_mse=7.821e-01  (n=7498)
+Epoch 00105: Time=  16.6s, Loss=3.39e+00, Inv=3.39e+00, For=6.57e+01, Power=1.30e+00
+  [eval] val_mse=7.778e-01  (n=7498)
+Epoch 00106: Time=  16.7s, Loss=3.38e+00, Inv=3.38e+00, For=6.67e+01, Power=1.29e+00
+  [eval] val_mse=7.812e-01  (n=7498)
+Epoch 00107: Time=  16.8s, Loss=3.38e+00, Inv=3.38e+00, For=6.75e+01, Power=1.30e+00
+  [eval] val_mse=7.839e-01  (n=7498)
+Epoch 00108: Time=  16.9s, Loss=3.38e+00, Inv=3.38e+00, For=6.90e+01, Power=1.30e+00
+  [eval] val_mse=7.779e-01  (n=7498)
+Epoch 00109: Time=  17.0s, Loss=3.38e+00, Inv=3.38e+00, For=7.05e+01, Power=1.30e+00
+  [eval] val_mse=7.774e-01  (n=7498)
+Epoch 00110: Time=  17.1s, Loss=3.38e+00, Inv=3.38e+00, For=7.14e+01, Power=1.30e+00
+  [eval] val_mse=7.806e-01  (n=7498)
+Epoch 00111: Time=  17.2s, Loss=3.38e+00, Inv=3.38e+00, For=7.30e+01, Power=1.30e+00
+  [eval] val_mse=7.772e-01  (n=7498)
+Epoch 00112: Time=  17.3s, Loss=3.38e+00, Inv=3.38e+00, For=7.33e+01, Power=1.30e+00
+  [eval] val_mse=7.689e-01  (n=7498)
+Epoch 00113: Time=  17.4s, Loss=3.38e+00, Inv=3.38e+00, For=7.54e+01, Power=1.30e+00
+  [eval] val_mse=7.734e-01  (n=7498)
+Epoch 00114: Time=  17.5s, Loss=3.37e+00, Inv=3.37e+00, For=7.65e+01, Power=1.30e+00
+  [eval] val_mse=7.749e-01  (n=7498)
+Epoch 00115: Time=  17.6s, Loss=3.37e+00, Inv=3.37e+00, For=7.72e+01, Power=1.29e+00
+  [eval] val_mse=7.787e-01  (n=7498)
+Epoch 00116: Time=  17.7s, Loss=3.38e+00, Inv=3.38e+00, For=7.94e+01, Power=1.30e+00
+  [eval] val_mse=7.832e-01  (n=7498)
+Epoch 00117: Time=  17.8s, Loss=3.37e+00, Inv=3.37e+00, For=7.96e+01, Power=1.30e+00
+  [eval] val_mse=7.721e-01  (n=7498)
+Epoch 00118: Time=  17.9s, Loss=3.36e+00, Inv=3.36e+00, For=8.04e+01, Power=1.30e+00
+  [eval] val_mse=7.747e-01  (n=7498)
+Epoch 00119: Time=  18.0s, Loss=3.37e+00, Inv=3.37e+00, For=8.34e+01, Power=1.30e+00
+  [eval] val_mse=7.748e-01  (n=7498)
+Epoch 00120: Time=  18.1s, Loss=3.36e+00, Inv=3.36e+00, For=8.19e+01, Power=1.29e+00
+  [eval] val_mse=7.815e-01  (n=7498)
+Epoch 00121: Time=  18.2s, Loss=3.37e+00, Inv=3.37e+00, For=8.45e+01, Power=1.30e+00
+  [eval] val_mse=7.734e-01  (n=7498)
+Epoch 00122: Time=  18.4s, Loss=3.36e+00, Inv=3.36e+00, For=8.50e+01, Power=1.30e+00
+  [eval] val_mse=7.746e-01  (n=7498)
+  [early_stop] stop at epoch=122 (best_epoch=112, best_val_mse=7.689e-01)
+Saved DeLaN checkpoint: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+Saved training history: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3__train_history.csv
+
+################################################
+Evaluating DeLaN | run=UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  [val] Torque RMSE = 3.580e-01
+Torque MSE  = 1.086e-01
+Torque RMSE = 3.295e-01
+Per-joint MSE : 1.431e-01 2.190e-01 9.320e-02 7.133e-02 5.950e-02 6.517e-02
+Per-joint RMSE: 3.783e-01 4.680e-01 3.053e-01 2.671e-01 2.439e-01 2.553e-01
+Comp Time per Sample = 1.441e-04s / 6941.2Hz
+Saved metrics TXT: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics_test.txt
+Saved metrics JSON: /workspace/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics.json
+
+
+################################################################################################################################################################################################################################################################
+### 3) SELECT BEST DELAN (by val RMSE)                                                                                                                                                                                                                       ###
+### best_seed=2 val_rmse=0.34930385260970537 test_rmse=0.3221021989221491                                                                                                                                                                                    ###
+### metrics_json=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/models/delan/UR3_Load0_cc__delanModelStory__K84__seed2__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics.json ###
+################################################################################################################################################################################################################################################################

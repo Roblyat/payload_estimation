@@ -171,6 +171,14 @@ def main() -> None:
         if tau_gt_valid_all.size == 0:
             continue
 
+        if tau_rg_valid_all.shape[0] != tau_gt_valid_all.shape[0]:
+            n = min(tau_rg_valid_all.shape[0], tau_gt_valid_all.shape[0])
+            if n <= 0:
+                continue
+            tau_gt_valid_all = tau_gt_valid_all[:n]
+            tau_delan_valid_all = tau_delan_valid_all[:n]
+            tau_rg_valid_all = tau_rg_valid_all[:n]
+
         err_delan = tau_delan_valid_all - tau_gt_valid_all
         err_rg = tau_rg_valid_all - tau_gt_valid_all
 

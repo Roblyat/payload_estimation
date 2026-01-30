@@ -1,0 +1,51 @@
+##################################################################################
+### DeLaN best plots                                                           ###
+### ts=                                                                        ###
+### run_tag=best5x10L0                                                         ###
+### out_dir=/workspace/shared/evaluation/delan_best/UR3_Load0_cc__best5x10L0__ ###
+##################################################################################
+
+==============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/delan_best_fold_plots.py --summary_jsonl /workspace/shared/evaluation/summary_delan_best_runs_best5x10L0.jsonl --out_dir /workspace/shared/evaluation/delan_best/UR3_Load0_cc__best5x10L0__/folds' ===
+==============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-abr4q_by because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+[info] summary_jsonl=/workspace/shared/evaluation/summary_delan_best_runs_best5x10L0.jsonl rows=50
+[info] out_dir=/workspace/shared/evaluation/delan_best/UR3_Load0_cc__best5x10L0__/folds MPLCONFIGDIR=/tmp/matplotlib-abr4q_by
+[info] groups=10
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_cc__best5x10L0__/folds/delan_best_fold_K84__hp_lutter_like_128__d0.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_cc__best5x10L0__/folds/delan_best_fold_K84__hp_lutter_like_128__d1.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_cc__best5x10L0__/folds/delan_best_fold_K84__hp_lutter_like_256__d0.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_cc__best5x10L0__/folds/delan_best_fold_K84__hp_lutter_like_256__d1.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_cc__best5x10L0__/folds/delan_best_fold_K84__hp_lutter_like_256_d3__d0.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_cc__best5x10L0__/folds/delan_best_fold_K84__hp_lutter_like_256_d3__d1.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_cc__best5x10L0__/folds/delan_best_fold_K84__hp_lutter_like_256_lr5e5__d0.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_cc__best5x10L0__/folds/delan_best_fold_K84__hp_lutter_like_256_lr5e5__d1.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_cc__best5x10L0__/folds/delan_best_fold_K84__hp_lutter_like_256_wd1e4__d0.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_cc__best5x10L0__/folds/delan_best_fold_K84__hp_lutter_like_256_wd1e4__d1.png
+
+
+=========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/delan_best_hyper_scatter.py --summary_jsonl /workspace/shared/evaluation/summary_delan_best_hypers_best5x10L0.jsonl --out_dir /workspace/shared/evaluation/delan_best/UR3_Load0_cc__best5x10L0__/hypers --run_tag best5x10L0' ===
+=========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-zwhraxtf because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+[info] summary_jsonl=/workspace/shared/evaluation/summary_delan_best_hypers_best5x10L0.jsonl rows=5 run_tag=best5x10L0
+[info] out_dir=/workspace/shared/evaluation/delan_best/UR3_Load0_cc__best5x10L0__/hypers MPLCONFIGDIR=/tmp/matplotlib-zwhraxtf
+[info] points_a=5 points_b=5
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_cc__best5x10L0__/hypers/scatter_accuracy_vs_stability.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_cc__best5x10L0__/hypers/scatter_val_vs_test.png
+
+
+=================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/delan_best_torque_rmse_aggregate.py --summary_jsonl /workspace/shared/evaluation/summary_delan_best_folds_best5x10L0.jsonl --out_dir /workspace/shared/evaluation/delan_best/UR3_Load0_cc__best5x10L0__/torque --bins 200 --split test --hp_presets lutter_like_128,lutter_like_256 ' ===
+=================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-arlg6jon because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+[warn] no hp_presets with per-joint data; skipping A4 plot
+
+#############################################################################################################################################
+### DeLaN best plots finished                                                                                                             ###
+### ts=                                                                                                                                   ###
+### log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/delan_best_plots_UR3_Load0_cc_best5x10L0_.log ###
+#############################################################################################################################################

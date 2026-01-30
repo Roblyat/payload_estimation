@@ -1,0 +1,16 @@
+[2026-01-30 15:54:55] kBestModel^2 started ts=20260130_155455
+[2026-01-30 15:54:55] START best_delan (5x10^4_under): /usr/bin/python3 /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/services/sweep/scripts/run_sweep_delan.py
+Traceback (most recent call last):
+  File "/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/services/sweep/scripts/run_sweep_delan.py", line 22, in <module>
+    main()
+  File "/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/services/sweep/scripts/run_sweep_delan.py", line 16, in main
+    from sweep_best_delan_tplvl import main as _main
+  File "/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/services/sweep/src/sweep_best_delan_tplvl.py", line 48, in <module>
+    from sweep_helper import (
+  File "/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/services/sweep/src/sweep_helper.py", line 9, in <module>
+    import numpy as np
+ModuleNotFoundError: No module named 'numpy'
+
+[2026-01-30 15:54:55] END best_delan (5x10^4_under): exit_code=1
+[2026-01-30 15:54:55] best_delan failed for 5x10^4_under; skipping best_lstm
+[2026-01-30 15:54:55] kBestModel^2 finished ok=False

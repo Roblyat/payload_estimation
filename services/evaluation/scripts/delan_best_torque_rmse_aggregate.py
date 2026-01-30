@@ -215,7 +215,7 @@ def main() -> None:
             per_hp_joint[hp] = (med, q25, q75)
 
     available_hp = sorted(per_hp_joint.keys())
-    selected_hp = hp_filter or available_hp
+    selected_hp = [hp for hp in (hp_filter or available_hp) if hp in per_hp_joint]
     color_map = _hp_color_map(selected_hp)
 
     if selected_hp:
@@ -260,6 +260,8 @@ def main() -> None:
             joint_q25=np.stack([per_hp_joint[hp][1] for hp in selected_hp], axis=0),
             joint_q75=np.stack([per_hp_joint[hp][2] for hp in selected_hp], axis=0),
         )
+    else:
+        print("[warn] no hp_presets with per-joint data; skipping A4 plot", flush=True)
 
 
 if __name__ == "__main__":

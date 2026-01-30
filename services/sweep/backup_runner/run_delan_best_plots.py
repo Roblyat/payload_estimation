@@ -33,14 +33,40 @@ def _default_ts() -> str:
     return last.replace("summary_delan_best_runs_", "").replace(".jsonl", "")
 
 
-def _summary_paths(ts: str, overrides: dict[str, str]) -> dict[str, str]:
-    paths = {
-        "runs": f"{EVAL_DIR}/summary_delan_best_runs_{ts}.jsonl",
-        "folds": f"{EVAL_DIR}/summary_delan_best_folds_{ts}.jsonl",
-        "hypers": f"{EVAL_DIR}/summary_delan_best_hypers_{ts}.jsonl",
+def _summary_paths(ts: str, run_tag: str, overrides: dict[str, str]) -> dict[str, str]:
+    """
+    Build default summary paths. If run_tag is explicitly provided, prefer the
+    tag-only filenames (no timestamp) like summary_delan_best_runs_<run_tag>.jsonl.
+    """
+
+    def pick(defaults: list[str], override: str | None) -> str:
+        if override:
+            return override
+        return defaults[0]
+
+    def run_path(prefix: str) -> list[str]:
+        if run_tag and not ts:
+            # explicit run_tag override: trust tag-only
+            return [f"{EVAL_DIR}/{prefix}_{run_tag}.jsonl"]
+        if run_tag and ts:
+            return [
+                f"{EVAL_DIR}/{prefix}_{run_tag}_{ts}.jsonl",
+                f"{EVAL_DIR}/{prefix}_{run_tag}.jsonl",
+            ]
+        if ts:
+            return [f"{EVAL_DIR}/{prefix}_{ts}.jsonl"]
+        # fallback: return empty path, caller should override
+        return [f"{EVAL_DIR}/{prefix}.jsonl"]
+
+    runs_defaults = run_path("summary_delan_best_runs")
+    folds_defaults = run_path("summary_delan_best_folds")
+    hypers_defaults = run_path("summary_delan_best_hypers")
+
+    return {
+        "runs": pick(runs_defaults, overrides.get("runs")),
+        "folds": pick(folds_defaults, overrides.get("folds")),
+        "hypers": pick(hypers_defaults, overrides.get("hypers")),
     }
-    paths.update({k: v for k, v in overrides.items() if v})
-    return paths
 
 
 def _plot_base_dir(ts: str) -> str:
@@ -59,9 +85,18 @@ def main() -> None:
     ap.add_argument("--skip_torque", action="store_true")
     args = ap.parse_args()
 
-    ts = args.ts.strip() or _default_ts()
+    ts = args.ts.strip()
+    run_tag = args.run_tag.strip()
+
+    # If user provided run_tag, trust it and ignore timestamp (tag-only filenames)
+    if run_tag:
+        ts = ""
+    else:
+        ts = ts or _default_ts()
+        run_tag = RUN_TAG
     paths = _summary_paths(
         ts,
+        run_tag,
         {
             "runs": args.summary_runs,
             "folds": args.summary_folds,
@@ -69,7 +104,6 @@ def main() -> None:
         },
     )
 
-    run_tag = args.run_tag.strip() or RUN_TAG
     out_dir = f"{DELAN_BEST_PLOTS_OUT_DIR}/{DATASET_NAME}__{run_tag}__{ts}"
     logs_dir = Path(LOGS_DIR_HOST)
     if not logs_dir.is_absolute():

@@ -35,7 +35,7 @@ class SweepConfig:
     delan_model_type: str = "structured"
     delan_hp_preset: str = "lutter_like_256"
     delan_hp_flags: str = ""
-    delan_seeds: List[int] = field(default_factory=lambda: [0, 1, 2, 3, 4]) ## K-Domination-Story
+    delan_seeds: List[int] = field(default_factory=lambda: [0, 1, 2, 3, 4]) ## Best DeLaN Model & K-Domination-Story
     delan_epochs: int = 200
     delan_eval_every: int = 1
     delan_log_every: int = 1

@@ -34,6 +34,14 @@ def _run_py(script_path: Path, env: dict, log_file, label: str) -> int:
     return int(p.returncode)
 
 
+def _handshake_paths(run_tag: str) -> tuple[str, str, str]:
+    base = "/workspace/shared/evaluation"
+    hypers = f"{base}/summary_{run_tag}_delan_best_hypers.jsonl"
+    folds = f"{base}/summary_{run_tag}_delan_best_folds.jsonl"
+    model = f"{base}/delan_best_model_{run_tag}.json"
+    return hypers, folds, model
+
+
 def main() -> int:
     sweep_root, payload_root, _ = _paths()
     scripts_dir = sweep_root / "scripts"
@@ -44,10 +52,6 @@ def main() -> int:
     log_path = log_dir / f"kBestModel2_{ts}.log"
 
     env_base = os.environ.copy()
-
-    best_hypers = "/workspace/shared/evaluation/summary_delan_best_hypers_20260129_154853.jsonl"
-    best_folds = "/workspace/shared/evaluation/summary_delan_best_folds_20260129_154853.jsonl"
-    best_model = "/workspace/shared/evaluation/delan_best_model_20260129_154853.json"
 
     overall_ok = True
 
@@ -65,19 +69,20 @@ def main() -> int:
         # 2) best DeLaN + best LSTM for UR3_Load0_5x10^4_under
         env = env_base.copy()
         env["SWEEP_DATASET_NAME"] = "UR3_Load0_5x10^4_under"
-        env["SWEEP_RUN_TAG"] = "delanBest5x10L0"
+        env["SWEEP_RUN_TAG"] = "best5x10L0"
         rc = _run_py(scripts_dir / "run_sweep_delan.py", env, log_file, "best_delan (5x10^4_under)")
         if rc == 0:
             env = env_base.copy()
             env["SWEEP_DATASET_NAME"] = "UR3_Load0_5x10^4_under"
-            env["SWEEP_RUN_TAG"] = "lstmBest5x10L0"
-            env["LSTM_BEST_DELAN_HYPERS_JSONL"] = best_hypers
-            env["LSTM_BEST_DELAN_FOLDS_JSONL"] = best_folds
-            env["LSTM_BEST_DELAN_MODEL_JSON"] = best_model
+            env["SWEEP_RUN_TAG"] = "best5x10L0"
+            h, f, m = _handshake_paths("best5x10L0")
+            env["LSTM_BEST_DELAN_HYPERS_JSONL"] = h
+            env["LSTM_BEST_DELAN_FOLDS_JSONL"] = f
+            env["LSTM_BEST_DELAN_MODEL_JSON"] = m
             _log_line(log_file, "LSTM handshake paths (5x10^4_under):")
-            _log_line(log_file, f"  LSTM_BEST_DELAN_HYPERS_JSONL={best_hypers}")
-            _log_line(log_file, f"  LSTM_BEST_DELAN_FOLDS_JSONL={best_folds}")
-            _log_line(log_file, f"  LSTM_BEST_DELAN_MODEL_JSON={best_model}")
+            _log_line(log_file, f"  LSTM_BEST_DELAN_HYPERS_JSONL={h}")
+            _log_line(log_file, f"  LSTM_BEST_DELAN_FOLDS_JSONL={f}")
+            _log_line(log_file, f"  LSTM_BEST_DELAN_MODEL_JSON={m}")
             rc_lstm = _run_py(scripts_dir / "run_sweep_lstm.py", env, log_file, "best_lstm (5x10^4_under)")
             if rc_lstm != 0:
                 overall_ok = False
@@ -88,19 +93,20 @@ def main() -> int:
         # 3) best DeLaN + best LSTM for UR3_Load0_K86_uniform
         env = env_base.copy()
         env["SWEEP_DATASET_NAME"] = "UR3_Load0_K86_uniform"
-        env["SWEEP_RUN_TAG"] = "delanBest86uL0"
+        env["SWEEP_RUN_TAG"] = "best86uL0"
         rc = _run_py(scripts_dir / "run_sweep_delan.py", env, log_file, "best_delan (K86_uniform)")
         if rc == 0:
             env = env_base.copy()
             env["SWEEP_DATASET_NAME"] = "UR3_Load0_K86_uniform"
-            env["SWEEP_RUN_TAG"] = "lstmBest86uL0"
-            env["LSTM_BEST_DELAN_HYPERS_JSONL"] = best_hypers
-            env["LSTM_BEST_DELAN_FOLDS_JSONL"] = best_folds
-            env["LSTM_BEST_DELAN_MODEL_JSON"] = best_model
+            env["SWEEP_RUN_TAG"] = "best86uL0"
+            h, f, m = _handshake_paths("best86uL0")
+            env["LSTM_BEST_DELAN_HYPERS_JSONL"] = h
+            env["LSTM_BEST_DELAN_FOLDS_JSONL"] = f
+            env["LSTM_BEST_DELAN_MODEL_JSON"] = m
             _log_line(log_file, "LSTM handshake paths (K86_uniform):")
-            _log_line(log_file, f"  LSTM_BEST_DELAN_HYPERS_JSONL={best_hypers}")
-            _log_line(log_file, f"  LSTM_BEST_DELAN_FOLDS_JSONL={best_folds}")
-            _log_line(log_file, f"  LSTM_BEST_DELAN_MODEL_JSON={best_model}")
+            _log_line(log_file, f"  LSTM_BEST_DELAN_HYPERS_JSONL={h}")
+            _log_line(log_file, f"  LSTM_BEST_DELAN_FOLDS_JSONL={f}")
+            _log_line(log_file, f"  LSTM_BEST_DELAN_MODEL_JSON={m}")
             rc_lstm = _run_py(scripts_dir / "run_sweep_lstm.py", env, log_file, "best_lstm (K86_uniform)")
             if rc_lstm != 0:
                 overall_ok = False

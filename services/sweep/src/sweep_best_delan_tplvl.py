@@ -80,6 +80,10 @@ def main() -> None:
     hypers_csv = str(Path(EVAL_DIR_HOST) / f"summary_delan_best_hypers_{ts}.csv")
     hypers_jsonl = str(Path(EVAL_DIR_HOST) / f"summary_delan_best_hypers_{ts}.jsonl")
     best_model_json = Path(EVAL_DIR_HOST) / f"delan_best_model_{ts}.json"
+    # run-tagged stable copies
+    best_model_json_tag = Path(EVAL_DIR_HOST) / f"delan_best_model_{RUN_TAG}.json"
+    hypers_jsonl_tag = Path(EVAL_DIR_HOST) / f"summary_{RUN_TAG}_delan_best_hypers.jsonl"
+    folds_jsonl_tag = Path(EVAL_DIR_HOST) / f"summary_{RUN_TAG}_delan_best_folds.jsonl"
 
     with master_log_path.open("w", encoding="utf-8") as master_log:
         master_log.write(banner([
@@ -365,6 +369,20 @@ def main() -> None:
             best_model_json.parent.mkdir(parents=True, exist_ok=True)
             with best_model_json.open("w", encoding="utf-8") as f:
                 json.dump(best_manifest, f, indent=2)
+            # also write run-tagged stable copies
+            with best_model_json_tag.open("w", encoding="utf-8") as f:
+                json.dump(best_manifest, f, indent=2)
+            # copy hypers/folds to run-tagged stable copies
+            try:
+                Path(hypers_jsonl).replace(hypers_jsonl_tag)
+            except Exception:
+                import shutil
+                shutil.copyfile(hypers_jsonl, hypers_jsonl_tag)
+            try:
+                Path(folds_jsonl).replace(folds_jsonl_tag)
+            except Exception:
+                import shutil
+                shutil.copyfile(folds_jsonl, folds_jsonl_tag)
 
         if DELAN_BEST_FOLD_PLOTS:
             out_dir = f"{DELAN_BEST_PLOTS_OUT_DIR}/{DATASET_NAME}__{RUN_TAG}__{ts}/folds"

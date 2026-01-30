@@ -74,23 +74,23 @@ def main() -> int:
         _log_line(log_file, f"kBestModel^2 started ts={ts}")
 
         # 1) run_sweep.py (independent; failure does not stop pipeline)
-        # env = env_base.copy()
-        # env["SWEEP_DATASET_NAME"] = "UR3_Load0_cc"
-        # env["SWEEP_RUN_TAG"] = "kStoryTest"
-        # rc = _run_py(scripts_dir / "run_sweep.py", env, log_file, "run_sweep (kStoryTest)")
-        # if rc != 0:
-        #     _log_line(log_file, "run_sweep failed; continuing to best-Delan/LSTM")
+        env = env_base.copy()
+        env["SWEEP_DATASET_NAME"] = "UR3_Load0_cc"
+        env["SWEEP_RUN_TAG"] = "kStory"
+        rc = _run_py(scripts_dir / "run_sweep.py", env, log_file, "run_sweep (kStoryTest)")
+        if rc != 0:
+            _log_line(log_file, "run_sweep failed; continuing to best-Delan/LSTM")
 
         # 2) best DeLaN + best LSTM for UR3_Load0_5x10^4_under
         env = env_base.copy()
         env["SWEEP_DATASET_NAME"] = "UR3_Load0_5x10^4_under"
-        env["SWEEP_RUN_TAG"] = "testHSK_2" #"best5x10L0"
+        env["SWEEP_RUN_TAG"] = "best5x10L0"
         rc = _run_py(scripts_dir / "run_sweep_delan.py", env, log_file, "best_delan (5x10^4_under)")
         if rc == 0:
             env = env_base.copy()
             env["SWEEP_DATASET_NAME"] = "UR3_Load0_5x10^4_under"
-            env["SWEEP_RUN_TAG"] = "testHSK_2"
-            h, f, m = _handshake_paths("testHSK_2")
+            env["SWEEP_RUN_TAG"] = "best5x10L0"
+            h, f, m = _handshake_paths("best5x10L0")
             env["LSTM_BEST_DELAN_HYPERS_JSONL"] = h
             env["LSTM_BEST_DELAN_FOLDS_JSONL"] = f
             env["LSTM_BEST_DELAN_MODEL_JSON"] = m

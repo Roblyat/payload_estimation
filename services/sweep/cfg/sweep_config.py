@@ -35,7 +35,7 @@ class SweepConfig:
     delan_model_type: str = "structured"
     delan_hp_preset: str = "lutter_like_256"
     delan_hp_flags: str = ""
-    delan_seeds: List[int] = field(default_factory=lambda: [0, 1]) #[0, 1, 2, 3, 4]) ## Best DeLaN Model & K-Domination-Story
+    delan_seeds: List[int] = field(default_factory=lambda: [0, 1, 2, 3, 4]) ## Best DeLaN Model & K-Domination-Story
     delan_epochs: int = 200
     delan_eval_every: int = 1
     delan_log_every: int = 1
@@ -46,20 +46,15 @@ class SweepConfig:
 
     # DeLaN best-model sweep
     delan_best_k_max: int = 84
-    delan_best_dataset_seeds: List[int] = field(default_factory=lambda: [0, 1]) #[0, 1, 2, 3, 4])
-    # delan_best_hp_presets: List[str] = field(default_factory=lambda: 
-    #                                      [
-    #     "lutter_like_128",
-    #     "lutter_like_256",
-    #     "lutter_like_256_d3",
-    #     "lutter_like_256_lr5e5",
-    #     "lutter_like_256_wd1e4",
-    # ])
+    delan_best_dataset_seeds: List[int] = field(default_factory=lambda: [0, 1, 2, 3, 4])
     delan_best_hp_presets: List[str] = field(default_factory=lambda: 
                                          [
         "lutter_like_128",
         "lutter_like_256",
-    ])    
+        "lutter_like_256_d3",
+        "lutter_like_256_lr5e5",
+        "lutter_like_256_wd1e4",
+    ])   
     delan_best_score_lambda: float = 0.5
     delan_best_score_penalty: float = 10.0
     delan_best_fold_plots: bool = True
@@ -69,18 +64,14 @@ class SweepConfig:
     delan_best_torque_bins: int = 200
     delan_best_torque_split: str = "test"
     # best torque hp_presets just for plot alginment. no relation to any algorithm logic
-    # delan_best_torque_hp_presets: List[str] = field(default_factory=list)
-    # delan_best_torque_hp_presets = [
-    #     "lutter_like_128",
-    #     "lutter_like_256",
-    #     "lutter_like_256_d3",
-    #     "lutter_like_256_lr5e5",
-    #     "lutter_like_256_wd1e4"
-    #     ]
+    delan_best_torque_hp_presets: List[str] = field(default_factory=list)
     delan_best_torque_hp_presets = [
         "lutter_like_128",
         "lutter_like_256",
-        ]    
+        "lutter_like_256_d3",
+        "lutter_like_256_lr5e5",
+        "lutter_like_256_wd1e4"
+        ]
     delan_best_plots_out_dir: str = "/workspace/shared/evaluation/delan_best"
 
     # LSTM hyperparams
@@ -98,9 +89,9 @@ class SweepConfig:
 
     # LSTM best-model sweep
     lstm_best_dataset_seeds: List[int] = field(default_factory=lambda: [0, 1, 2])
-    lstm_best_feature_modes: List[str] = field(default_factory=lambda: ["full"]) #["full", "state", "tau_hat", "state_tauhat"])
-    lstm_best_h_list: List[int] = field(default_factory=lambda: [50]) #[50, 100, 150])
-    lstm_best_seeds: List[int] = field(default_factory=lambda: [0]) #[0, 1, 2])
+    lstm_best_feature_modes: List[str] = field(default_factory=lambda: ["full", "state", "tau_hat", "state_tauhat"])
+    lstm_best_h_list: List[int] = field(default_factory=lambda: [50, 100, 150])
+    lstm_best_seeds: List[int] = field(default_factory=lambda: [0, 1, 2])
     lstm_best_score_lambda: float = 0.5
     lstm_best_score_penalty: float = 10.0
     lstm_best_delan_hypers_jsonl: str = "/workspace/shared/evaluation/summary_delan_best_hypers_20260129_154853.jsonl"

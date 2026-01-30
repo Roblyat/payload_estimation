@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+import os
 from pathlib import Path
 from typing import List, Optional
 
@@ -131,4 +132,22 @@ class SweepConfig:
 def default_sweep_config() -> SweepConfig:
     # sweep_config.py -> cfg -> sweep -> services -> payload_estimation -> repo root
     repo_root = Path(__file__).resolve().parents[4]
-    return SweepConfig(repo_root=repo_root)
+    cfg = SweepConfig(repo_root=repo_root)
+
+    def _env_str(name: str, default: str) -> str:
+        val = os.getenv(name)
+        return val if val else default
+
+    cfg.dataset_name = _env_str("SWEEP_DATASET_NAME", cfg.dataset_name)
+    cfg.run_tag = _env_str("SWEEP_RUN_TAG", cfg.run_tag)
+    cfg.lstm_best_delan_hypers_jsonl = _env_str(
+        "LSTM_BEST_DELAN_HYPERS_JSONL", cfg.lstm_best_delan_hypers_jsonl
+    )
+    cfg.lstm_best_delan_folds_jsonl = _env_str(
+        "LSTM_BEST_DELAN_FOLDS_JSONL", cfg.lstm_best_delan_folds_jsonl
+    )
+    cfg.lstm_best_delan_model_json = _env_str(
+        "LSTM_BEST_DELAN_MODEL_JSON", cfg.lstm_best_delan_model_json
+    )
+
+    return cfg

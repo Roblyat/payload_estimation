@@ -13,6 +13,25 @@ import matplotlib as mpl
 mpl.use("Agg")
 import matplotlib.pyplot as plt
 
+_PALETTE = [
+    "#e41a1c",  # red
+    "#ff7f00",  # orange
+    "#377eb8",  # blue
+    "#4daf4a",  # green
+    "#984ea3",  # purple
+    "#a65628",
+    "#f781bf",
+    "#999999",
+    "#1b9e77",
+    "#d95f02",
+    "#7570b3",
+]
+
+
+def _color_map(keys: List[int], palette: List[str] | None = None) -> Dict[int, str]:
+    pal = palette or _PALETTE
+    return {k: pal[i % len(pal)] for i, k in enumerate(keys)}
+
 
 def _resolve_shared_path(path: str) -> str:
     if not path:
@@ -157,8 +176,11 @@ def main() -> None:
 
         if time_by_k:
             plt.figure(figsize=(9, 5), dpi=160)
-            colors = plt.cm.tab10(np.linspace(0, 1, len(time_by_k)))
-            for (K, (med, q25, q75)), color in zip(sorted(time_by_k.items(), key=lambda kv: kv[0]), colors):
+            ks_order = sorted(time_by_k.keys())
+            color_map = _color_map(ks_order)
+            for K in ks_order:
+                med, q25, q75 = time_by_k[K]
+                color = color_map.get(K, "#1f77b4")
                 plt.plot(xs, med, label=f"K={K}", color=color, linewidth=1.4)
                 plt.fill_between(xs, q25, q75, color=color, alpha=0.18)
             max_median = None
@@ -171,9 +193,9 @@ def main() -> None:
                     max_median = m if max_median is None else max(max_median, m)
             if max_median is not None:
                 plt.ylim(0, max_median + 0.25)
-            plt.title(f"LSTM residual RMSE over progress by K{title_h}")
+            plt.title(f"LSTM Residual RMSE over Progress by K{title_h}")
             plt.xlabel("Progress (0 → 1)")
-            plt.ylabel("Residual RMSE")
+            plt.ylabel("Residual RMSE (real units)")
             plt.grid(True, alpha=0.25)
             plt.legend(ncol=2, fontsize=8)
             plt.tight_layout()
@@ -208,11 +230,13 @@ def main() -> None:
             width = 0.8 / max(1, n_groups)
 
             plt.figure(figsize=(10, 4.8), dpi=160)
+            color_map = _color_map(selected_K)
             for i, K in enumerate(selected_K):
                 med, q25, q75 = joint_by_k[K]
                 offsets = x - 0.4 + (i + 0.5) * width
                 yerr = np.vstack([med - q25, q75 - med])
-                plt.bar(offsets, med, width=width, label=f"K={K}", alpha=0.9)
+                color = color_map.get(K, "#1f77b4")
+                plt.bar(offsets, med, width=width, label=f"K={K}", alpha=0.9, color=color)
                 plt.errorbar(offsets, med, yerr=yerr, fmt="none", ecolor="k", elinewidth=0.9, capsize=2, alpha=0.8)
             max_median = None
             for med, _, _ in joint_by_k.values():
@@ -225,9 +249,9 @@ def main() -> None:
             if max_median is not None:
                 plt.ylim(0, max_median + 0.25)
 
-            plt.title(f"LSTM residual RMSE per joint (median ± IQR){title_h}")
+            plt.title(f"LSTM Residual RMSE per Joint (median ± IQR){title_h}")
             plt.xlabel("Joint")
-            plt.ylabel("Residual RMSE")
+            plt.ylabel("Joint Residual RMSE (real units)")
             plt.xticks(x, [f"joint{j}" for j in x])
             plt.grid(True, axis="y", alpha=0.25)
             plt.legend(ncol=min(3, len(selected_K)), fontsize=8)

@@ -121,6 +121,7 @@ LSTM_BEST_BINS = CFG.lstm_best_bins
 LSTM_BEST_RESIDUAL_AGGREGATE = CFG.lstm_best_residual_aggregate
 LSTM_BEST_COMBINED_AGGREGATE = CFG.lstm_best_combined_aggregate
 LSTM_BEST_BOXPLOTS = CFG.lstm_best_boxplots
+LSTM_BEST_SCATTER_LEGEND = CFG.lstm_best_scatter_legend
 LSTM_BEST_PLOTS_OUT_DIR = CFG.lstm_best_plots_out_dir
 
 # Plot/cleanup behavior

@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 from collections import defaultdict
 from typing import Dict, List, Tuple
 
@@ -12,6 +13,25 @@ import numpy as np
 import matplotlib as mpl
 mpl.use("Agg")
 import matplotlib.pyplot as plt
+
+_PALETTE = [
+    "#e41a1c",  # red
+    "#ff7f00",  # orange
+    "#377eb8",  # blue
+    "#4daf4a",  # green
+    "#984ea3",  # purple
+    "#a65628",
+    "#f781bf",
+    "#999999",
+    "#1b9e77",
+    "#d95f02",
+    "#7570b3",
+]
+
+
+def _color_map(keys: List[int], palette: List[str] | None = None) -> Dict[int, str]:
+    pal = palette or _PALETTE
+    return {k: pal[i % len(pal)] for i, k in enumerate(keys)}
 
 
 def _resolve_shared_path(path: str) -> str:
@@ -23,6 +43,18 @@ def _resolve_shared_path(path: str) -> str:
     if marker in path:
         return os.path.join("/workspace/shared", path.split(marker, 1)[1])
     return path
+
+
+def _coerce_2d(arr: object, label: str, ctx: str) -> np.ndarray | None:
+    try:
+        out = np.asarray(arr, dtype=np.float32)
+    except Exception as e:
+        print(f"[skip] {label} not coercible: {ctx} err={e}", file=sys.stderr)
+        return None
+    if out.ndim != 2:
+        print(f"[skip] {label} ndim={out.ndim} (expected 2): {ctx}", file=sys.stderr)
+        return None
+    return out
 
 
 def _resample_progress(curve: np.ndarray, n_bins: int) -> np.ndarray:
@@ -66,15 +98,18 @@ def _concat_valid(
     tau_hat_list: List[np.ndarray],
     tau_rg_list: List[np.ndarray],
     H: int,
+    ctx: str,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     tau_gt_valid_all: List[np.ndarray] = []
     tau_delan_valid_all: List[np.ndarray] = []
     tau_rg_valid_all: List[np.ndarray] = []
 
     for tau, tau_hat, tau_rg in zip(tau_list, tau_hat_list, tau_rg_list):
-        tau = np.asarray(tau)
-        tau_hat = np.asarray(tau_hat)
-        tau_rg = np.asarray(tau_rg)
+        tau = _coerce_2d(tau, "tau", ctx)
+        tau_hat = _coerce_2d(tau_hat, "tau_hat", ctx)
+        tau_rg = _coerce_2d(tau_rg, "tau_rg", ctx)
+        if tau is None or tau_hat is None or tau_rg is None:
+            continue
         if tau.shape[0] < H:
             continue
         sl = slice(H - 1, None)
@@ -161,8 +196,9 @@ def main() -> None:
         if not tau_rg_list:
             continue
 
+        ctx = f"K={K} H={H} seed={seed}"
         tau_gt_valid_all, tau_delan_valid_all, tau_rg_valid_all = _concat_valid(
-            tau_list, tau_hat_list, tau_rg_list, H
+            tau_list, tau_hat_list, tau_rg_list, H, ctx
         )
         if tau_gt_valid_all.size == 0:
             continue
@@ -255,19 +291,26 @@ def main() -> None:
             ax1 = fig.add_subplot(1, 2, 1)
             ax2 = fig.add_subplot(1, 2, 2)
 
-            colors = plt.cm.tab10(np.linspace(0, 1, len(time_by_k_delan)))
-            for (K, (med, q25, q75)), color in zip(sorted(time_by_k_delan.items(), key=lambda kv: kv[0]), colors):
+            ks_order = sorted(time_by_k_delan.keys())
+            color_map = _color_map(ks_order)
+            for K in ks_order:
+                med, q25, q75 = time_by_k_delan[K]
+                color = color_map.get(K, "#1f77b4")
                 ax1.plot(xs, med, label=f"K={K}", color=color, linewidth=1.3)
                 ax1.fill_between(xs, q25, q75, color=color, alpha=0.18)
-            for (K, (med, q25, q75)), color in zip(sorted(time_by_k_rg.items(), key=lambda kv: kv[0]), colors):
+            for K in ks_order:
+                if K not in time_by_k_rg:
+                    continue
+                med, q25, q75 = time_by_k_rg[K]
+                color = color_map.get(K, "#1f77b4")
                 ax2.plot(xs, med, label=f"K={K}", color=color, linewidth=1.3)
                 ax2.fill_between(xs, q25, q75, color=color, alpha=0.18)
 
-            ax1.set_title(f"DeLaN torque RMSE over progress{title_h}")
-            ax2.set_title(f"Combined torque RMSE over progress{title_h}")
+            ax1.set_title(f"DeLaN Torque RMSE over Progress{title_h}")
+            ax2.set_title(f"Combined Torque RMSE over Progress{title_h}")
             for ax in (ax1, ax2):
                 ax.set_xlabel("Progress (0 → 1)")
-                ax.set_ylabel("Torque RMSE")
+                ax.set_ylabel("Torque RMSE (real units)")
                 ax.grid(True, alpha=0.25)
                 ax.legend(ncol=2, fontsize=8)
 
@@ -320,7 +363,7 @@ def main() -> None:
                 ax.errorbar(x + width / 2, med_r, yerr=yerr_r, fmt="none", ecolor="k", elinewidth=0.9, capsize=2, alpha=0.8)
 
                 ax.set_title(f"K={K}{title_h}")
-                ax.set_ylabel("Torque RMSE")
+                ax.set_ylabel("Torque RMSE (real units)")
                 ax.set_xticks(x)
                 if idx == len(selected_K) - 1:
                     ax.set_xticklabels([f"joint{j}" for j in x])

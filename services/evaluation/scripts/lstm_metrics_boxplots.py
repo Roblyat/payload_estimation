@@ -12,6 +12,26 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+_PALETTE = [
+    "#e41a1c",  # red
+    "#ff7f00",  # orange
+    "#377eb8",  # blue
+    "#4daf4a",  # green
+    "#984ea3",  # purple
+    "#a65628",
+    "#f781bf",
+    "#999999",
+    "#1b9e77",
+    "#d95f02",
+    "#7570b3",
+]
+
+
+def _color_map(keys: List[str | int], palette: List[str] | None = None) -> Dict[str | int, str]:
+    pal = palette or _PALETTE
+    return {k: pal[i % len(pal)] for i, k in enumerate(keys)}
+
+
 def _safe_mkdir(p: str) -> None:
     os.makedirs(p, exist_ok=True)
 
@@ -136,6 +156,7 @@ def _boxplot(
     prefix_hint: str | None = None,
     force_prefixes: List[str] | None = None,
     title_prefix_override: str | None = None,
+    title_fontsize: int = 11,
 ) -> None:
     labels = sorted(groups.keys())
 
@@ -157,7 +178,7 @@ def _boxplot(
 
         ax1 = fig.add_subplot(2, 1, 1)
         ax1.boxplot([groups[k] for k in top_lbl], labels=top_disp, showmeans=True)
-        ax1.set_title(full_title)
+        ax1.set_title(full_title, fontsize=title_fontsize)
         ax1.set_ylabel(ylabel)
         ax1.grid(True, alpha=0.25)
         ax1.tick_params(axis="x", rotation=30)
@@ -176,7 +197,7 @@ def _boxplot(
     data = [groups[k] for k in labels]
     plt.figure(figsize=(max(10, 1.2 * len(labels)), 5), dpi=140)
     plt.boxplot(data, labels=disp, showmeans=True)
-    plt.title(full_title)
+    plt.title(full_title, fontsize=title_fontsize)
     plt.ylabel(ylabel)
     plt.grid(True, alpha=0.25)
     plt.xticks(rotation=30, ha="right")
@@ -196,6 +217,7 @@ def _per_joint_boxplot(
     prefix_hint: str | None = None,
     force_prefixes: List[str] | None = None,
     title_prefix_override: str | None = None,
+    suptitle_fontsize: int = 11,
 ) -> None:
     labels = sorted(groups_per_joint.keys())
 
@@ -226,21 +248,83 @@ def _per_joint_boxplot(
         else:
             ax.tick_params(axis="x", rotation=30)
 
-    fig.suptitle(full_title)
+    fig.suptitle(full_title, fontsize=suptitle_fontsize)
     plt.tight_layout()
     plt.savefig(out_png, dpi=160)
     plt.close(fig)
 
-def _scatter(xs, ys, xlabel: str, ylabel: str, title: str, out_png: str) -> None:
-    plt.figure(figsize=(7, 5), dpi=140)
-    plt.scatter(xs, ys)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.title(title)
-    plt.grid(True, alpha=0.25)
+def _scatter(
+    rows: List[Dict[str, Any]],
+    xlabel: str,
+    ylabel: str,
+    title: str,
+    out_png: str,
+    *,
+    show_legend: bool = True,
+) -> None:
+    pts = []
+    for r in rows:
+        x = r.get("best_val_loss")
+        y = r.get("rmse_total")
+        feat = r.get("feature_mode") or "unknown"
+        H = r.get("H")
+        if np.isfinite(x) and np.isfinite(y):
+            pts.append((float(x), float(y), str(feat), H))
+
+    if not pts:
+        return
+
+    feats = sorted({p[2] for p in pts})
+    hs = sorted({p[3] for p in pts if p[3] is not None})
+    feat_colors = _color_map(feats)
+    h_colors = _color_map(hs)
+
+    fig = plt.figure(figsize=(7.2, 5), dpi=140)
+    ax = fig.add_subplot(1, 1, 1)
+
+    for x, y, feat, H in pts:
+        edge = h_colors.get(H, "#000000")
+        ax.scatter(
+            x,
+            y,
+            s=55,
+            facecolor=feat_colors.get(feat, "#777777"),
+            edgecolor=edge,
+            linewidth=1.0,
+            alpha=0.9,
+        )
+
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(title, fontsize=11)
+    ax.grid(True, alpha=0.25)
+
+    if show_legend:
+        from matplotlib.lines import Line2D
+
+        feat_handles = [
+            Line2D([0], [0], marker="o", color="none",
+                   markerfacecolor=feat_colors[f], markeredgecolor="black",
+                   markersize=7, label=f)
+            for f in feats
+        ]
+        h_handles = [
+            Line2D([0], [0], marker="o", color="none",
+                   markerfacecolor="none", markeredgecolor=h_colors[h],
+                   markersize=7, markeredgewidth=1.2, label=f"H={h}")
+            for h in hs
+        ]
+
+        leg1 = ax.legend(handles=feat_handles, title="Feature", loc="upper right",
+                         fontsize=8, title_fontsize=9, framealpha=0.9)
+        ax.add_artist(leg1)
+        if h_handles:
+            ax.legend(handles=h_handles, title="H", loc="upper right",
+                      bbox_to_anchor=(1.0, 0.58), fontsize=8, title_fontsize=9, framealpha=0.9)
+
     plt.tight_layout()
     plt.savefig(out_png, dpi=160)
-    plt.close()
+    plt.close(fig)
 
 
 def main() -> None:
@@ -248,6 +332,7 @@ def main() -> None:
     ap.add_argument("--lstm_root", default="/workspace/shared/models/lstm", help="Root folder containing lstm runs")
     ap.add_argument("--out_dir", default="/workspace/shared/models/lstm/_metrics_plots", help="Where to save plots")
     ap.add_argument("--backend", choices=["all", "jax", "torch"], default="all")
+    ap.add_argument("--no_scatter_legend", action="store_true", help="Disable legend on scatter plot")
 
     args = ap.parse_args()
 
@@ -327,15 +412,15 @@ def main() -> None:
         g1.setdefault(g, []).append(r["rmse_total"])
     _boxplot(
         g1,
-        title=f"LSTM residual RMSE (test) grouped by feature_mode | {delan_pref}" if delan_pref else
-            "LSTM residual RMSE (test) grouped by feature_mode",
-        ylabel="rmse_total (residual torque units)",
+        title="LSTM Residual RMSE (test) by Feature Mode",
+        ylabel="RMSE Total (real units)",
         out_png=os.path.join(args.out_dir, "lstm_residual_rmse_by_feature_mode.png"),
         split_two_rows=True,
         strip_common_prefix=True,
         prefix_hint=delan_pref,
         force_prefixes=["jax_struct_"],
         title_prefix_override="delan_jax_struct_",
+        title_fontsize=11,
     )
 
 
@@ -347,15 +432,15 @@ def main() -> None:
         g1b.setdefault(key, []).append(r["rmse_total"])
     _boxplot(
         g1b,
-        title=f"LSTM residual RMSE (test) grouped by feature_mode|backend | {delan_pref}" if delan_pref else
-            "LSTM residual RMSE (test) grouped by feature_mode|backend",
-        ylabel="rmse_total (residual torque units)",
+        title="LSTM Residual RMSE (test) by Feature Mode / Backend",
+        ylabel="RMSE Total (real units)",
         out_png=os.path.join(args.out_dir, "lstm_residual_rmse_by_feature_mode_backend.png"),
         split_two_rows=True,
         strip_common_prefix=True,
         prefix_hint=delan_pref,
         force_prefixes=["jax_struct_"],
         title_prefix_override="delan_jax_struct_",
+        title_fontsize=11,
     )
 
     # 1b) Residual RMSE grouped by H (optional helpful)
@@ -365,9 +450,10 @@ def main() -> None:
     if len(gH) >= 2:
         _boxplot(
             gH,
-            title="LSTM residual RMSE (test) grouped by H",
-            ylabel="rmse_total",
+            title="LSTM Residual RMSE (test) by H",
+            ylabel="RMSE Total (real units)",
             out_png=os.path.join(args.out_dir, "lstm_residual_rmse_by_H.png"),
+            title_fontsize=11,
         )
 
     # 1b2) Residual RMSE grouped by backend only
@@ -377,9 +463,10 @@ def main() -> None:
     if len(gb) >= 2:
         _boxplot(
             gb,
-            title="LSTM residual RMSE (test) grouped by backend",
-            ylabel="rmse_total",
+            title="LSTM Residual RMSE (test) by Backend",
+            ylabel="RMSE Total (real units)",
             out_png=os.path.join(args.out_dir, "lstm_residual_rmse_by_backend.png"),
+            title_fontsize=11,
         )   
 
     # 2) Per-joint residual RMSE grid grouped by feature_mode
@@ -396,28 +483,27 @@ def main() -> None:
     if groups_per_joint:
         _per_joint_boxplot(
             groups_per_joint,
-            title=f"LSTM per-joint residual RMSE (test) grouped by feature_mode | {delan_pref}" if delan_pref else
-                "LSTM per-joint residual RMSE (test) grouped by feature_mode",
-            ylabel="joint residual rmse",
+            title="Per-joint Residual RMSE (test) by Feature Mode",
+            ylabel="Joint RMSE (real units)",
             out_png=os.path.join(args.out_dir, "lstm_joint_rmse_grid_by_feature_mode.png"),
             n_dof=n_dof,
             strip_common_prefix=True,
             prefix_hint=delan_pref,
             force_prefixes=["jax_struct_"],
             title_prefix_override="delan_jax_struct_",
+            suptitle_fontsize=11,
         )
 
 
     # 3) Generalization scatter: best_val_loss vs rmse_total
-    xs = [r["best_val_loss"] for r in rows if np.isfinite(r["best_val_loss"]) and np.isfinite(r["rmse_total"])]
-    ys = [r["rmse_total"] for r in rows if np.isfinite(r["best_val_loss"]) and np.isfinite(r["rmse_total"])]
-    if xs and ys:
+    if rows:
         _scatter(
-            xs, ys,
-            xlabel="best_val_loss (scaled MSE)",
-            ylabel="rmse_total (real units)",
-            title="Does scaled validation loss track real-unit residual RMSE?",
+            rows,
+            xlabel="Best Val Loss (scaled MSE)",
+            ylabel="RMSE Total (real units)",
+            title="Best Val Loss vs RMSE Total",
             out_png=os.path.join(args.out_dir, "lstm_best_val_loss_vs_rmse_total.png"),
+            show_legend=not args.no_scatter_legend,
         )
 
     # 4) Overfit indicator grouped by feature_mode: final_val_loss / final_train_loss
@@ -433,15 +519,15 @@ def main() -> None:
     if overfit:
         _boxplot(
             overfit,
-            title=f"LSTM overfit indicator grouped by feature_mode (val/train) | {delan_pref}" if delan_pref else
-                "LSTM overfit indicator grouped by feature_mode (final_val_loss / final_train_loss)",
-            ylabel="val/train loss ratio",
+            title="Overfit Indicator (final val / train) by Feature Mode",
+            ylabel="Val/Train Loss Ratio",
             out_png=os.path.join(args.out_dir, "lstm_overfit_ratio_by_feature_mode.png"),
             split_two_rows=True,
             strip_common_prefix=True,
             prefix_hint=delan_pref,
             force_prefixes=["jax_struct_"],
             title_prefix_override="delan_jax_struct_",
+            title_fontsize=11,
         )
 
 

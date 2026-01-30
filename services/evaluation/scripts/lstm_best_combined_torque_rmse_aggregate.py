@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 from collections import defaultdict
 from typing import Dict, List, Tuple
 
@@ -19,6 +20,25 @@ import matplotlib as mpl
 mpl.use("Agg")
 import matplotlib.pyplot as plt
 
+_PALETTE = [
+    "#e41a1c",  # red
+    "#ff7f00",  # orange
+    "#377eb8",  # blue
+    "#4daf4a",  # green
+    "#984ea3",  # purple
+    "#a65628",
+    "#f781bf",
+    "#999999",
+    "#1b9e77",
+    "#d95f02",
+    "#7570b3",
+]
+
+
+def _color_map(keys: List[int], palette: List[str] | None = None) -> Dict[int, str]:
+    pal = palette or _PALETTE
+    return {k: pal[i % len(pal)] for i, k in enumerate(keys)}
+
 
 def _resolve_shared_path(path: str) -> str:
     if not path:
@@ -29,6 +49,18 @@ def _resolve_shared_path(path: str) -> str:
     if marker in path:
         return os.path.join("/workspace/shared", path.split(marker, 1)[1])
     return path
+
+
+def _coerce_2d(arr: object, label: str, ctx: str) -> np.ndarray | None:
+    try:
+        out = np.asarray(arr, dtype=np.float32)
+    except Exception as e:
+        print(f"[skip] {label} not coercible: {ctx} err={e}", file=sys.stderr)
+        return None
+    if out.ndim != 2:
+        print(f"[skip] {label} ndim={out.ndim} (expected 2): {ctx}", file=sys.stderr)
+        return None
+    return out
 
 
 def _resample_progress(curve: np.ndarray, n_bins: int) -> np.ndarray:
@@ -72,15 +104,18 @@ def _concat_valid(
     tau_hat_list: List[np.ndarray],
     tau_rg_list: List[np.ndarray],
     H: int,
+    ctx: str,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     tau_gt_valid_all: List[np.ndarray] = []
     tau_delan_valid_all: List[np.ndarray] = []
     tau_rg_valid_all: List[np.ndarray] = []
 
     for tau, tau_hat, tau_rg in zip(tau_list, tau_hat_list, tau_rg_list):
-        tau = np.asarray(tau)
-        tau_hat = np.asarray(tau_hat)
-        tau_rg = np.asarray(tau_rg)
+        tau = _coerce_2d(tau, "tau", ctx)
+        tau_hat = _coerce_2d(tau_hat, "tau_hat", ctx)
+        tau_rg = _coerce_2d(tau_rg, "tau_rg", ctx)
+        if tau is None or tau_hat is None or tau_rg is None:
+            continue
         if tau.shape[0] < H:
             continue
         sl = slice(H - 1, None)
@@ -128,6 +163,7 @@ def main() -> None:
 
     time_groups_delan: Dict[Tuple[int, int, int], List[np.ndarray]] = defaultdict(list)
     time_groups_rg: Dict[Tuple[int, int, int], List[np.ndarray]] = defaultdict(list)
+    joint_groups_rg: Dict[Tuple[int, int, int], List[np.ndarray]] = defaultdict(list)
 
     for r in rows:
         try:
@@ -165,8 +201,9 @@ def main() -> None:
         if not tau_rg_list:
             continue
 
+        ctx = f"H={H} ds={ds} seed={seed}"
         tau_gt_valid_all, tau_delan_valid_all, tau_rg_valid_all = _concat_valid(
-            tau_list, tau_hat_list, tau_rg_list, H
+            tau_list, tau_hat_list, tau_rg_list, H, ctx
         )
         if tau_gt_valid_all.size == 0:
             continue
@@ -184,17 +221,20 @@ def main() -> None:
 
         rmse_time_delan = np.sqrt(np.mean(err_delan ** 2, axis=1))
         rmse_time_rg = np.sqrt(np.mean(err_rg ** 2, axis=1))
+        rmse_joint_rg = np.sqrt(np.mean(err_rg ** 2, axis=0))
 
         rmse_time_delan = _resample_progress(rmse_time_delan, int(args.bins))
         rmse_time_rg = _resample_progress(rmse_time_rg, int(args.bins))
 
         time_groups_delan[(H, ds, seed)].append(rmse_time_delan)
         time_groups_rg[(H, ds, seed)].append(rmse_time_rg)
+        joint_groups_rg[(H, ds, seed)].append(rmse_joint_rg)
 
     os.makedirs(args.out_dir, exist_ok=True)
 
     per_h_seed_time_delan: Dict[Tuple[int, int], Dict[int, Tuple[np.ndarray, np.ndarray, np.ndarray]]] = defaultdict(dict)
     per_h_seed_time_rg: Dict[Tuple[int, int], Dict[int, Tuple[np.ndarray, np.ndarray, np.ndarray]]] = defaultdict(dict)
+    per_h_seed_joint_rg: Dict[Tuple[int, int], Dict[int, np.ndarray]] = defaultdict(dict)
 
     for (H, ds, seed), curves in time_groups_delan.items():
         if curves:
@@ -204,8 +244,14 @@ def main() -> None:
         if curves:
             per_h_seed_time_rg[(H, ds)][seed] = _median_iqr(curves)
 
+    for (H, ds, seed), vecs in joint_groups_rg.items():
+        if vecs:
+            stack = np.stack(vecs, axis=0)
+            per_h_seed_joint_rg[(H, ds)][seed] = np.nanmedian(stack, axis=0)
+
     per_h_time_delan: Dict[int, Tuple[np.ndarray, np.ndarray, np.ndarray]] = {}
     per_h_time_rg: Dict[int, Tuple[np.ndarray, np.ndarray, np.ndarray]] = {}
+    per_h_joint_rg: Dict[Tuple[int, int], Tuple[np.ndarray, np.ndarray, np.ndarray]] = {}
 
     hs = sorted({h for (h, _) in per_h_seed_time_delan.keys()} | {h for (h, _) in per_h_seed_time_rg.keys()})
     for H in hs:
@@ -221,11 +267,25 @@ def main() -> None:
         if ds_curves_r:
             per_h_time_rg[H] = _median_iqr(ds_curves_r)
 
+    for (H, ds), seed_map in per_h_seed_joint_rg.items():
+        seed_vecs = [seed_map[s] for s in sorted(seed_map.keys()) if seed_map[s] is not None]
+        if seed_vecs:
+            per_h_joint_rg[(H, ds)] = _median_iqr(seed_vecs)
+
+    agg_joint_rg: Dict[int, Tuple[np.ndarray, np.ndarray, np.ndarray]] = {}
+    for H in hs:
+        ds_vecs = [per_h_joint_rg[(H, ds)][0] for (h, ds) in per_h_joint_rg.keys() if h == H]
+        if ds_vecs:
+            agg_joint_rg[H] = _median_iqr(ds_vecs)
+
     xs = np.linspace(0.0, 1.0, int(args.bins))
     if per_h_time_delan:
         plt.figure(figsize=(9, 5), dpi=160)
-        colors = plt.cm.tab10(np.linspace(0, 1, len(per_h_time_delan)))
-        for (H, (med, q25, q75)), color in zip(sorted(per_h_time_delan.items(), key=lambda kv: kv[0]), colors):
+        hs_order = sorted(per_h_time_delan.keys())
+        color_map = _color_map(hs_order)
+        for H in hs_order:
+            med, q25, q75 = per_h_time_delan[H]
+            color = color_map.get(H, "#1f77b4")
             plt.plot(xs, med, label=f"H={H}", color=color, linewidth=1.4)
             plt.fill_between(xs, q25, q75, color=color, alpha=0.18)
         max_median = None
@@ -239,9 +299,9 @@ def main() -> None:
         if max_median is not None:
             plt.ylim(0, max_median + 0.25)
         title_feat = f" (feat={args.feature})" if args.feature else ""
-        plt.title(f"DeLaN torque RMSE over progress by H{title_feat}")
+        plt.title(f"DeLaN Torque RMSE over Progress by H{title_feat}")
         plt.xlabel("Progress (0 → 1)")
-        plt.ylabel("Torque RMSE")
+        plt.ylabel("Torque RMSE (real units)")
         plt.grid(True, alpha=0.25)
         plt.legend(ncol=2, fontsize=8)
         plt.tight_layout()
@@ -259,8 +319,11 @@ def main() -> None:
 
     if per_h_time_rg:
         plt.figure(figsize=(9, 5), dpi=160)
-        colors = plt.cm.tab10(np.linspace(0, 1, len(per_h_time_rg)))
-        for (H, (med, q25, q75)), color in zip(sorted(per_h_time_rg.items(), key=lambda kv: kv[0]), colors):
+        hs_order = sorted(per_h_time_rg.keys())
+        color_map = _color_map(hs_order)
+        for H in hs_order:
+            med, q25, q75 = per_h_time_rg[H]
+            color = color_map.get(H, "#1f77b4")
             plt.plot(xs, med, label=f"H={H}", color=color, linewidth=1.4)
             plt.fill_between(xs, q25, q75, color=color, alpha=0.18)
         max_median = None
@@ -274,9 +337,9 @@ def main() -> None:
         if max_median is not None:
             plt.ylim(0, max_median + 0.25)
         title_feat = f" (feat={args.feature})" if args.feature else ""
-        plt.title(f"Combined torque RMSE over progress by H{title_feat}")
+        plt.title(f"Combined Torque RMSE over Progress by H{title_feat}")
         plt.xlabel("Progress (0 → 1)")
-        plt.ylabel("Torque RMSE")
+        plt.ylabel("Torque RMSE (real units)")
         plt.grid(True, alpha=0.25)
         plt.legend(ncol=2, fontsize=8)
         plt.tight_layout()
@@ -290,6 +353,65 @@ def main() -> None:
             curves=np.stack([per_h_time_rg[H][0] for H in sorted(per_h_time_rg.keys())], axis=0),
             q25=np.stack([per_h_time_rg[H][1] for H in sorted(per_h_time_rg.keys())], axis=0),
             q75=np.stack([per_h_time_rg[H][2] for H in sorted(per_h_time_rg.keys())], axis=0),
+        )
+
+    # C2: Combined torque RMSE per joint grouped by H
+    available_H = sorted(agg_joint_rg.keys())
+    selected_H = _parse_h_values(args.h_values)
+    if selected_H:
+        selected_H = [h for h in selected_H if h in agg_joint_rg]
+    if not selected_H:
+        if len(available_H) <= 3:
+            selected_H = available_H
+        elif available_H:
+            mid = available_H[len(available_H) // 2]
+            selected_H = [available_H[0], mid, available_H[-1]]
+            selected_H = list(dict.fromkeys(selected_H))
+
+    if selected_H:
+        n_dof = int(agg_joint_rg[selected_H[0]][0].shape[0])
+        x = np.arange(n_dof)
+        n_groups = len(selected_H)
+        width = 0.8 / max(1, n_groups)
+
+        plt.figure(figsize=(10, 4.8), dpi=160)
+        color_map = _color_map(selected_H)
+        for i, H in enumerate(selected_H):
+            med, q25, q75 = agg_joint_rg[H]
+            offsets = x - 0.4 + (i + 0.5) * width
+            yerr = np.vstack([med - q25, q75 - med])
+            color = color_map.get(H, "#1f77b4")
+            plt.bar(offsets, med, width=width, label=f"H={H}", alpha=0.9, color=color)
+            plt.errorbar(offsets, med, yerr=yerr, fmt="none", ecolor="k", elinewidth=0.9, capsize=2, alpha=0.8)
+
+        max_median = None
+        for med, _, _ in agg_joint_rg.values():
+            try:
+                m = float(np.nanmax(med))
+            except Exception:
+                continue
+            if np.isfinite(m):
+                max_median = m if max_median is None else max(max_median, m)
+        if max_median is not None:
+            plt.ylim(0, max_median + 0.25)
+
+        title_feat = f" (feat={args.feature})" if args.feature else ""
+        plt.title(f"Combined Torque RMSE per Joint (median ± IQR) by H{title_feat}")
+        plt.xlabel("Joint")
+        plt.ylabel("Joint Torque RMSE (real units)")
+        plt.xticks(x, [f"joint{j}" for j in x])
+        plt.grid(True, axis="y", alpha=0.25)
+        plt.legend(ncol=min(3, len(selected_H)), fontsize=8)
+        plt.tight_layout()
+        plt.savefig(os.path.join(args.out_dir, "C2_combined_rmse_per_joint_grouped.png"), dpi=200)
+        plt.close()
+
+        np.savez(
+            os.path.join(args.out_dir, "C2_combined_rmse_per_joint_grouped.npz"),
+            Hs=np.array(selected_H, dtype=np.int32),
+            joint_median=np.stack([agg_joint_rg[H][0] for H in selected_H], axis=0),
+            joint_q25=np.stack([agg_joint_rg[H][1] for H in selected_H], axis=0),
+            joint_q75=np.stack([agg_joint_rg[H][2] for H in selected_H], axis=0),
         )
 
 

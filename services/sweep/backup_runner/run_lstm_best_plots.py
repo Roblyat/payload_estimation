@@ -19,6 +19,7 @@ from sweep_base import (
     LSTM_BEST_EVAL_SPLIT,
     LSTM_BEST_PLOTS_OUT_DIR,
     LSTM_BEST_MODELS_DIR,
+    LSTM_BEST_SCATTER_LEGEND,
     PROCESSED_DIR,
     TEST_FRACTIONS,
     SCRIPT_LSTM_BEST_RESIDUAL_AGG,
@@ -134,6 +135,7 @@ def main() -> None:
                 f"python3 {SCRIPT_LSTM_METRICS_BOXPLOTS} "
                 f"--lstm_root {LSTM_BEST_MODELS_DIR} "
                 f"--out_dir {out_dir}/boxplots"
+                + ("" if LSTM_BEST_SCATTER_LEGEND else " --no_scatter_legend")
             )
             run_cmd(cmd, log_file)
 

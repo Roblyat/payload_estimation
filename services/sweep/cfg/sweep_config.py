@@ -11,7 +11,7 @@ class SweepConfig:
 
     # Dataset settings
     dataset_name: str = "UR3_Load0_cc"
-    run_tag: str = "delanModelStory"
+    run_tag: str = "kStoryTest"
     in_format: str = "csv"
     col_format: str = "wide"
     derive_qdd: bool = True
@@ -21,10 +21,10 @@ class SweepConfig:
     lowpass_qdd_values: bool = False
 
     # Sweep
-    traj_amounts: List[int] = field(default_factory=lambda: [8, 16, 32, 48, 64, 84, 122])
+    traj_amounts: List[int] = field(default_factory=lambda: [8, 16, 32]) #[8, 16, 32, 48, 64, 86]) ## K-Domination-Story
     test_fractions = 0.2
     val_fraction = 0.1
-    seeds: List[int] = field(default_factory=lambda: [0, 1, 2])
+    seeds: List[int] = field(default_factory=lambda: [0, 1]) #[0, 1, 2]) ## K-Domination-Story
 
     # Window sizes and feature modes
     h_list: List[int] = field(default_factory=lambda: [100])
@@ -34,7 +34,7 @@ class SweepConfig:
     delan_model_type: str = "structured"
     delan_hp_preset: str = "lutter_like_256"
     delan_hp_flags: str = ""
-    delan_seeds: List[int] = field(default_factory=lambda: [0, 1, 2, 3, 4])
+    delan_seeds: List[int] = field(default_factory=lambda: [0,1]) #[0, 1, 2, 3, 4]) ## K-Domination-Story
     delan_epochs: int = 200
     delan_eval_every: int = 1
     delan_log_every: int = 1
@@ -100,6 +100,7 @@ class SweepConfig:
     lstm_best_residual_aggregate: bool = True
     lstm_best_combined_aggregate: bool = True
     lstm_best_boxplots: bool = True
+    lstm_best_scatter_legend: bool = True
     lstm_best_models_dir: str = "/workspace/shared/models/lstm/best"
     lstm_best_plots_out_dir: str = "/workspace/shared/evaluation/lstm_best"
 

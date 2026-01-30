@@ -19,6 +19,25 @@ import matplotlib as mpl
 mpl.use("Agg")
 import matplotlib.pyplot as plt
 
+_PALETTE = [
+    "#e41a1c",  # red
+    "#ff7f00",  # orange
+    "#377eb8",  # blue
+    "#4daf4a",  # green
+    "#984ea3",  # purple
+    "#a65628",
+    "#f781bf",
+    "#999999",
+    "#1b9e77",
+    "#d95f02",
+    "#7570b3",
+]
+
+
+def _color_map(keys: List[int], palette: List[str] | None = None) -> Dict[int, str]:
+    pal = palette or _PALETTE
+    return {k: pal[i % len(pal)] for i, k in enumerate(keys)}
+
 
 def _resolve_shared_path(path: str) -> str:
     if not path:
@@ -164,8 +183,11 @@ def main() -> None:
     xs = np.linspace(0.0, 1.0, int(args.bins))
     if agg_time:
         plt.figure(figsize=(9, 5), dpi=160)
-        colors = plt.cm.tab10(np.linspace(0, 1, len(agg_time)))
-        for (H, (med, q25, q75)), color in zip(sorted(agg_time.items(), key=lambda kv: kv[0]), colors):
+        hs_order = sorted(agg_time.keys())
+        color_map = _color_map(hs_order)
+        for H in hs_order:
+            med, q25, q75 = agg_time[H]
+            color = color_map.get(H, "#1f77b4")
             plt.plot(xs, med, label=f"H={H}", color=color, linewidth=1.4)
             plt.fill_between(xs, q25, q75, color=color, alpha=0.18)
         max_median = None
@@ -179,9 +201,9 @@ def main() -> None:
         if max_median is not None:
             plt.ylim(0, max_median + 0.25)
         title_feat = f" (feat={args.feature})" if args.feature else ""
-        plt.title(f"LSTM residual RMSE over progress by H{title_feat}")
+        plt.title(f"LSTM Residual RMSE over Progress by H{title_feat}")
         plt.xlabel("Progress (0 → 1)")
-        plt.ylabel("Residual RMSE")
+        plt.ylabel("Residual RMSE (real units)")
         plt.grid(True, alpha=0.25)
         plt.legend(ncol=2, fontsize=8)
         plt.tight_layout()
@@ -216,11 +238,13 @@ def main() -> None:
         width = 0.8 / max(1, n_groups)
 
         plt.figure(figsize=(10, 4.8), dpi=160)
+        color_map = _color_map(selected_H)
         for i, H in enumerate(selected_H):
             med, q25, q75 = agg_joint[H]
             offsets = x - 0.4 + (i + 0.5) * width
             yerr = np.vstack([med - q25, q75 - med])
-            plt.bar(offsets, med, width=width, label=f"H={H}", alpha=0.9)
+            color = color_map.get(H, "#1f77b4")
+            plt.bar(offsets, med, width=width, label=f"H={H}", alpha=0.9, color=color)
             plt.errorbar(offsets, med, yerr=yerr, fmt="none", ecolor="k", elinewidth=0.9, capsize=2, alpha=0.8)
         max_median = None
         for med, _, _ in agg_joint.values():
@@ -234,9 +258,9 @@ def main() -> None:
             plt.ylim(0, max_median + 0.25)
 
         title_feat = f" (feat={args.feature})" if args.feature else ""
-        plt.title(f"LSTM residual RMSE per joint (median ± IQR) by H{title_feat}")
+        plt.title(f"LSTM Residual RMSE per Joint (median ± IQR) by H{title_feat}")
         plt.xlabel("Joint")
-        plt.ylabel("Residual RMSE")
+        plt.ylabel("Joint Residual RMSE (real units)")
         plt.xticks(x, [f"joint{j}" for j in x])
         plt.grid(True, axis="y", alpha=0.25)
         plt.legend(ncol=min(3, len(selected_H)), fontsize=8)

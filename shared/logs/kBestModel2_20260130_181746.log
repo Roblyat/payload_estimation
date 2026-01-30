@@ -1,0 +1,2 @@
+[2026-01-30 18:17:46] kBestModel^2 started ts=20260130_181746
+[2026-01-30 18:17:46] START best_delan (5x10^4_under): /home/robat/.venv/ape_sweep/bin/python3 /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/services/sweep/scripts/run_sweep_delan.py

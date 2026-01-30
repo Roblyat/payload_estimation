@@ -1,0 +1,335 @@
+####################################################################################################################################################
+### RUN: dataset_seed=0 K=84 test_fraction=0.2 val_fraction=0.1                                                                                  ###
+### npz_in=/workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed0_dataset/delan_UR3_Load0_5x10^4_under_K84_seed0_dataset.npz ###
+####################################################################################################################################################
+
+#####################
+### 1) PREPROCESS ###
+#####################
+
+============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T preprocess bash -lc 'python3 scripts/build_delan_dataset.py --derive_qdd_from_qd True --col_format wide --trajectory_amount 84 --test_fraction 0.2 --val_fraction 0.1 --seed 0 --lowpass_signals True --lowpass_cutoff_hz 10.0 --lowpass_order 4 --lowpass_qdd False --raw_csv /workspace/shared/data/raw/UR3_Load0_5x10^4_under.csv --out_npz /workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed0_dataset/delan_UR3_Load0_5x10^4_under_K84_seed0_dataset.npz' ===
+============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Saved: /workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed0_dataset/delan_UR3_Load0_5x10^4_under_K84_seed0_dataset.npz
+Saved: /workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed0_dataset/delan_UR3_Load0_5x10^4_under_K84_seed0_dataset.json
+Trajectories: train=19 val=3 test=5
+Exists: True
+
+
+#####################################
+### EXPORT RESIDUALS (best DeLaN) ###
+#####################################
+
+=================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T delan_jax bash -lc 'python3 /workspace/delan_jax/scripts/export_delan_residuals_jax.py --npz_in /workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed0_dataset/delan_UR3_Load0_5x10^4_under_K84_seed0_dataset.npz --ckpt /workspace/shared/models/delan/UR3_Load0_5x10^4_under__testHSK_2__K84__seed0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/UR3_Load0_5x10^4_under__testHSK_2__K84__seed0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax --out /workspace/shared/data/processed/UR3_Load0_5x10^4_under__testHSK_2__K84__residual__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz' ===
+=================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Loading dataset: /workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed0_dataset/delan_UR3_Load0_5x10^4_under_K84_seed0_dataset.npz
+Loading checkpoint: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__testHSK_2__K84__seed0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/UR3_Load0_5x10^4_under__testHSK_2__K84__seed0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.jax
+Detected n_dof=6 (seed=1)
+2026-01-30 17:34:17.913003: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+
+Exporting split=train: 19 trajectories
+  done 19/19
+
+Exporting split=test: 5 trajectories
+  done 5/5
+
+Saved residual trajectory dataset: /workspace/shared/data/processed/UR3_Load0_5x10^4_under__testHSK_2__K84__residual__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/UR3_Load0_5x10^4_under__testHSK_2__K84__residual__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz
+Keys: ['test_labels', 'test_q', 'test_qd', 'test_qdd', 'test_r_tau', 'test_t', 'test_tau', 'test_tau_hat', 'train_labels', 'train_q', 'train_qd', 'train_qdd', 'train_r_tau', 'train_t', 'train_tau', 'train_tau_hat']
+Saved export JSON: /workspace/shared/data/processed/UR3_Load0_5x10^4_under__testHSK_2__K84__residual__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/UR3_Load0_5x10^4_under__testHSK_2__K84__residual__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.json
+
+
+##############################
+### CONFIG: feat=full H=50 ###
+##############################
+
+#########################################
+### BUILD LSTM WINDOWS H=50 feat=full ###
+#########################################
+
+===========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T preprocess bash -lc 'python3 scripts/build_lstm_windows.py --in_npz /workspace/shared/data/processed/UR3_Load0_5x10^4_under__testHSK_2__K84__residual__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz --out_npz /workspace/shared/data/processed/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__lstm_windows_H50__feat_full__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz --H 50 --features full' ===
+===========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Building LSTM windows
+  in_npz      = /workspace/shared/data/processed/UR3_Load0_5x10^4_under__testHSK_2__K84__residual__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz
+  out_npz     = /workspace/shared/data/processed/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__lstm_windows_H50__feat_full__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz
+  H           = 50
+  feature_mode= full
+Saved: /workspace/shared/data/processed/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__lstm_windows_H50__feat_full__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__lstm_windows_H50__feat_full__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz
+Saved: /workspace/shared/data/processed/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__lstm_windows_H50__feat_full__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__lstm_windows_H50__feat_full__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.json
+H=50, n_dof=6, feature_dim=24
+X_train: (34566, 50, 24)  Y_train: (34566, 6)
+X_test : (5255, 50, 24)  Y_test : (5255, 6)
+feature_mode=full
+
+
+##############################
+### TRAIN LSTM seed=0 H=50 ###
+##############################
+
+================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T lstm bash -lc 'python3 -c '"'"'import runpy
+import keras.callbacks as cb
+_Orig = cb.ModelCheckpoint
+
+class PatchedModelCheckpoint(_Orig):
+    def __init__(self, filepath, *args, **kwargs):
+        if isinstance(filepath, str) and (not filepath.endswith('"'"'"'"'"'"'"'"'.keras'"'"'"'"'"'"'"'"')) and (not filepath.endswith('"'"'"'"'"'"'"'"'.h5'"'"'"'"'"'"'"'"')):
+            filepath = filepath + '"'"'"'"'"'"'"'"'.keras'"'"'"'"'"'"'"'"'
+        super().__init__(filepath, *args, **kwargs)
+
+cb.ModelCheckpoint = PatchedModelCheckpoint
+runpy.run_path('"'"'"'"'"'"'"'"'scripts/train_residual_lstm.py'"'"'"'"'"'"'"'"', run_name='"'"'"'"'"'"'"'"'__main__'"'"'"'"'"'"'"'"')
+'"'"' --npz /workspace/shared/data/processed/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__lstm_windows_H50__feat_full__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz --out_dir /workspace/shared/models/lstm/best/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2 --model_name residual_lstm.keras --epochs 120 --batch 64 --val_split 0.1 --seed 0 --units 128 --dropout 0.2 --eps 1e-08 --early_stop True --early_stop_patience 20 --early_stop_min_delta 0.0 --early_stop_warmup_evals 10 ' ===
+================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+2026-01-30 17:34:26.226153: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-01-30 17:34:26.251775: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI AVX512_BF16 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+mkdir -p failed for path /.config/matplotlib: [Errno 13] Permission denied: '/.config'
+Matplotlib created a temporary cache directory at /tmp/matplotlib-rh9z5z6k because there was an issue with the default path (/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+################################################
+LSTM Residual Dataset:
+  npz = /workspace/shared/data/processed/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__lstm_windows_H50__feat_full__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__lstm_windows_H50__feat_full__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz
+   H  = 50
+  din = 24
+ dout = 6
+  X_train = (34566, 50, 24), Y_train = (34566, 6)
+  X_test  = (5255, 50, 24),  Y_test  = (5255, 6)
+################################################
+
+Saved scalers: /workspace/shared/models/lstm/best/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2/scalers_H50.npz
+X mean/std shapes: (24,)/(24,)
+Y mean/std shapes: (6,)/(6,)
+2026-01-30 17:34:27.576707: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 17:34:27.581703: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 17:34:27.582601: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 17:34:27.584271: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 17:34:27.585177: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 17:34:27.586045: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 17:34:27.678290: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 17:34:27.679275: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 17:34:27.680204: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 17:34:27.681080: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1928] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 9020 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 4070 Ti, pci bus id: 0000:01:00.0, compute capability: 8.9
+/usr/local/lib/python3.11/dist-packages/keras/src/layers/rnn/rnn.py:205: UserWarning: Do not pass an `input_shape`/`input_dim` argument to a layer. When using Sequential models, prefer using an `Input(shape)` object as the first layer in the model instead.
+  super().__init__(**kwargs)
+Model: "sequential"
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Layer (type)                    ┃ Output Shape           ┃       Param # ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ lstm (LSTM)                     │ (None, 50, 128)        │        78,336 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dropout (Dropout)               │ (None, 50, 128)        │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ lstm_1 (LSTM)                   │ (None, 128)            │       131,584 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dropout_1 (Dropout)             │ (None, 128)            │             0 │
+├─────────────────────────────────┼────────────────────────┼───────────────┤
+│ dense (Dense)                   │ (None, 6)              │           774 │
+└─────────────────────────────────┴────────────────────────┴───────────────┘
+ Total params: 210,694 (823.02 KB)
+ Trainable params: 210,694 (823.02 KB)
+ Non-trainable params: 0 (0.00 B)
+
+
+Epoch 1/120
+2026-01-30 17:34:28.730793: I external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:465] Loaded cuDNN version 8906
+487/487 - 3s - 6ms/step - loss: 0.0965 - val_loss: 0.1785
+Epoch 2/120
+487/487 - 1s - 3ms/step - loss: 0.0507 - val_loss: 0.1920
+Epoch 3/120
+487/487 - 1s - 3ms/step - loss: 0.0412 - val_loss: 0.2129
+Epoch 4/120
+487/487 - 1s - 3ms/step - loss: 0.0381 - val_loss: 0.2248
+Epoch 5/120
+487/487 - 1s - 3ms/step - loss: 0.0342 - val_loss: 0.2451
+Epoch 6/120
+487/487 - 1s - 3ms/step - loss: 0.0320 - val_loss: 0.2616
+Epoch 7/120
+487/487 - 1s - 3ms/step - loss: 0.0309 - val_loss: 0.2553
+Epoch 8/120
+487/487 - 1s - 3ms/step - loss: 0.0308 - val_loss: 0.2631
+Epoch 9/120
+487/487 - 1s - 3ms/step - loss: 0.0294 - val_loss: 0.2607
+Epoch 10/120
+487/487 - 1s - 3ms/step - loss: 0.0287 - val_loss: 0.2669
+Epoch 11/120
+487/487 - 1s - 3ms/step - loss: 0.0278 - val_loss: 0.2644
+Epoch 12/120
+487/487 - 1s - 3ms/step - loss: 0.0272 - val_loss: 0.2638
+Epoch 13/120
+487/487 - 1s - 3ms/step - loss: 0.0267 - val_loss: 0.2570
+Epoch 14/120
+487/487 - 1s - 3ms/step - loss: 0.0264 - val_loss: 0.2754
+Epoch 15/120
+487/487 - 1s - 3ms/step - loss: 0.0262 - val_loss: 0.2930
+Epoch 16/120
+487/487 - 1s - 3ms/step - loss: 0.0254 - val_loss: 0.2536
+Epoch 17/120
+487/487 - 1s - 3ms/step - loss: 0.0253 - val_loss: 0.2705
+Epoch 18/120
+487/487 - 1s - 3ms/step - loss: 0.0246 - val_loss: 0.2666
+Epoch 19/120
+487/487 - 1s - 3ms/step - loss: 0.0249 - val_loss: 0.2816
+Epoch 20/120
+487/487 - 1s - 3ms/step - loss: 0.0243 - val_loss: 0.2534
+Epoch 21/120
+487/487 - 1s - 3ms/step - loss: 0.0239 - val_loss: 0.2628
+Epoch 22/120
+487/487 - 1s - 3ms/step - loss: 0.0241 - val_loss: 0.2746
+Epoch 23/120
+487/487 - 1s - 3ms/step - loss: 0.0236 - val_loss: 0.2624
+Epoch 24/120
+487/487 - 1s - 3ms/step - loss: 0.0235 - val_loss: 0.2562
+Epoch 25/120
+487/487 - 1s - 3ms/step - loss: 0.0230 - val_loss: 0.2541
+Epoch 26/120
+487/487 - 1s - 3ms/step - loss: 0.0230 - val_loss: 0.2490
+Epoch 27/120
+487/487 - 1s - 3ms/step - loss: 0.0230 - val_loss: 0.2520
+Epoch 28/120
+487/487 - 1s - 3ms/step - loss: 0.0227 - val_loss: 0.2518
+Epoch 29/120
+487/487 - 1s - 3ms/step - loss: 0.0225 - val_loss: 0.2395
+Epoch 30/120
+487/487 - 1s - 3ms/step - loss: 0.0221 - val_loss: 0.2580
+Epoch 31/120
+487/487 - 1s - 3ms/step - loss: 0.0220 - val_loss: 0.2516
+Epoch 32/120
+487/487 - 1s - 3ms/step - loss: 0.0223 - val_loss: 0.2729
+Epoch 33/120
+487/487 - 1s - 3ms/step - loss: 0.0219 - val_loss: 0.2616
+Epoch 34/120
+487/487 - 1s - 3ms/step - loss: 0.0216 - val_loss: 0.2636
+Epoch 35/120
+487/487 - 1s - 3ms/step - loss: 0.0214 - val_loss: 0.2570
+Epoch 36/120
+487/487 - 1s - 3ms/step - loss: 0.0215 - val_loss: 0.2535
+Epoch 37/120
+487/487 - 1s - 3ms/step - loss: 0.0228 - val_loss: 0.2720
+Epoch 38/120
+487/487 - 1s - 3ms/step - loss: 0.0211 - val_loss: 0.2787
+Epoch 39/120
+487/487 - 1s - 3ms/step - loss: 0.0211 - val_loss: 0.2643
+Epoch 40/120
+487/487 - 1s - 3ms/step - loss: 0.0210 - val_loss: 0.2884
+Epoch 41/120
+487/487 - 1s - 3ms/step - loss: 0.0209 - val_loss: 0.2630
+Epoch 42/120
+487/487 - 1s - 3ms/step - loss: 0.0209 - val_loss: 0.2679
+Epoch 43/120
+487/487 - 1s - 3ms/step - loss: 0.0204 - val_loss: 0.2406
+Epoch 44/120
+487/487 - 1s - 3ms/step - loss: 0.0204 - val_loss: 0.2385
+Epoch 45/120
+487/487 - 1s - 3ms/step - loss: 0.0204 - val_loss: 0.2268
+Epoch 46/120
+487/487 - 1s - 3ms/step - loss: 0.0206 - val_loss: 0.2320
+Epoch 47/120
+487/487 - 1s - 3ms/step - loss: 0.0202 - val_loss: 0.2504
+Epoch 48/120
+487/487 - 1s - 3ms/step - loss: 0.0202 - val_loss: 0.2506
+Epoch 49/120
+487/487 - 1s - 3ms/step - loss: 0.0199 - val_loss: 0.2373
+Epoch 50/120
+487/487 - 1s - 3ms/step - loss: 0.0202 - val_loss: 0.2520
+Epoch 51/120
+487/487 - 1s - 3ms/step - loss: 0.0200 - val_loss: 0.2565
+Epoch 52/120
+487/487 - 1s - 3ms/step - loss: 0.0200 - val_loss: 0.2524
+Epoch 53/120
+487/487 - 1s - 3ms/step - loss: 0.0199 - val_loss: 0.2468
+Epoch 54/120
+487/487 - 1s - 3ms/step - loss: 0.0197 - val_loss: 0.2559
+Epoch 55/120
+487/487 - 1s - 3ms/step - loss: 0.0193 - val_loss: 0.2522
+Epoch 56/120
+487/487 - 1s - 3ms/step - loss: 0.0194 - val_loss: 0.2391
+Epoch 57/120
+487/487 - 1s - 3ms/step - loss: 0.0193 - val_loss: 0.2455
+Epoch 58/120
+487/487 - 1s - 3ms/step - loss: 0.0193 - val_loss: 0.2646
+Epoch 59/120
+487/487 - 1s - 3ms/step - loss: 0.0193 - val_loss: 0.2499
+Epoch 60/120
+487/487 - 1s - 3ms/step - loss: 0.0191 - val_loss: 0.2525
+Epoch 61/120
+487/487 - 1s - 3ms/step - loss: 0.0191 - val_loss: 0.2492
+Epoch 62/120
+487/487 - 1s - 3ms/step - loss: 0.0191 - val_loss: 0.2530
+Epoch 63/120
+487/487 - 1s - 3ms/step - loss: 0.0189 - val_loss: 0.2404
+Epoch 64/120
+487/487 - 1s - 3ms/step - loss: 0.0189 - val_loss: 0.2477
+Epoch 65/120
+487/487 - 1s - 3ms/step - loss: 0.0188 - val_loss: 0.2441
+Saved metrics JSON: /workspace/shared/models/lstm/best/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2/metrics_train_test_H50.json
+
+################################################
+LSTM Residual Evaluation (test, unscaled units):
+Total RMSE: 0.2526
+Per-joint RMSE: 0.1666 0.5029 0.1682 0.1675 0.2026 0.0699
+################################################
+
+Saved predictions: /workspace/shared/models/lstm/best/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2/predictions_test.npz
+Saved best model:  /workspace/shared/models/lstm/best/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2/residual_lstm.keras
+Saved: /workspace/shared/models/lstm/best/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2/loss_curve.png
+Saved: /workspace/shared/models/lstm/best/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2/residual_gt_vs_pred.png
+Saved: /workspace/shared/models/lstm/best/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2/residual_rmse_per_joint.png
+Saved: /workspace/shared/models/lstm/best/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2/residual_rmse_time.png
+
+
+#################################
+### COMBINED EVAL seed=0 H=50 ###
+#################################
+
+===============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/combined_evaluation.py --residual_npz /workspace/shared/data/processed/UR3_Load0_5x10^4_under__testHSK_2__K84__residual__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz --model /workspace/shared/models/lstm/best/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2/residual_lstm.keras --scalers /workspace/shared/models/lstm/best/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2/scalers_H50.npz --out_dir /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__testHSK_2__20260130_183414/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2 --H 50 --split test --features full --save_pred_npz --metrics_csv /workspace/shared/evaluation/summary_lstm_best_combined_20260130_183414.csv --metrics_json /workspace/shared/evaluation/summary_lstm_best_combined_20260130_183414.jsonl --K 84 --test_fraction 0.2 --seed 0 --dataset_seed 0 --delan_seed 1 --delan_epochs 200 --hp_preset lutter_like_256 --delan_rmse_val 0.23504051452766397 --delan_rmse_test 0.3472883764136661' ===
+===============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+2026-01-30 17:36:04.419415: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-01-30 17:36:04.445635: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI AVX512_BF16 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-jipoqfmg because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+################################################
+Evaluate & Combine
+ residual_npz = /workspace/shared/data/processed/UR3_Load0_5x10^4_under__testHSK_2__K84__residual__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2/UR3_Load0_5x10^4_under__testHSK_2__K84__residual__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2.npz
+ model        = /workspace/shared/models/lstm/best/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2/residual_lstm.keras
+ split        = test
+ H            = 50
+ n_traj       = 5
+ n_dof        = 6
+ feature_dim  = 24
+################################################
+2026-01-30 17:36:05.452880: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 17:36:05.457649: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 17:36:05.458440: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 17:36:05.460084: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 17:36:05.460874: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 17:36:05.461600: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 17:36:05.535659: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 17:36:05.536499: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 17:36:05.537240: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 17:36:05.538059: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1928] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 9031 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 4070 Ti, pci bus id: 0000:01:00.0, compute capability: 8.9
+2026-01-30 17:36:05.843828: I external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:465] Loaded cuDNN version 8906
+  done 5/5
+
+################################################
+Stage-2 Evaluation (test, valid k>=H-1):
+DeLaN torque:   MSE=1.232002e-01  RMSE=3.509988e-01
+  per-joint RMSE: 0.2734 0.6768 0.2135 0.1655 0.3370 0.1410
+Residual LSTM:  MSE=7.044167e-02      RMSE=2.654085e-01
+  per-joint RMSE: 0.1930 0.4987 0.2222 0.1832 0.2131 0.0917
+Combined torque MSE=7.044167e-02     RMSE=2.654085e-01
+  per-joint RMSE: 0.1930 0.4987 0.2222 0.1832 0.2131 0.0917
+################################################
+
+Saved: /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__testHSK_2__20260130_183414/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2/metrics_test_H50.txt
+Saved: /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__testHSK_2__20260130_183414/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2/metrics_test_H50.json
+Appended CSV: /workspace/shared/evaluation/summary_lstm_best_combined_20260130_183414.csv
+Appended JSON: /workspace/shared/evaluation/summary_lstm_best_combined_20260130_183414.jsonl
+Saved: /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__testHSK_2__20260130_183414/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2/combined_predictions_test_H50.npz
+Saved: /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__testHSK_2__20260130_183414/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2/residual_gt_vs_pred_test_H50.png
+Saved: /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__testHSK_2__20260130_183414/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2/torque_gt_vs_delan_vs_combined_test_H50.png
+Saved: /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__testHSK_2__20260130_183414/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2/torque_rmse_per_joint_grouped_test_H50.png
+Saved: /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__testHSK_2__20260130_183414/UR3_Load0_5x10^4_under__testHSK_2__K84__d0__delan_jax_struct_s1_ep200_hp_lutter_like_256_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d2__feat_full__lstm_best_s0_H50_ep120_b64_u128_do0p2/torque_rmse_time_test_H50.png
+

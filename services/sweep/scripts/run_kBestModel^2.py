@@ -47,6 +47,16 @@ def _handshake_paths(run_tag: str) -> tuple[str, str, str]:
     return hypers, folds, model
 
 
+def _load_best_dataset_seed(model_json_path: Path) -> int | None:
+    try:
+        import json
+        data = json.loads(model_json_path.read_text(encoding="utf-8"))
+        ds = data.get("dataset_seed")
+        return int(ds) if ds is not None else None
+    except Exception:
+        return None
+
+
 def main() -> int:
     sweep_root, payload_root, _ = _paths()
     scripts_dir = sweep_root / "scripts"
@@ -74,16 +84,20 @@ def main() -> int:
         # 2) best DeLaN + best LSTM for UR3_Load0_5x10^4_under
         env = env_base.copy()
         env["SWEEP_DATASET_NAME"] = "UR3_Load0_5x10^4_under"
-        env["SWEEP_RUN_TAG"] = "best5x10L0"
+        env["SWEEP_RUN_TAG"] = "testHSK_2" #"best5x10L0"
         rc = _run_py(scripts_dir / "run_sweep_delan.py", env, log_file, "best_delan (5x10^4_under)")
         if rc == 0:
             env = env_base.copy()
             env["SWEEP_DATASET_NAME"] = "UR3_Load0_5x10^4_under"
-            env["SWEEP_RUN_TAG"] = "best5x10L0"
-            h, f, m = _handshake_paths("best5x10L0")
+            env["SWEEP_RUN_TAG"] = "testHSK_2"
+            h, f, m = _handshake_paths("testHSK_2")
             env["LSTM_BEST_DELAN_HYPERS_JSONL"] = h
             env["LSTM_BEST_DELAN_FOLDS_JSONL"] = f
             env["LSTM_BEST_DELAN_MODEL_JSON"] = m
+            best_seed = _load_best_dataset_seed(payload_root / "shared" / "evaluation" / f"delan_best_model_best5x10L0.json")
+            if best_seed is not None:
+                env["LSTM_BEST_DATASET_SEEDS"] = f"[{best_seed}]"
+                _log_line(log_file, f"LSTM_BEST_DATASET_SEEDS=[{best_seed}] (from best DeLaN)")
             _log_line(log_file, "LSTM handshake paths (5x10^4_under):")
             _log_line(log_file, f"  LSTM_BEST_DELAN_HYPERS_JSONL={h}")
             _log_line(log_file, f"  LSTM_BEST_DELAN_FOLDS_JSONL={f}")
@@ -108,6 +122,10 @@ def main() -> int:
         #     env["LSTM_BEST_DELAN_HYPERS_JSONL"] = h
         #     env["LSTM_BEST_DELAN_FOLDS_JSONL"] = f
         #     env["LSTM_BEST_DELAN_MODEL_JSON"] = m
+        #     best_seed = _load_best_dataset_seed(payload_root / "shared" / "evaluation" / f"delan_best_model_best86uL0.json")
+        #     if best_seed is not None:
+        #         env["LSTM_BEST_DATASET_SEEDS"] = f"[{best_seed}]"
+        #         _log_line(log_file, f"LSTM_BEST_DATASET_SEEDS=[{best_seed}] (from best DeLaN)")
         #     _log_line(log_file, "LSTM handshake paths (K86_uniform):")
         #     _log_line(log_file, f"  LSTM_BEST_DELAN_HYPERS_JSONL={h}")
         #     _log_line(log_file, f"  LSTM_BEST_DELAN_FOLDS_JSONL={f}")

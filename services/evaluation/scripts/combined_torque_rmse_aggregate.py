@@ -306,11 +306,11 @@ def main() -> None:
                 ax2.plot(xs, med, label=f"K={K}", color=color, linewidth=1.3)
                 ax2.fill_between(xs, q25, q75, color=color, alpha=0.18)
 
-            ax1.set_title(f"DeLaN Torque RMSE over Progress{title_h}")
-            ax2.set_title(f"Combined Torque RMSE over Progress{title_h}")
+            ax1.set_title(f"DeLaN $i_{motor}$ RMSE over Progress{title_h}")
+            ax2.set_title(f"Combined $i_{motor}$ RMSE over Progress{title_h}")
             for ax in (ax1, ax2):
                 ax.set_xlabel("Progress (0 → 1)")
-                ax.set_ylabel("Torque RMSE (real units)")
+                ax.set_ylabel("$i_{motor}$ RMSE [A]")
                 ax.grid(True, alpha=0.25)
                 ax.legend(ncol=2, fontsize=8)
 
@@ -363,7 +363,7 @@ def main() -> None:
                 ax.errorbar(x + width / 2, med_r, yerr=yerr_r, fmt="none", ecolor="k", elinewidth=0.9, capsize=2, alpha=0.8)
 
                 ax.set_title(f"K={K}{title_h}")
-                ax.set_ylabel("Torque RMSE (real units)")
+                ax.set_ylabel("$i_{motor}$ RMSE [A]")
                 ax.set_xticks(x)
                 if idx == len(selected_K) - 1:
                     ax.set_xticklabels([f"joint{j}" for j in x])

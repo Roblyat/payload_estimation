@@ -23,7 +23,7 @@ def save_residual_overlay_grid(
     out_dir: str,
     *,
     max_samples: int = 800,
-    title: str = "Residual: GT vs LSTM (valid region)",
+    title: str = "Residual $i_{motor}$: GT vs LSTM (valid region)",
     out_name: str = "residual_gt_vs_pred.png",
 ) -> str:
     os.makedirs(out_dir, exist_ok=True)
@@ -39,8 +39,8 @@ def save_residual_overlay_grid(
 
     for j in range(n_dof):
         ax = fig.add_subplot(rows, cols, j + 1)
-        ax.plot(r_gt[:n, j], label="GT residual", linewidth=1.0)
-        ax.plot(r_pred[:n, j], label="LSTM residual", linewidth=1.0, alpha=0.85)
+        ax.plot(r_gt[:n, j], label="GT $i_{motor}$ residual", linewidth=1.0)
+        ax.plot(r_pred[:n, j], label="LSTM $i_{motor}$ residual", linewidth=1.0, alpha=0.85)
         ax.set_title(f"Residual joint {j}")
         ax.grid(True, alpha=0.2)
         if j == 0:
@@ -62,7 +62,7 @@ def save_torque_overlay_grid(
     out_dir: str,
     *,
     max_samples: int = 800,
-    title: str = "Torque: GT vs DeLaN vs Combined (valid region)",
+    title: str = "$i_{motor}$: GT vs DeLaN vs Combined (valid region)",
     out_name: str = "torque_gt_vs_delan_vs_combined.png",
 ) -> str:
     os.makedirs(out_dir, exist_ok=True)
@@ -79,10 +79,10 @@ def save_torque_overlay_grid(
 
     for j in range(n_dof):
         ax = fig.add_subplot(rows, cols, j + 1)
-        ax.plot(tau_gt[:n, j], label="GT tau", linewidth=1.0)
-        ax.plot(tau_delan[:n, j], label="DeLaN tau_hat", linewidth=1.0, alpha=0.85)
-        ax.plot(tau_combined[:n, j], label="Combined tau_RG", linewidth=1.0, alpha=0.85)
-        ax.set_title(f"Torque joint {j}")
+        ax.plot(tau_gt[:n, j], label="GT $i_{motor}$", linewidth=1.0)
+        ax.plot(tau_delan[:n, j], label="DeLaN $\\hat{i}_{motor}$", linewidth=1.0, alpha=0.85)
+        ax.plot(tau_combined[:n, j], label="Combined $i_{motor}$", linewidth=1.0, alpha=0.85)
+        ax.set_title(f"$i_{{motor}}$ joint {j} [A]")
         ax.grid(True, alpha=0.2)
         if j == 0:
             ax.legend()
@@ -104,7 +104,7 @@ def save_torque_rmse_per_joint_grouped_bar(
     *,
     max_samples: int | None = None,
     max_joints: int = 6,
-    title: str = "Torque RMSE per joint (GT baseline)",
+    title: str = "$i_{motor}$ RMSE per joint (GT baseline)",
     out_name: str = "torque_rmse_per_joint_grouped.png",
 ) -> str:
     os.makedirs(out_dir, exist_ok=True)
@@ -137,7 +137,7 @@ def save_torque_rmse_per_joint_grouped_bar(
     ax.bar(x + width, rmse_combined, width=width, label="Combined", color="C0", alpha=0.9)
     ax.set_title(title)
     ax.set_xlabel("Joint")
-    ax.set_ylabel("RMSE")
+    ax.set_ylabel("$i_{motor}$ RMSE [A]")
     ax.set_xticks(x)
     ax.set_xticklabels([f"joint{j}" for j in x])
     ax.grid(True, axis="y", alpha=0.25)
@@ -159,7 +159,7 @@ def save_torque_rmse_time_curve(
     dt: float | None = None,
     max_samples: int | None = None,
     max_joints: int = 6,
-    title: str = "Torque RMSE over time (joint-avg)",
+    title: str = "$i_{motor}$ RMSE over time (joint-avg)",
     out_name: str = "torque_rmse_time.png",
 ) -> str:
     os.makedirs(out_dir, exist_ok=True)
@@ -189,7 +189,7 @@ def save_torque_rmse_time_curve(
     ax.plot(x, rmse_t_combined, linewidth=1.4, label="Combined")
     ax.set_title(title)
     ax.set_xlabel(x_label)
-    ax.set_ylabel("RMSE")
+    ax.set_ylabel("$i_{motor}$ RMSE [A]")
     ax.grid(True, alpha=0.25)
     ax.legend()
     fig.tight_layout()

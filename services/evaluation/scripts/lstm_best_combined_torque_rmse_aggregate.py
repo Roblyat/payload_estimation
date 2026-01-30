@@ -299,9 +299,9 @@ def main() -> None:
         if max_median is not None:
             plt.ylim(0, max_median + 0.25)
         title_feat = f" (feat={args.feature})" if args.feature else ""
-        plt.title(f"DeLaN Torque RMSE over Progress by H{title_feat}")
+        plt.title(f"DeLaN $i_{motor}$ RMSE over Progress by H{title_feat}")
         plt.xlabel("Progress (0 → 1)")
-        plt.ylabel("Torque RMSE (real units)")
+        plt.ylabel("$i_{motor}$ RMSE [A]")
         plt.grid(True, alpha=0.25)
         plt.legend(ncol=2, fontsize=8)
         plt.tight_layout()
@@ -337,9 +337,9 @@ def main() -> None:
         if max_median is not None:
             plt.ylim(0, max_median + 0.25)
         title_feat = f" (feat={args.feature})" if args.feature else ""
-        plt.title(f"Combined Torque RMSE over Progress by H{title_feat}")
+        plt.title(f"Combined $i_{motor}$ RMSE over Progress by H{title_feat}")
         plt.xlabel("Progress (0 → 1)")
-        plt.ylabel("Torque RMSE (real units)")
+        plt.ylabel("$i_{motor}$ RMSE [A]")
         plt.grid(True, alpha=0.25)
         plt.legend(ncol=2, fontsize=8)
         plt.tight_layout()
@@ -396,9 +396,9 @@ def main() -> None:
             plt.ylim(0, max_median + 0.25)
 
         title_feat = f" (feat={args.feature})" if args.feature else ""
-        plt.title(f"Combined Torque RMSE per Joint (median ± IQR) by H{title_feat}")
+        plt.title(f"Combined $i_{motor}$ RMSE per Joint (median ± IQR) by H{title_feat}")
         plt.xlabel("Joint")
-        plt.ylabel("Joint Torque RMSE (real units)")
+        plt.ylabel("Joint $i_{motor}$ RMSE [A]")
         plt.xticks(x, [f"joint{j}" for j in x])
         plt.grid(True, axis="y", alpha=0.25)
         plt.legend(ncol=min(3, len(selected_H)), fontsize=8)

@@ -358,7 +358,7 @@ def main():
         r_hat_valid_all,
         args.out_dir,
         max_samples=args.max_plot_samples,
-        title=f"Residual: GT vs LSTM ({split}, valid k>=H-1)",
+        title=f"$i_{{motor}}$ residual: GT vs LSTM ({split}, valid k>=H-1)",
         out_name=f"residual_gt_vs_pred_{split}_H{H}.png",
     )
     print(f"Saved: {out}")
@@ -369,7 +369,7 @@ def main():
         tau_rg_valid_all,
         args.out_dir,
         max_samples=args.max_plot_samples,
-        title=f"Torque: GT vs DeLaN vs Combined ({split}, valid k>=H-1)",
+        title=f"$i_{{motor}}$: GT vs DeLaN vs Combined ({split}, valid k>=H-1)",
         out_name=f"torque_gt_vs_delan_vs_combined_{split}_H{H}.png",
     )
     print(f"Saved: {out}")
@@ -381,7 +381,7 @@ def main():
         args.out_dir,
         max_samples=None,
         max_joints=n_dof,
-        title=f"Torque RMSE per joint (GT baseline) ({split}, valid k>=H-1)",
+        title=f"$i_{{motor}}$ RMSE per joint (GT baseline) ({split}, valid k>=H-1)",
         out_name=f"torque_rmse_per_joint_grouped_{split}_H{H}.png",
     )
     print(f"Saved: {out}")
@@ -394,7 +394,7 @@ def main():
         dt=args.dt,
         max_samples=args.max_plot_samples,
         max_joints=n_dof,
-        title=f"Torque RMSE over time (joint-avg) ({split}, valid k>=H-1)",
+        title=f"$i_{{motor}}$ RMSE over time (joint-avg) ({split}, valid k>=H-1)",
         out_name=f"torque_rmse_time_{split}_H{H}.png",
     )
     print(f"Saved: {out}")

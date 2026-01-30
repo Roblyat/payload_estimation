@@ -346,8 +346,8 @@ def main() -> None:
         groups.setdefault(g, []).append(r["torque_rmse"])
     _boxplot(
         groups,
-        title="DeLaN torque RMSE (test) grouped by model type",
-        ylabel="torque_rmse",
+        title="DeLaN $i_{motor}$ RMSE (test) grouped by model type",
+        ylabel="$i_{motor}$ RMSE [A]",
         out_png=os.path.join(args.out_dir, "delan_torque_rmse_by_model_type.png"),
     )
 
@@ -358,8 +358,8 @@ def main() -> None:
         groups_mb.setdefault(key, []).append(r["torque_rmse"])
     _boxplot(
         groups_mb,
-        title="DeLaN torque RMSE (test) grouped by model_short|backend",
-        ylabel="torque_rmse",
+        title="DeLaN $i_{motor}$ RMSE (test) grouped by model_short|backend",
+        ylabel="$i_{motor}$ RMSE [A]",
         out_png=os.path.join(args.out_dir, "delan_torque_rmse_by_model_short_backend.png"),
     )
 
@@ -370,8 +370,8 @@ def main() -> None:
     if len(groups_b) >= 2:
         _boxplot(
             groups_b,
-            title="DeLaN torque RMSE (test) grouped by backend",
-            ylabel="torque_rmse",
+            title="DeLaN $i_{motor}$ RMSE (test) grouped by backend",
+            ylabel="$i_{motor}$ RMSE [A]",
             out_png=os.path.join(args.out_dir, "delan_torque_rmse_by_backend.png"),
         )
 
@@ -382,8 +382,8 @@ def main() -> None:
         groups.setdefault(g, []).append(r["torque_rmse"])
     _boxplot(
          groups,
-         title="DeLaN torque RMSE (test) grouped by delan_tag",
-         ylabel="torque_rmse",
+         title="DeLaN $i_{motor}$ RMSE (test) grouped by delan_tag",
+         ylabel="$i_{motor}$ RMSE [A]",
          out_png=os.path.join(args.out_dir, "delan_torque_rmse_by_delan_tag.png"),
         split_two_rows=True,
         strip_common_prefix=True,
@@ -405,8 +405,8 @@ def main() -> None:
     if groups_per_joint:
         _per_joint_boxplot(
              groups_per_joint,
-             title="DeLaN per-joint RMSE (test) grouped by delan_tag",
-             ylabel="joint torque_rmse",
+             title="DeLaN per-joint $i_{motor}$ RMSE (test) grouped by delan_tag",
+             ylabel="Joint $i_{motor}$ RMSE [A]",
              out_png=os.path.join(args.out_dir, "delan_joint_rmse_grid_by_delan_tag.png"),
              n_dof=n_dof,
             strip_common_prefix=True,
@@ -421,7 +421,7 @@ def main() -> None:
         _scatter(
             xs, ys,
             xlabel="time_per_sample_s",
-            ylabel="torque_rmse",
+            ylabel="$i_{motor}$ RMSE [A]",
             title="DeLaN speed vs accuracy (lower is better)",
             out_png=os.path.join(args.out_dir, "delan_speed_vs_rmse.png"),
         )
@@ -435,8 +435,8 @@ def main() -> None:
     if len(seed_groups) >= 2:
         _boxplot(
             seed_groups,
-            title="DeLaN torque RMSE (test) grouped by seed",
-            ylabel="torque_rmse",
+            title="DeLaN $i_{motor}$ RMSE (test) grouped by seed",
+            ylabel="$i_{motor}$ RMSE [A]",
             out_png=os.path.join(args.out_dir, "delan_torque_rmse_by_seed.png"),
         )
 

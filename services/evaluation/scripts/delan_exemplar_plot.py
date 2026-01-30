@@ -184,15 +184,15 @@ def main() -> None:
         ax2 = fig.add_subplot(1, 2, 2)
 
         n = min(int(args.max_samples), tau_gt_h.shape[0])
-        ax1.plot(tau_gt_h[:n, j], label="GT", linewidth=1.0)
-        ax1.plot(tau_hat_h[:n, j], label="DeLaN", linewidth=1.0, alpha=0.85)
+        ax1.plot(tau_gt_h[:n, j], label="GT $i_{motor}$", linewidth=1.0)
+        ax1.plot(tau_hat_h[:n, j], label="DeLaN $i_{motor}$", linewidth=1.0, alpha=0.85)
         ax1.set_title(f"K={k_high} | joint {j}")
         ax1.grid(True, alpha=0.2)
         ax1.legend()
 
         n2 = min(int(args.max_samples), tau_gt_l.shape[0])
-        ax2.plot(tau_gt_l[:n2, j], label="GT", linewidth=1.0)
-        ax2.plot(tau_hat_l[:n2, j], label="DeLaN", linewidth=1.0, alpha=0.85)
+        ax2.plot(tau_gt_l[:n2, j], label="GT $i_{motor}$", linewidth=1.0)
+        ax2.plot(tau_hat_l[:n2, j], label="DeLaN $i_{motor}$", linewidth=1.0, alpha=0.85)
         ax2.set_title(f"K={args.k_low} | joint {j}")
         ax2.grid(True, alpha=0.2)
 
@@ -207,8 +207,8 @@ def main() -> None:
     for i, j in enumerate(joints):
         ax = fig.add_subplot(len(joints), 1, i + 1)
         n = min(int(args.max_samples), tau_gt_h.shape[0])
-        ax.plot(tau_gt_h[:n, j], label="GT", linewidth=1.0)
-        ax.plot(tau_hat_h[:n, j], label="DeLaN", linewidth=1.0, alpha=0.85)
+        ax.plot(tau_gt_h[:n, j], label="GT $i_{motor}$", linewidth=1.0)
+        ax.plot(tau_hat_h[:n, j], label="DeLaN $i_{motor}$", linewidth=1.0, alpha=0.85)
         ax.set_title(f"K={k_high} | joint {j}")
         ax.grid(True, alpha=0.2)
         if i == 0:

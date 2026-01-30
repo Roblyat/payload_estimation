@@ -21,20 +21,20 @@ class SweepConfig:
     lowpass_qdd_values: bool = False
 
     # Sweep
-    traj_amounts: List[int] = field(default_factory=lambda: [8, 16, 32]) #[8, 16, 32, 48, 64, 86]) ## K-Domination-Story
+    traj_amounts: List[int] = field(default_factory=lambda: [8, 16, 32, 48, 64, 86, 122]) ## K-Domination-Story
     test_fractions = 0.2
     val_fraction = 0.1
-    seeds: List[int] = field(default_factory=lambda: [0, 1]) #[0, 1, 2]) ## K-Domination-Story
+    seeds: List[int] = field(default_factory=lambda: [0, 1, 2]) ## K-Domination-Story
 
     # Window sizes and feature modes
-    h_list: List[int] = field(default_factory=lambda: [100])
-    feature_modes: List[str] = field(default_factory=lambda: ["full"])
+    h_list: List[int] = field(default_factory=lambda: [100]) ## K-Domination-Story
+    feature_modes: List[str] = field(default_factory=lambda: ["full"]) ## K-Domination-Story
 
     # DeLaN settings
     delan_model_type: str = "structured"
     delan_hp_preset: str = "lutter_like_256"
     delan_hp_flags: str = ""
-    delan_seeds: List[int] = field(default_factory=lambda: [0,1]) #[0, 1, 2, 3, 4]) ## K-Domination-Story
+    delan_seeds: List[int] = field(default_factory=lambda: [0, 1, 2, 3, 4]) ## K-Domination-Story
     delan_epochs: int = 200
     delan_eval_every: int = 1
     delan_log_every: int = 1
@@ -86,10 +86,10 @@ class SweepConfig:
     lstm_early_stop_warmup_evals: int = 10
 
     # LSTM best-model sweep
-    lstm_best_dataset_seeds: List[int] = field(default_factory=lambda: [0, 1]) #[0, 1, 2])
-    lstm_best_feature_modes: List[str] = field(default_factory=lambda: ["full", "state"]) #["full", "state", "tau_hat", "state_tauhat"])
-    lstm_best_h_list: List[int] = field(default_factory=lambda: [50, 100]) #[50, 100, 150])
-    lstm_best_seeds: List[int] = field(default_factory=lambda: [0,1]) #[0, 1, 2])
+    lstm_best_dataset_seeds: List[int] = field(default_factory=lambda: [0, 1, 2])
+    lstm_best_feature_modes: List[str] = field(default_factory=lambda: ["full", "state", "tau_hat", "state_tauhat"])
+    lstm_best_h_list: List[int] = field(default_factory=lambda: [50, 100, 150])
+    lstm_best_seeds: List[int] = field(default_factory=lambda: [0, 1, 2])
     lstm_best_score_lambda: float = 0.5
     lstm_best_score_penalty: float = 10.0
     lstm_best_delan_hypers_jsonl: str = "/workspace/shared/evaluation/summary_delan_best_hypers_20260129_154853.jsonl"

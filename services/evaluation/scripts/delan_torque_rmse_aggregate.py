@@ -149,9 +149,9 @@ def main() -> None:
                 max_median = m if max_median is None else max(max_median, m)
         if max_median is not None:
             plt.ylim(0, max_median + 0.25)
-        plt.title("DeLaN torque RMSE over progress (median ± IQR) by K")
+        plt.title("DeLaN $i_{motor}$ RMSE over progress (median ± IQR) by K")
         plt.xlabel("Progress (0 → 1)")
-        plt.ylabel("Torque RMSE")
+        plt.ylabel("$i_{motor}$ RMSE [A]")
         plt.grid(True, alpha=0.25)
         plt.legend(ncol=2, fontsize=8)
         plt.tight_layout()
@@ -218,9 +218,9 @@ def main() -> None:
         if max_median is not None:
             plt.ylim(0, max_median + 0.25)
 
-        plt.title("DeLaN torque RMSE per joint (median ± IQR)")
+        plt.title("DeLaN $i_{motor}$ RMSE per joint (median ± IQR)")
         plt.xlabel("Joint")
-        plt.ylabel("Torque RMSE")
+        plt.ylabel("Joint $i_{motor}$ RMSE [A]")
         plt.xticks(x, [f"joint{j}" for j in x])
         plt.grid(True, axis="y", alpha=0.25)
         plt.legend(ncol=min(3, len(selected_K)), fontsize=8)

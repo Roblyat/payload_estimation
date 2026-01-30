@@ -441,7 +441,7 @@ def main():
     save_boxplot(
         df, "feature_mode", "rg_rmse",
         os.path.join(args.out_dir, "box_rg_rmse_by_feature_mode.png"),
-        "Final torque RMSE (rg_rmse) grouped by feature_mode"
+        "Final $i_{motor}$ RMSE (rg_rmse) grouped by feature_mode"
     )
 
     # ----------------------------
@@ -479,8 +479,8 @@ def main():
         groups.setdefault(str(r["delan_id"]), []).append(float(r["delan_rmse"]))
     _boxplot_groups(
         groups,
-        title="DeLaN torque RMSE (delan_rmse) grouped by delan_id",
-        ylabel="delan_rmse",
+        title="DeLaN $i_{motor}$ RMSE (delan_rmse) grouped by delan_id",
+        ylabel="$i_{motor}$ RMSE [A]",
         out_png=os.path.join(args.out_dir, "box_delan_rmse_by_delan_id.png"),
         strip_common_prefix=True,
         split_two_rows=True,
@@ -494,7 +494,7 @@ def main():
         save_boxplot(
             df, "feature_mode", f"rg_joint_rmse_{j}",
             os.path.join(args.out_dir, f"box_rg_joint_rmse_{j}_by_feature_mode.png"),
-            f"Final torque RMSE joint {j} grouped by feature_mode"
+            f"Final $i_{{motor}}$ RMSE joint {j} grouped by feature_mode"
         )
 
     # ----------------------------
@@ -503,18 +503,18 @@ def main():
     save_scatter(
         df, "delan_rmse", "rg_rmse",
         os.path.join(args.out_dir, "scatter_delan_rmse_vs_rg_rmse.png"),
-        "Does better DeLaN (lower rmse) correlate with better final torque?"
+        "Does better DeLaN (lower rmse) correlate with better final $i_{motor}$?"
     )
     save_scatter(
         df, "res_rmse", "rg_rmse",
         os.path.join(args.out_dir, "scatter_res_rmse_vs_rg_rmse.png"),
-        "Does better residual fit translate to better final torque?"
+        "Does better residual fit translate to better final $i_{motor}$?"
     )
     for j in range(6):
         save_scatter(
             df, f"delan_joint_rmse_{j}", f"rg_joint_rmse_{j}",
             os.path.join(args.out_dir, f"scatter_delan_vs_rg_joint_{j}.png"),
-            f"Joint {j}: DeLaN RMSE vs final torque RMSE"
+            f"Joint {j}: DeLaN RMSE vs final $i_{{motor}}$ RMSE"
         )
 
     # ----------------------------

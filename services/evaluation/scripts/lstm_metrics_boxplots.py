@@ -26,6 +26,12 @@ _PALETTE = [
     "#7570b3",
 ]
 
+_H_EDGE_PALETTE = [
+    "#4daf4a",  # green
+    "#377eb8",  # blue
+    "#984ea3",  # purple
+]
+
 
 def _color_map(keys: List[str | int], palette: List[str] | None = None) -> Dict[str | int, str]:
     pal = palette or _PALETTE
@@ -277,7 +283,7 @@ def _scatter(
     feats = sorted({p[2] for p in pts})
     hs = sorted({p[3] for p in pts if p[3] is not None})
     feat_colors = _color_map(feats)
-    h_colors = _color_map(hs)
+    h_colors = _color_map(hs, _H_EDGE_PALETTE)
 
     fig = plt.figure(figsize=(7.2, 5), dpi=140)
     ax = fig.add_subplot(1, 1, 1)
@@ -315,12 +321,13 @@ def _scatter(
             for h in hs
         ]
 
-        leg1 = ax.legend(handles=feat_handles, title="Feature", loc="upper right",
-                         fontsize=8, title_fontsize=9, framealpha=0.9)
-        ax.add_artist(leg1)
+        leg_h = None
         if h_handles:
-            ax.legend(handles=h_handles, title="H", loc="upper right",
-                      bbox_to_anchor=(1.0, 0.58), fontsize=8, title_fontsize=9, framealpha=0.9)
+            leg_h = ax.legend(handles=h_handles, title="H", loc="upper right",
+                              bbox_to_anchor=(1.0, 1.0), fontsize=8, title_fontsize=9, framealpha=0.9)
+            ax.add_artist(leg_h)
+        ax.legend(handles=feat_handles, title="Feature", loc="upper right",
+                  bbox_to_anchor=(0.78, 1.0), fontsize=8, title_fontsize=9, framealpha=0.9)
 
     plt.tight_layout()
     plt.savefig(out_png, dpi=160)
@@ -412,8 +419,8 @@ def main() -> None:
         g1.setdefault(g, []).append(r["rmse_total"])
     _boxplot(
         g1,
-        title="LSTM Residual RMSE (test) by Feature Mode",
-        ylabel="RMSE Total (real units)",
+        title="LSTM $i_{motor}$ Residual RMSE (test) by Feature Mode",
+        ylabel="$i_{motor}$ RMSE Total [A]",
         out_png=os.path.join(args.out_dir, "lstm_residual_rmse_by_feature_mode.png"),
         split_two_rows=True,
         strip_common_prefix=True,
@@ -432,8 +439,8 @@ def main() -> None:
         g1b.setdefault(key, []).append(r["rmse_total"])
     _boxplot(
         g1b,
-        title="LSTM Residual RMSE (test) by Feature Mode / Backend",
-        ylabel="RMSE Total (real units)",
+        title="LSTM $i_{motor}$ Residual RMSE (test) by Feature Mode / Backend",
+        ylabel="$i_{motor}$ RMSE Total [A]",
         out_png=os.path.join(args.out_dir, "lstm_residual_rmse_by_feature_mode_backend.png"),
         split_two_rows=True,
         strip_common_prefix=True,
@@ -450,8 +457,8 @@ def main() -> None:
     if len(gH) >= 2:
         _boxplot(
             gH,
-            title="LSTM Residual RMSE (test) by H",
-            ylabel="RMSE Total (real units)",
+            title="LSTM $i_{motor}$ Residual RMSE (test) by H",
+            ylabel="$i_{motor}$ RMSE Total [A]",
             out_png=os.path.join(args.out_dir, "lstm_residual_rmse_by_H.png"),
             title_fontsize=11,
         )
@@ -463,8 +470,8 @@ def main() -> None:
     if len(gb) >= 2:
         _boxplot(
             gb,
-            title="LSTM Residual RMSE (test) by Backend",
-            ylabel="RMSE Total (real units)",
+            title="LSTM $i_{motor}$ Residual RMSE (test) by Backend",
+            ylabel="$i_{motor}$ RMSE Total [A]",
             out_png=os.path.join(args.out_dir, "lstm_residual_rmse_by_backend.png"),
             title_fontsize=11,
         )   
@@ -483,8 +490,8 @@ def main() -> None:
     if groups_per_joint:
         _per_joint_boxplot(
             groups_per_joint,
-            title="Per-joint Residual RMSE (test) by Feature Mode",
-            ylabel="Joint RMSE (real units)",
+            title="Per-joint $i_{motor}$ Residual RMSE (test) by Feature Mode",
+            ylabel="Joint $i_{motor}$ RMSE [A]",
             out_png=os.path.join(args.out_dir, "lstm_joint_rmse_grid_by_feature_mode.png"),
             n_dof=n_dof,
             strip_common_prefix=True,
@@ -500,8 +507,8 @@ def main() -> None:
         _scatter(
             rows,
             xlabel="Best Val Loss (scaled MSE)",
-            ylabel="RMSE Total (real units)",
-            title="Best Val Loss vs RMSE Total",
+            ylabel="$i_{motor}$ RMSE Total [A]",
+            title="Best Val Loss vs $i_{motor}$ RMSE Total",
             out_png=os.path.join(args.out_dir, "lstm_best_val_loss_vs_rmse_total.png"),
             show_legend=not args.no_scatter_legend,
         )

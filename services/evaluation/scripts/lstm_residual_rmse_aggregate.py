@@ -193,7 +193,7 @@ def main() -> None:
                     max_median = m if max_median is None else max(max_median, m)
             if max_median is not None:
                 plt.ylim(0, max_median + 0.25)
-            plt.title(f"LSTM $i_{motor}$ Residual RMSE over Progress by K{title_h}")
+            plt.title(f"LSTM $i_{{motor}}$ Residual RMSE over Progress by K{title_h}")
             plt.xlabel("Progress (0 → 1)")
             plt.ylabel("$i_{motor}$ Residual RMSE [A]")
             plt.grid(True, alpha=0.25)
@@ -211,61 +211,56 @@ def main() -> None:
                 q75=np.stack([time_by_k[K][2] for K in sorted(time_by_k.keys())], axis=0),
             )
 
-        available_K = sorted(joint_by_k.keys())
-        selected_K = _parse_k_values(args.k_values)
-        if selected_K:
-            selected_K = [k for k in selected_K if k in joint_by_k]
-        if not selected_K:
-            if len(available_K) <= 3:
-                selected_K = available_K
-            elif available_K:
-                mid = available_K[len(available_K) // 2]
-                selected_K = [available_K[0], mid, available_K[-1]]
-                selected_K = list(dict.fromkeys(selected_K))
+    available_K = sorted(joint_by_k.keys())
+    selected_K = _parse_k_values(args.k_values)
+    if selected_K:
+        selected_K = [k for k in selected_K if k in joint_by_k]
+    if not selected_K:
+        selected_K = available_K
 
-        if selected_K:
-            n_dof = int(joint_by_k[selected_K[0]][0].shape[0])
-            x = np.arange(n_dof)
-            n_groups = len(selected_K)
-            width = 0.8 / max(1, n_groups)
+    if selected_K:
+        n_dof = int(joint_by_k[selected_K[0]][0].shape[0])
+        x = np.arange(n_dof)
+        n_groups = len(selected_K)
+        width = 0.8 / max(1, n_groups)
 
-            plt.figure(figsize=(10, 4.8), dpi=160)
-            color_map = _color_map(selected_K)
-            for i, K in enumerate(selected_K):
-                med, q25, q75 = joint_by_k[K]
-                offsets = x - 0.4 + (i + 0.5) * width
-                yerr = np.vstack([med - q25, q75 - med])
-                color = color_map.get(K, "#1f77b4")
-                plt.bar(offsets, med, width=width, label=f"K={K}", alpha=0.9, color=color)
-                plt.errorbar(offsets, med, yerr=yerr, fmt="none", ecolor="k", elinewidth=0.9, capsize=2, alpha=0.8)
-            max_median = None
-            for med, _, _ in joint_by_k.values():
-                try:
-                    m = float(np.nanmax(med))
-                except Exception:
-                    continue
-                if np.isfinite(m):
-                    max_median = m if max_median is None else max(max_median, m)
-            if max_median is not None:
-                plt.ylim(0, max_median + 0.25)
+        plt.figure(figsize=(10, 4.8), dpi=160)
+        color_map = _color_map(selected_K)
+        for i, K in enumerate(selected_K):
+            med, q25, q75 = joint_by_k[K]
+            offsets = x - 0.4 + (i + 0.5) * width
+            yerr = np.vstack([med - q25, q75 - med])
+            color = color_map.get(K, "#1f77b4")
+            plt.bar(offsets, med, width=width, label=f"K={K}", alpha=0.9, color=color)
+            plt.errorbar(offsets, med, yerr=yerr, fmt="none", ecolor="k", elinewidth=0.9, capsize=2, alpha=0.8)
+        max_median = None
+        for med, _, _ in joint_by_k.values():
+            try:
+                m = float(np.nanmax(med))
+            except Exception:
+                continue
+            if np.isfinite(m):
+                max_median = m if max_median is None else max(max_median, m)
+        if max_median is not None:
+            plt.ylim(0, max_median + 0.25)
 
-            plt.title(f"LSTM $i_{motor}$ Residual RMSE per Joint (median ± IQR){title_h}")
-            plt.xlabel("Joint")
-            plt.ylabel("Joint $i_{motor}$ Residual RMSE [A]")
-            plt.xticks(x, [f"joint{j}" for j in x])
-            plt.grid(True, axis="y", alpha=0.25)
-            plt.legend(ncol=min(3, len(selected_K)), fontsize=8)
-            plt.tight_layout()
-            plt.savefig(os.path.join(args.out_dir, f"B4_residual_rmse_per_joint_grouped{suffix}.png"), dpi=200)
-            plt.close()
+        plt.title(f"LSTM $i_{{motor}}$ Residual RMSE per Joint (median ± IQR){title_h}")
+        plt.xlabel("Joint")
+        plt.ylabel("Joint $i_{motor}$ Residual RMSE [A]")
+        plt.xticks(x, [f"joint{j}" for j in x])
+        plt.grid(True, axis="y", alpha=0.25)
+        plt.legend(ncol=min(3, len(selected_K)), fontsize=8)
+        plt.tight_layout()
+        plt.savefig(os.path.join(args.out_dir, f"B4_residual_rmse_per_joint_grouped{suffix}.png"), dpi=200)
+        plt.close()
 
-            np.savez(
-                os.path.join(args.out_dir, f"B4_residual_rmse_per_joint_grouped{suffix}.npz"),
-                Ks=np.array(selected_K, dtype=np.int32),
-                joint_median=np.stack([joint_by_k[K][0] for K in selected_K], axis=0),
-                joint_q25=np.stack([joint_by_k[K][1] for K in selected_K], axis=0),
-                joint_q75=np.stack([joint_by_k[K][2] for K in selected_K], axis=0),
-            )
+        np.savez(
+            os.path.join(args.out_dir, f"B4_residual_rmse_per_joint_grouped{suffix}.npz"),
+            Ks=np.array(selected_K, dtype=np.int32),
+            joint_median=np.stack([joint_by_k[K][0] for K in selected_K], axis=0),
+            joint_q25=np.stack([joint_by_k[K][1] for K in selected_K], axis=0),
+            joint_q75=np.stack([joint_by_k[K][2] for K in selected_K], axis=0),
+        )
 
 
 if __name__ == "__main__":

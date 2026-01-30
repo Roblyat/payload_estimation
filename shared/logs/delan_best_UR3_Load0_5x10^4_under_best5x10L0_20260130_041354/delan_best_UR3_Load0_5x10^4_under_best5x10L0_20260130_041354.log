@@ -1,0 +1,96 @@
+#################################################################################################################################################################
+### DeLaN best-model sweep started: 20260130_041354                                                                                                           ###
+### sweep_name=delan_best_UR3_Load0_5x10^4_under_best5x10L0_20260130_041354                                                                                   ###
+### logs_dir=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/delan_best_UR3_Load0_5x10^4_under_best5x10L0_20260130_041354 ###
+### dataset=UR3_Load0_5x10^4_under run_tag=best5x10L0                                                                                                         ###
+### raw_csv=/workspace/shared/data/raw/UR3_Load0_5x10^4_under.csv                                                                                             ###
+### col_format=wide derive_qdd=True                                                                                                                           ###
+### K_max=84 test_fraction=0.2 val_fraction=0.1                                                                                                               ###
+### dataset_seeds=[0, 1, 2, 3, 4, 5]                                                                                                                          ###
+### delan_seeds=[0, 1, 2, 3, 4]                                                                                                                               ###
+### hp_presets=['lutter_like_128', 'lutter_like_256', 'lutter_like_256_d3', 'lutter_like_256_lr5e5', 'lutter_like_256_wd1e4']                                 ###
+### score_lambda=0.5 score_penalty=10.0                                                                                                                       ###
+### DeLaN: backend=jax type=structured epochs=200 hp_flags=                                                                                                   ###
+### runs_csv=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_delan_best_runs_20260130_041354.csv            ###
+### runs_jsonl=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_delan_best_runs_20260130_041354.jsonl        ###
+### folds_csv=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_delan_best_folds_20260130_041354.csv          ###
+### folds_jsonl=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_delan_best_folds_20260130_041354.jsonl      ###
+### hypers_csv=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_delan_best_hypers_20260130_041354.csv        ###
+### hypers_jsonl=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_delan_best_hypers_20260130_041354.jsonl    ###
+### best_model_json=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/delan_best_model_20260130_041354.json           ###
+#################################################################################################################################################################
+
+#############################
+### DeLaN best fold plots ###
+#############################
+
+============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/delan_best_fold_plots.py --summary_jsonl /workspace/shared/evaluation/summary_delan_best_runs_20260130_041354.jsonl --out_dir /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds' ===
+============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-jwqsze79 because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+[info] summary_jsonl=/workspace/shared/evaluation/summary_delan_best_runs_20260130_041354.jsonl rows=150
+[info] out_dir=/workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds MPLCONFIGDIR=/tmp/matplotlib-jwqsze79
+[info] groups=30
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_128__d0.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_128__d1.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_128__d2.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_128__d3.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_128__d4.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_128__d5.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256__d0.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256__d1.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256__d2.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256__d3.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256__d4.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256__d5.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256_d3__d0.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256_d3__d1.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256_d3__d2.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256_d3__d3.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256_d3__d4.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256_d3__d5.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256_lr5e5__d0.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256_lr5e5__d1.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256_lr5e5__d2.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256_lr5e5__d3.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256_lr5e5__d4.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256_lr5e5__d5.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256_wd1e4__d0.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256_wd1e4__d1.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256_wd1e4__d2.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256_wd1e4__d3.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256_wd1e4__d4.png
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/folds/delan_best_fold_K84__hp_lutter_like_256_wd1e4__d5.png
+
+
+############################################
+### DeLaN best hp-level train/val curves ###
+############################################
+
+=========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/delan_best_hp_curves.py --summary_jsonl /workspace/shared/evaluation/summary_delan_best_runs_20260130_041354.jsonl --out_dir /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/curves --hp_presets lutter_like_128,lutter_like_256,lutter_like_256_d3,lutter_like_256_lr5e5,lutter_like_256_wd1e4 ' ===
+=========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-qf00b3gb because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+[info] summary_jsonl=/workspace/shared/evaluation/summary_delan_best_runs_20260130_041354.jsonl rows=150
+[info] out_dir=/workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/curves MPLCONFIGDIR=/tmp/matplotlib-qf00b3gb
+[info] saved /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/curves/delan_best_train_val_curves_by_hp.png
+
+
+######################################
+### DeLaN best hyper scatter plots ###
+######################################
+
+==================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/delan_best_hyper_scatter.py --summary_jsonl /workspace/shared/evaluation/summary_delan_best_hypers_20260130_041354.jsonl --out_dir /workspace/shared/evaluation/delan_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_041354/hypers' ===
+==================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-yemty6b2 because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+Traceback (most recent call last):
+  File "/workspace/evaluation/scripts/delan_best_hyper_scatter.py", line 127, in <module>
+    main()
+  File "/workspace/evaluation/scripts/delan_best_hyper_scatter.py", line 62, in main
+    raise FileNotFoundError(f"summary_jsonl not found: {summary_path}")
+FileNotFoundError: summary_jsonl not found: /workspace/shared/evaluation/summary_delan_best_hypers_20260130_041354.jsonl
+

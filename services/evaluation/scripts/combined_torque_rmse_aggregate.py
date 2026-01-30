@@ -306,8 +306,8 @@ def main() -> None:
                 ax2.plot(xs, med, label=f"K={K}", color=color, linewidth=1.3)
                 ax2.fill_between(xs, q25, q75, color=color, alpha=0.18)
 
-            ax1.set_title(f"DeLaN $i_{motor}$ RMSE over Progress{title_h}")
-            ax2.set_title(f"Combined $i_{motor}$ RMSE over Progress{title_h}")
+            ax1.set_title(f"DeLaN $i_{{motor}}$ RMSE over Progress{title_h}")
+            ax2.set_title(f"Combined $i_{{motor}}$ RMSE over Progress{title_h}")
             for ax in (ax1, ax2):
                 ax.set_xlabel("Progress (0 → 1)")
                 ax.set_ylabel("$i_{motor}$ RMSE [A]")

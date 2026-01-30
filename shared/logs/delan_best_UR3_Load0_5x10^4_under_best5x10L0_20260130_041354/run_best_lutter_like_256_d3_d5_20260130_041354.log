@@ -1,0 +1,610 @@
+####################################################################################################################################################
+### RUN: hp_preset=lutter_like_256_d3 K=84 test_fraction=0.2 val_fraction=0.1                                                                    ###
+### dataset_seed=5                                                                                                                               ###
+### npz_in=/workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset.npz ###
+####################################################################################################################################################
+
+#####################
+### 1) PREPROCESS ###
+#####################
+
+============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T preprocess bash -lc 'python3 scripts/build_delan_dataset.py --derive_qdd_from_qd True --col_format wide --trajectory_amount 84 --test_fraction 0.2 --val_fraction 0.1 --seed 5 --lowpass_signals True --lowpass_cutoff_hz 10.0 --lowpass_order 4 --lowpass_qdd False --raw_csv /workspace/shared/data/raw/UR3_Load0_5x10^4_under.csv --out_npz /workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset.npz' ===
+============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+Saved: /workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset.npz
+Saved: /workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset.json
+Trajectories: train=19 val=3 test=5
+Exists: True
+
+###############################################################################################################################################################################################################################################################################################################################
+### DELAN VARIANT: hp_preset=lutter_like_256_d3 delan_seed=0                                                                                                                                                                                                                                                                ###
+### ckpt=/workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax ###
+###############################################################################################################################################################################################################################################################################################################################
+
+######################
+### 2) DELAN TRAIN ###
+######################
+
+======================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T delan_jax bash -lc 'python3 /workspace/delan_jax/scripts/rbyt_train_delan_jax.py --npz /workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset.npz -t structured -s 0 -r 0 --hp_preset lutter_like_256_d3 --epochs 200 --eval_every 1 --log_every 1 --early_stop True --early_stop_patience 10 --early_stop_min_delta 0.0 --early_stop_warmup_evals 0 --save_path /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax' ===
+======================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+mkdir -p failed for path /.config/matplotlib: [Errno 13] Permission denied: '/.config'
+Matplotlib created a temporary cache directory at /tmp/matplotlib-rm9fofk8 because there was an issue with the default path (/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+Final hyper: {'dataset': 'UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3', 'n_width': 256, 'n_depth': 3, 'n_minibatch': 1024, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'softplus', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 200, 'lagrangian_type': <function structured_lagrangian_fn at 0x7ce1e37268c0>}
+
+
+################################################
+DeLaN run: UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  model_dir = /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  ckpt_path = /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+  type = structured
+  hp_preset = lutter_like_256_d3
+################################################
+
+
+################################################
+Dataset: delan_UR3_Load0_5x10^4_under_K84_seed5_dataset.npz
+  npz = /workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset.npz
+   dt ≈ 0.013911611423806564
+  dof = 6
+  Train trajectories = 19
+  Val trajectories   = 3
+  Test trajectories  = 5
+  Train samples = 34000
+  Test samples  = 4000
+################################################
+
+2026-01-30 03:42:39.950429: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-30 03:42:41.812429: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+################################################
+Training DeLaN | run=UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3 | type=structured | dof=6
+################################################
+Epoch 00001: Time=   3.9s, Loss=8.54e+03, Inv=8.54e+03, For=5.75e+00, Power=6.45e+02
+  [eval] val_mse=9.657e+00  (n=9997)
+Epoch 00002: Time=   5.8s, Loss=4.21e+02, Inv=4.21e+02, For=5.47e+00, Power=6.88e+01
+  [eval] val_mse=3.840e+00  (n=9997)
+Epoch 00003: Time=   5.9s, Loss=1.48e+02, Inv=1.48e+02, For=5.27e+00, Power=2.18e+01
+  [eval] val_mse=2.777e+00  (n=9997)
+Epoch 00004: Time=   5.9s, Loss=8.27e+01, Inv=8.27e+01, For=5.15e+00, Power=1.13e+01
+  [eval] val_mse=2.325e+00  (n=9997)
+Epoch 00005: Time=   6.0s, Loss=5.39e+01, Inv=5.39e+01, For=5.08e+00, Power=7.05e+00
+  [eval] val_mse=2.010e+00  (n=9997)
+Epoch 00006: Time=   6.0s, Loss=3.80e+01, Inv=3.80e+01, For=5.03e+00, Power=4.81e+00
+  [eval] val_mse=1.766e+00  (n=9997)
+Epoch 00007: Time=   6.1s, Loss=2.85e+01, Inv=2.85e+01, For=5.01e+00, Power=3.54e+00
+  [eval] val_mse=1.561e+00  (n=9997)
+Epoch 00008: Time=   6.1s, Loss=2.24e+01, Inv=2.24e+01, For=4.99e+00, Power=2.73e+00
+  [eval] val_mse=1.365e+00  (n=9997)
+Epoch 00009: Time=   6.2s, Loss=1.81e+01, Inv=1.81e+01, For=4.93e+00, Power=2.17e+00
+  [eval] val_mse=1.184e+00  (n=9997)
+Epoch 00010: Time=   6.2s, Loss=1.50e+01, Inv=1.50e+01, For=4.87e+00, Power=1.79e+00
+  [eval] val_mse=1.038e+00  (n=9997)
+Epoch 00011: Time=   6.3s, Loss=1.28e+01, Inv=1.28e+01, For=4.84e+00, Power=1.52e+00
+  [eval] val_mse=9.412e-01  (n=9997)
+Epoch 00012: Time=   6.3s, Loss=1.12e+01, Inv=1.12e+01, For=4.85e+00, Power=1.31e+00
+  [eval] val_mse=9.002e-01  (n=9997)
+Epoch 00013: Time=   6.4s, Loss=9.94e+00, Inv=9.94e+00, For=4.91e+00, Power=1.15e+00
+  [eval] val_mse=8.852e-01  (n=9997)
+Epoch 00014: Time=   6.4s, Loss=9.00e+00, Inv=9.00e+00, For=5.01e+00, Power=1.04e+00
+  [eval] val_mse=8.732e-01  (n=9997)
+Epoch 00015: Time=   6.5s, Loss=8.26e+00, Inv=8.26e+00, For=5.13e+00, Power=9.53e-01
+  [eval] val_mse=8.652e-01  (n=9997)
+Epoch 00016: Time=   6.5s, Loss=7.63e+00, Inv=7.63e+00, For=5.27e+00, Power=8.77e-01
+  [eval] val_mse=8.667e-01  (n=9997)
+Epoch 00017: Time=   6.6s, Loss=7.12e+00, Inv=7.12e+00, For=5.40e+00, Power=8.20e-01
+  [eval] val_mse=8.600e-01  (n=9997)
+Epoch 00018: Time=   6.6s, Loss=6.69e+00, Inv=6.69e+00, For=5.55e+00, Power=7.73e-01
+  [eval] val_mse=8.491e-01  (n=9997)
+Epoch 00019: Time=   6.7s, Loss=6.33e+00, Inv=6.33e+00, For=5.71e+00, Power=7.35e-01
+  [eval] val_mse=8.534e-01  (n=9997)
+Epoch 00020: Time=   6.7s, Loss=6.00e+00, Inv=6.00e+00, For=5.87e+00, Power=7.01e-01
+  [eval] val_mse=8.477e-01  (n=9997)
+Epoch 00021: Time=   6.8s, Loss=5.72e+00, Inv=5.72e+00, For=6.04e+00, Power=6.75e-01
+  [eval] val_mse=8.498e-01  (n=9997)
+Epoch 00022: Time=   6.8s, Loss=5.48e+00, Inv=5.48e+00, For=6.19e+00, Power=6.51e-01
+  [eval] val_mse=8.507e-01  (n=9997)
+Epoch 00023: Time=   6.9s, Loss=5.27e+00, Inv=5.27e+00, For=6.39e+00, Power=6.31e-01
+  [eval] val_mse=8.502e-01  (n=9997)
+Epoch 00024: Time=   6.9s, Loss=5.07e+00, Inv=5.07e+00, For=6.53e+00, Power=6.13e-01
+  [eval] val_mse=8.594e-01  (n=9997)
+Epoch 00025: Time=   7.0s, Loss=4.91e+00, Inv=4.91e+00, For=6.71e+00, Power=5.99e-01
+  [eval] val_mse=8.712e-01  (n=9997)
+Epoch 00026: Time=   7.0s, Loss=4.75e+00, Inv=4.75e+00, For=6.89e+00, Power=5.85e-01
+  [eval] val_mse=8.773e-01  (n=9997)
+Epoch 00027: Time=   7.1s, Loss=4.62e+00, Inv=4.62e+00, For=7.09e+00, Power=5.74e-01
+  [eval] val_mse=8.809e-01  (n=9997)
+Epoch 00028: Time=   7.1s, Loss=4.48e+00, Inv=4.48e+00, For=7.29e+00, Power=5.63e-01
+  [eval] val_mse=8.906e-01  (n=9997)
+Epoch 00029: Time=   7.2s, Loss=4.37e+00, Inv=4.37e+00, For=7.46e+00, Power=5.54e-01
+  [eval] val_mse=9.150e-01  (n=9997)
+Epoch 00030: Time=   7.2s, Loss=4.27e+00, Inv=4.27e+00, For=7.68e+00, Power=5.47e-01
+  [eval] val_mse=9.251e-01  (n=9997)
+  [early_stop] stop at epoch=30 (best_epoch=20, best_val_mse=8.477e-01)
+Saved DeLaN checkpoint: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+Saved training history: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3__train_history.csv
+
+################################################
+Evaluating DeLaN | run=UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  [val] Torque RMSE = 3.759e-01
+Torque MSE  = 3.626e-01
+Torque RMSE = 6.021e-01
+Per-joint MSE : 1.372e+00 4.744e-01 1.515e-01 8.184e-02 4.633e-02 4.992e-02
+Per-joint RMSE: 1.171e+00 6.888e-01 3.892e-01 2.861e-01 2.152e-01 2.234e-01
+Comp Time per Sample = 4.118e-04s / 2428.6Hz
+Saved metrics TXT: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics_test.txt
+Saved metrics JSON: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s0_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics.json
+
+###############################################################################################################################################################################################################################################################################################################################
+### DELAN VARIANT: hp_preset=lutter_like_256_d3 delan_seed=1                                                                                                                                                                                                                                                                ###
+### ckpt=/workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax ###
+###############################################################################################################################################################################################################################################################################################################################
+
+######################
+### 2) DELAN TRAIN ###
+######################
+
+======================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T delan_jax bash -lc 'python3 /workspace/delan_jax/scripts/rbyt_train_delan_jax.py --npz /workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset.npz -t structured -s 1 -r 0 --hp_preset lutter_like_256_d3 --epochs 200 --eval_every 1 --log_every 1 --early_stop True --early_stop_patience 10 --early_stop_min_delta 0.0 --early_stop_warmup_evals 0 --save_path /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax' ===
+======================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+mkdir -p failed for path /.config/matplotlib: [Errno 13] Permission denied: '/.config'
+Matplotlib created a temporary cache directory at /tmp/matplotlib-d0rwzat1 because there was an issue with the default path (/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+Final hyper: {'dataset': 'UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3', 'n_width': 256, 'n_depth': 3, 'n_minibatch': 1024, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'softplus', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 200, 'lagrangian_type': <function structured_lagrangian_fn at 0x7158da8868c0>}
+
+
+################################################
+DeLaN run: UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  model_dir = /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  ckpt_path = /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+  type = structured
+  hp_preset = lutter_like_256_d3
+################################################
+
+
+################################################
+Dataset: delan_UR3_Load0_5x10^4_under_K84_seed5_dataset.npz
+  npz = /workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset.npz
+   dt ≈ 0.013911611423806564
+  dof = 6
+  Train trajectories = 19
+  Val trajectories   = 3
+  Test trajectories  = 5
+  Train samples = 34000
+  Test samples  = 4000
+################################################
+
+2026-01-30 03:42:57.105224: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-30 03:42:58.962103: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+################################################
+Training DeLaN | run=UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3 | type=structured | dof=6
+################################################
+Epoch 00001: Time=   4.1s, Loss=7.63e+03, Inv=7.63e+03, For=5.72e+00, Power=7.43e+02
+  [eval] val_mse=1.190e+01  (n=9997)
+Epoch 00002: Time=   6.0s, Loss=4.47e+02, Inv=4.47e+02, For=5.45e+00, Power=1.02e+02
+  [eval] val_mse=4.992e+00  (n=9997)
+Epoch 00003: Time=   6.1s, Loss=1.70e+02, Inv=1.70e+02, For=5.30e+00, Power=3.70e+01
+  [eval] val_mse=3.196e+00  (n=9997)
+Epoch 00004: Time=   6.1s, Loss=9.45e+01, Inv=9.45e+01, For=5.17e+00, Power=1.94e+01
+  [eval] val_mse=2.529e+00  (n=9997)
+Epoch 00005: Time=   6.2s, Loss=6.13e+01, Inv=6.13e+01, For=5.08e+00, Power=1.20e+01
+  [eval] val_mse=2.142e+00  (n=9997)
+Epoch 00006: Time=   6.2s, Loss=4.32e+01, Inv=4.32e+01, For=5.04e+00, Power=8.02e+00
+  [eval] val_mse=1.879e+00  (n=9997)
+Epoch 00007: Time=   6.3s, Loss=3.22e+01, Inv=3.22e+01, For=5.01e+00, Power=5.75e+00
+  [eval] val_mse=1.675e+00  (n=9997)
+Epoch 00008: Time=   6.3s, Loss=2.51e+01, Inv=2.51e+01, For=5.00e+00, Power=4.31e+00
+  [eval] val_mse=1.499e+00  (n=9997)
+Epoch 00009: Time=   6.4s, Loss=2.02e+01, Inv=2.02e+01, For=5.00e+00, Power=3.37e+00
+  [eval] val_mse=1.343e+00  (n=9997)
+Epoch 00010: Time=   6.4s, Loss=1.67e+01, Inv=1.67e+01, For=5.02e+00, Power=2.71e+00
+  [eval] val_mse=1.202e+00  (n=9997)
+Epoch 00011: Time=   6.5s, Loss=1.42e+01, Inv=1.42e+01, For=5.09e+00, Power=2.23e+00
+  [eval] val_mse=1.104e+00  (n=9997)
+Epoch 00012: Time=   6.5s, Loss=1.23e+01, Inv=1.23e+01, For=5.21e+00, Power=1.89e+00
+  [eval] val_mse=1.027e+00  (n=9997)
+Epoch 00013: Time=   6.6s, Loss=1.09e+01, Inv=1.09e+01, For=5.36e+00, Power=1.63e+00
+  [eval] val_mse=9.795e-01  (n=9997)
+Epoch 00014: Time=   6.6s, Loss=9.84e+00, Inv=9.84e+00, For=5.53e+00, Power=1.43e+00
+  [eval] val_mse=9.592e-01  (n=9997)
+Epoch 00015: Time=   6.7s, Loss=8.97e+00, Inv=8.97e+00, For=5.75e+00, Power=1.28e+00
+  [eval] val_mse=9.354e-01  (n=9997)
+Epoch 00016: Time=   6.7s, Loss=8.24e+00, Inv=8.24e+00, For=5.98e+00, Power=1.16e+00
+  [eval] val_mse=9.282e-01  (n=9997)
+Epoch 00017: Time=   6.8s, Loss=7.65e+00, Inv=7.65e+00, For=6.22e+00, Power=1.06e+00
+  [eval] val_mse=9.232e-01  (n=9997)
+Epoch 00018: Time=   6.8s, Loss=7.14e+00, Inv=7.14e+00, For=6.50e+00, Power=9.72e-01
+  [eval] val_mse=9.158e-01  (n=9997)
+Epoch 00019: Time=   6.9s, Loss=6.72e+00, Inv=6.72e+00, For=6.79e+00, Power=9.08e-01
+  [eval] val_mse=9.245e-01  (n=9997)
+Epoch 00020: Time=   6.9s, Loss=6.34e+00, Inv=6.34e+00, For=7.06e+00, Power=8.51e-01
+  [eval] val_mse=9.260e-01  (n=9997)
+Epoch 00021: Time=   7.0s, Loss=6.02e+00, Inv=6.02e+00, For=7.38e+00, Power=8.04e-01
+  [eval] val_mse=9.352e-01  (n=9997)
+Epoch 00022: Time=   7.0s, Loss=5.73e+00, Inv=5.73e+00, For=7.68e+00, Power=7.61e-01
+  [eval] val_mse=9.576e-01  (n=9997)
+Epoch 00023: Time=   7.1s, Loss=5.47e+00, Inv=5.47e+00, For=7.98e+00, Power=7.28e-01
+  [eval] val_mse=9.777e-01  (n=9997)
+Epoch 00024: Time=   7.1s, Loss=5.25e+00, Inv=5.25e+00, For=8.32e+00, Power=6.99e-01
+  [eval] val_mse=1.018e+00  (n=9997)
+Epoch 00025: Time=   7.2s, Loss=5.04e+00, Inv=5.04e+00, For=8.66e+00, Power=6.72e-01
+  [eval] val_mse=1.052e+00  (n=9997)
+Epoch 00026: Time=   7.2s, Loss=4.85e+00, Inv=4.85e+00, For=8.99e+00, Power=6.48e-01
+  [eval] val_mse=1.066e+00  (n=9997)
+Epoch 00027: Time=   7.3s, Loss=4.69e+00, Inv=4.69e+00, For=9.33e+00, Power=6.32e-01
+  [eval] val_mse=1.137e+00  (n=9997)
+Epoch 00028: Time=   7.3s, Loss=4.55e+00, Inv=4.55e+00, For=9.68e+00, Power=6.13e-01
+  [eval] val_mse=1.192e+00  (n=9997)
+  [early_stop] stop at epoch=28 (best_epoch=18, best_val_mse=9.158e-01)
+Saved DeLaN checkpoint: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+Saved training history: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3__train_history.csv
+
+################################################
+Evaluating DeLaN | run=UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  [val] Torque RMSE = 3.907e-01
+Torque MSE  = 3.442e-01
+Torque RMSE = 5.867e-01
+Per-joint MSE : 7.573e-01 8.822e-01 2.011e-01 7.990e-02 9.034e-02 5.417e-02
+Per-joint RMSE: 8.702e-01 9.392e-01 4.484e-01 2.827e-01 3.006e-01 2.328e-01
+Comp Time per Sample = 4.166e-04s / 2400.3Hz
+Saved metrics TXT: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics_test.txt
+Saved metrics JSON: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s1_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics.json
+
+###############################################################################################################################################################################################################################################################################################################################
+### DELAN VARIANT: hp_preset=lutter_like_256_d3 delan_seed=2                                                                                                                                                                                                                                                                ###
+### ckpt=/workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax ###
+###############################################################################################################################################################################################################################################################################################################################
+
+######################
+### 2) DELAN TRAIN ###
+######################
+
+======================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T delan_jax bash -lc 'python3 /workspace/delan_jax/scripts/rbyt_train_delan_jax.py --npz /workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset.npz -t structured -s 2 -r 0 --hp_preset lutter_like_256_d3 --epochs 200 --eval_every 1 --log_every 1 --early_stop True --early_stop_patience 10 --early_stop_min_delta 0.0 --early_stop_warmup_evals 0 --save_path /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax' ===
+======================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+mkdir -p failed for path /.config/matplotlib: [Errno 13] Permission denied: '/.config'
+Matplotlib created a temporary cache directory at /tmp/matplotlib-kuqb8shp because there was an issue with the default path (/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+Final hyper: {'dataset': 'UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3', 'n_width': 256, 'n_depth': 3, 'n_minibatch': 1024, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'softplus', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 200, 'lagrangian_type': <function structured_lagrangian_fn at 0x7a5957c1a8c0>}
+
+
+################################################
+DeLaN run: UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  model_dir = /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  ckpt_path = /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+  type = structured
+  hp_preset = lutter_like_256_d3
+################################################
+
+
+################################################
+Dataset: delan_UR3_Load0_5x10^4_under_K84_seed5_dataset.npz
+  npz = /workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset.npz
+   dt ≈ 0.013911611423806564
+  dof = 6
+  Train trajectories = 19
+  Val trajectories   = 3
+  Test trajectories  = 5
+  Train samples = 34000
+  Test samples  = 4000
+################################################
+
+2026-01-30 03:43:14.400540: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-30 03:43:16.242400: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+################################################
+Training DeLaN | run=UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3 | type=structured | dof=6
+################################################
+Epoch 00001: Time=   4.0s, Loss=2.17e+03, Inv=2.17e+03, For=5.62e+00, Power=3.13e+02
+  [eval] val_mse=3.667e+00  (n=9997)
+Epoch 00002: Time=   5.8s, Loss=1.06e+02, Inv=1.06e+02, For=5.34e+00, Power=2.21e+01
+  [eval] val_mse=2.306e+00  (n=9997)
+Epoch 00003: Time=   5.8s, Loss=4.13e+01, Inv=4.13e+01, For=5.31e+00, Power=7.99e+00
+  [eval] val_mse=1.859e+00  (n=9997)
+Epoch 00004: Time=   5.9s, Loss=2.58e+01, Inv=2.58e+01, For=5.39e+00, Power=4.51e+00
+  [eval] val_mse=1.543e+00  (n=9997)
+Epoch 00005: Time=   5.9s, Loss=1.83e+01, Inv=1.83e+01, For=5.53e+00, Power=3.02e+00
+  [eval] val_mse=1.293e+00  (n=9997)
+Epoch 00006: Time=   6.0s, Loss=1.40e+01, Inv=1.40e+01, For=5.72e+00, Power=2.20e+00
+  [eval] val_mse=1.073e+00  (n=9997)
+Epoch 00007: Time=   6.0s, Loss=1.11e+01, Inv=1.11e+01, For=5.91e+00, Power=1.70e+00
+  [eval] val_mse=8.969e-01  (n=9997)
+Epoch 00008: Time=   6.1s, Loss=9.30e+00, Inv=9.30e+00, For=6.17e+00, Power=1.38e+00
+  [eval] val_mse=7.846e-01  (n=9997)
+Epoch 00009: Time=   6.1s, Loss=8.05e+00, Inv=8.05e+00, For=6.53e+00, Power=1.17e+00
+  [eval] val_mse=7.403e-01  (n=9997)
+Epoch 00010: Time=   6.2s, Loss=7.18e+00, Inv=7.18e+00, For=6.96e+00, Power=1.02e+00
+  [eval] val_mse=7.313e-01  (n=9997)
+Epoch 00011: Time=   6.2s, Loss=6.55e+00, Inv=6.55e+00, For=7.46e+00, Power=9.07e-01
+  [eval] val_mse=7.220e-01  (n=9997)
+Epoch 00012: Time=   6.3s, Loss=6.07e+00, Inv=6.07e+00, For=8.01e+00, Power=8.26e-01
+  [eval] val_mse=7.202e-01  (n=9997)
+Epoch 00013: Time=   6.3s, Loss=5.70e+00, Inv=5.70e+00, For=8.56e+00, Power=7.65e-01
+  [eval] val_mse=7.075e-01  (n=9997)
+Epoch 00014: Time=   6.4s, Loss=5.39e+00, Inv=5.39e+00, For=9.17e+00, Power=7.19e-01
+  [eval] val_mse=7.037e-01  (n=9997)
+Epoch 00015: Time=   6.4s, Loss=5.14e+00, Inv=5.14e+00, For=9.73e+00, Power=6.84e-01
+  [eval] val_mse=6.955e-01  (n=9997)
+Epoch 00016: Time=   6.5s, Loss=4.93e+00, Inv=4.93e+00, For=1.04e+01, Power=6.54e-01
+  [eval] val_mse=6.946e-01  (n=9997)
+Epoch 00017: Time=   6.5s, Loss=4.76e+00, Inv=4.76e+00, For=1.09e+01, Power=6.30e-01
+  [eval] val_mse=6.878e-01  (n=9997)
+Epoch 00018: Time=   6.6s, Loss=4.60e+00, Inv=4.60e+00, For=1.15e+01, Power=6.11e-01
+  [eval] val_mse=6.870e-01  (n=9997)
+Epoch 00019: Time=   6.6s, Loss=4.47e+00, Inv=4.47e+00, For=1.22e+01, Power=5.94e-01
+  [eval] val_mse=6.848e-01  (n=9997)
+Epoch 00020: Time=   6.7s, Loss=4.35e+00, Inv=4.35e+00, For=1.28e+01, Power=5.82e-01
+  [eval] val_mse=6.790e-01  (n=9997)
+Epoch 00021: Time=   6.7s, Loss=4.24e+00, Inv=4.24e+00, For=1.34e+01, Power=5.69e-01
+  [eval] val_mse=6.838e-01  (n=9997)
+Epoch 00022: Time=   6.8s, Loss=4.14e+00, Inv=4.14e+00, For=1.41e+01, Power=5.60e-01
+  [eval] val_mse=6.857e-01  (n=9997)
+Epoch 00023: Time=   6.8s, Loss=4.06e+00, Inv=4.06e+00, For=1.46e+01, Power=5.52e-01
+  [eval] val_mse=6.930e-01  (n=9997)
+Epoch 00024: Time=   6.9s, Loss=3.98e+00, Inv=3.98e+00, For=1.53e+01, Power=5.44e-01
+  [eval] val_mse=6.940e-01  (n=9997)
+Epoch 00025: Time=   6.9s, Loss=3.90e+00, Inv=3.90e+00, For=1.60e+01, Power=5.38e-01
+  [eval] val_mse=7.094e-01  (n=9997)
+Epoch 00026: Time=   7.0s, Loss=3.84e+00, Inv=3.84e+00, For=1.66e+01, Power=5.32e-01
+  [eval] val_mse=7.153e-01  (n=9997)
+Epoch 00027: Time=   7.0s, Loss=3.78e+00, Inv=3.78e+00, For=1.71e+01, Power=5.28e-01
+  [eval] val_mse=7.287e-01  (n=9997)
+Epoch 00028: Time=   7.1s, Loss=3.72e+00, Inv=3.72e+00, For=1.78e+01, Power=5.23e-01
+  [eval] val_mse=7.391e-01  (n=9997)
+Epoch 00029: Time=   7.1s, Loss=3.68e+00, Inv=3.68e+00, For=1.84e+01, Power=5.19e-01
+  [eval] val_mse=7.465e-01  (n=9997)
+Epoch 00030: Time=   7.2s, Loss=3.63e+00, Inv=3.63e+00, For=1.90e+01, Power=5.15e-01
+  [eval] val_mse=7.563e-01  (n=9997)
+  [early_stop] stop at epoch=30 (best_epoch=20, best_val_mse=6.790e-01)
+Saved DeLaN checkpoint: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+Saved training history: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3__train_history.csv
+
+################################################
+Evaluating DeLaN | run=UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  [val] Torque RMSE = 3.364e-01
+Torque MSE  = 1.673e-01
+Torque RMSE = 4.090e-01
+Per-joint MSE : 4.788e-01 2.060e-01 1.343e-01 6.604e-02 4.525e-02 7.323e-02
+Per-joint RMSE: 6.919e-01 4.539e-01 3.664e-01 2.570e-01 2.127e-01 2.706e-01
+Comp Time per Sample = 4.227e-04s / 2365.6Hz
+Saved metrics TXT: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics_test.txt
+Saved metrics JSON: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics.json
+
+###############################################################################################################################################################################################################################################################################################################################
+### DELAN VARIANT: hp_preset=lutter_like_256_d3 delan_seed=3                                                                                                                                                                                                                                                                ###
+### ckpt=/workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax ###
+###############################################################################################################################################################################################################################################################################################################################
+
+######################
+### 2) DELAN TRAIN ###
+######################
+
+======================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T delan_jax bash -lc 'python3 /workspace/delan_jax/scripts/rbyt_train_delan_jax.py --npz /workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset.npz -t structured -s 3 -r 0 --hp_preset lutter_like_256_d3 --epochs 200 --eval_every 1 --log_every 1 --early_stop True --early_stop_patience 10 --early_stop_min_delta 0.0 --early_stop_warmup_evals 0 --save_path /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax' ===
+======================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+mkdir -p failed for path /.config/matplotlib: [Errno 13] Permission denied: '/.config'
+Matplotlib created a temporary cache directory at /tmp/matplotlib-xqe6omh7 because there was an issue with the default path (/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+Final hyper: {'dataset': 'UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3', 'n_width': 256, 'n_depth': 3, 'n_minibatch': 1024, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'softplus', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 200, 'lagrangian_type': <function structured_lagrangian_fn at 0x7076daca28c0>}
+
+
+################################################
+DeLaN run: UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  model_dir = /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  ckpt_path = /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+  type = structured
+  hp_preset = lutter_like_256_d3
+################################################
+
+
+################################################
+Dataset: delan_UR3_Load0_5x10^4_under_K84_seed5_dataset.npz
+  npz = /workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset.npz
+   dt ≈ 0.013911611423806564
+  dof = 6
+  Train trajectories = 19
+  Val trajectories   = 3
+  Test trajectories  = 5
+  Train samples = 34000
+  Test samples  = 4000
+################################################
+
+2026-01-30 03:43:31.554400: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-30 03:43:33.419156: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+################################################
+Training DeLaN | run=UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3 | type=structured | dof=6
+################################################
+Epoch 00001: Time=   3.9s, Loss=5.82e+03, Inv=5.82e+03, For=5.72e+00, Power=6.64e+02
+  [eval] val_mse=6.471e+00  (n=9997)
+Epoch 00002: Time=   5.8s, Loss=2.83e+02, Inv=2.83e+02, For=5.33e+00, Power=4.97e+01
+  [eval] val_mse=3.074e+00  (n=9997)
+Epoch 00003: Time=   5.8s, Loss=1.00e+02, Inv=1.00e+02, For=5.12e+00, Power=1.61e+01
+  [eval] val_mse=2.274e+00  (n=9997)
+Epoch 00004: Time=   5.9s, Loss=5.70e+01, Inv=5.70e+01, For=4.99e+00, Power=8.44e+00
+  [eval] val_mse=1.898e+00  (n=9997)
+Epoch 00005: Time=   5.9s, Loss=3.80e+01, Inv=3.80e+01, For=4.90e+00, Power=5.30e+00
+  [eval] val_mse=1.621e+00  (n=9997)
+Epoch 00006: Time=   6.0s, Loss=2.76e+01, Inv=2.76e+01, For=4.83e+00, Power=3.71e+00
+  [eval] val_mse=1.396e+00  (n=9997)
+Epoch 00007: Time=   6.0s, Loss=2.12e+01, Inv=2.12e+01, For=4.78e+00, Power=2.79e+00
+  [eval] val_mse=1.202e+00  (n=9997)
+Epoch 00008: Time=   6.1s, Loss=1.70e+01, Inv=1.70e+01, For=4.74e+00, Power=2.22e+00
+  [eval] val_mse=1.037e+00  (n=9997)
+Epoch 00009: Time=   6.1s, Loss=1.41e+01, Inv=1.41e+01, For=4.71e+00, Power=1.81e+00
+  [eval] val_mse=9.185e-01  (n=9997)
+Epoch 00010: Time=   6.2s, Loss=1.21e+01, Inv=1.21e+01, For=4.73e+00, Power=1.53e+00
+  [eval] val_mse=8.554e-01  (n=9997)
+Epoch 00011: Time=   6.2s, Loss=1.06e+01, Inv=1.06e+01, For=4.79e+00, Power=1.32e+00
+  [eval] val_mse=8.251e-01  (n=9997)
+Epoch 00012: Time=   6.3s, Loss=9.45e+00, Inv=9.45e+00, For=4.90e+00, Power=1.17e+00
+  [eval] val_mse=8.037e-01  (n=9997)
+Epoch 00013: Time=   6.3s, Loss=8.57e+00, Inv=8.57e+00, For=5.03e+00, Power=1.05e+00
+  [eval] val_mse=7.947e-01  (n=9997)
+Epoch 00014: Time=   6.4s, Loss=7.86e+00, Inv=7.86e+00, For=5.18e+00, Power=9.57e-01
+  [eval] val_mse=7.915e-01  (n=9997)
+Epoch 00015: Time=   6.4s, Loss=7.29e+00, Inv=7.29e+00, For=5.36e+00, Power=8.85e-01
+  [eval] val_mse=7.850e-01  (n=9997)
+Epoch 00016: Time=   6.5s, Loss=6.81e+00, Inv=6.81e+00, For=5.56e+00, Power=8.23e-01
+  [eval] val_mse=7.876e-01  (n=9997)
+Epoch 00017: Time=   6.5s, Loss=6.41e+00, Inv=6.41e+00, For=5.73e+00, Power=7.75e-01
+  [eval] val_mse=7.849e-01  (n=9997)
+Epoch 00018: Time=   6.6s, Loss=6.07e+00, Inv=6.07e+00, For=5.97e+00, Power=7.37e-01
+  [eval] val_mse=7.816e-01  (n=9997)
+Epoch 00019: Time=   6.6s, Loss=5.78e+00, Inv=5.78e+00, For=6.18e+00, Power=7.04e-01
+  [eval] val_mse=7.829e-01  (n=9997)
+Epoch 00020: Time=   6.7s, Loss=5.52e+00, Inv=5.52e+00, For=6.37e+00, Power=6.76e-01
+  [eval] val_mse=7.839e-01  (n=9997)
+Epoch 00021: Time=   6.7s, Loss=5.30e+00, Inv=5.30e+00, For=6.62e+00, Power=6.54e-01
+  [eval] val_mse=7.836e-01  (n=9997)
+Epoch 00022: Time=   6.8s, Loss=5.09e+00, Inv=5.09e+00, For=6.82e+00, Power=6.34e-01
+  [eval] val_mse=7.852e-01  (n=9997)
+Epoch 00023: Time=   6.8s, Loss=4.92e+00, Inv=4.92e+00, For=7.04e+00, Power=6.16e-01
+  [eval] val_mse=7.842e-01  (n=9997)
+Epoch 00024: Time=   6.9s, Loss=4.75e+00, Inv=4.75e+00, For=7.25e+00, Power=6.02e-01
+  [eval] val_mse=7.858e-01  (n=9997)
+Epoch 00025: Time=   6.9s, Loss=4.60e+00, Inv=4.60e+00, For=7.46e+00, Power=5.88e-01
+  [eval] val_mse=8.003e-01  (n=9997)
+Epoch 00026: Time=   7.0s, Loss=4.47e+00, Inv=4.47e+00, For=7.69e+00, Power=5.77e-01
+  [eval] val_mse=8.028e-01  (n=9997)
+Epoch 00027: Time=   7.0s, Loss=4.35e+00, Inv=4.35e+00, For=7.88e+00, Power=5.68e-01
+  [eval] val_mse=8.152e-01  (n=9997)
+Epoch 00028: Time=   7.1s, Loss=4.23e+00, Inv=4.23e+00, For=8.11e+00, Power=5.59e-01
+  [eval] val_mse=8.421e-01  (n=9997)
+  [early_stop] stop at epoch=28 (best_epoch=18, best_val_mse=7.816e-01)
+Saved DeLaN checkpoint: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+Saved training history: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3__train_history.csv
+
+################################################
+Evaluating DeLaN | run=UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  [val] Torque RMSE = 3.609e-01
+Torque MSE  = 2.391e-01
+Torque RMSE = 4.889e-01
+Per-joint MSE : 7.655e-01 3.341e-01 1.372e-01 8.566e-02 5.034e-02 6.160e-02
+Per-joint RMSE: 8.749e-01 5.780e-01 3.704e-01 2.927e-01 2.244e-01 2.482e-01
+Comp Time per Sample = 3.811e-04s / 2624.1Hz
+Saved metrics TXT: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics_test.txt
+Saved metrics JSON: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s3_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics.json
+
+###############################################################################################################################################################################################################################################################################################################################
+### DELAN VARIANT: hp_preset=lutter_like_256_d3 delan_seed=4                                                                                                                                                                                                                                                                ###
+### ckpt=/workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax ###
+###############################################################################################################################################################################################################################################################################################################################
+
+######################
+### 2) DELAN TRAIN ###
+######################
+
+======================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T delan_jax bash -lc 'python3 /workspace/delan_jax/scripts/rbyt_train_delan_jax.py --npz /workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset.npz -t structured -s 4 -r 0 --hp_preset lutter_like_256_d3 --epochs 200 --eval_every 1 --log_every 1 --early_stop True --early_stop_patience 10 --early_stop_min_delta 0.0 --early_stop_warmup_evals 0 --save_path /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax' ===
+======================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+mkdir -p failed for path /.config/matplotlib: [Errno 13] Permission denied: '/.config'
+Matplotlib created a temporary cache directory at /tmp/matplotlib-3e7lf_0y because there was an issue with the default path (/.config/matplotlib); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+Final hyper: {'dataset': 'UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3', 'n_width': 256, 'n_depth': 3, 'n_minibatch': 1024, 'diagonal_epsilon': 0.1, 'diagonal_shift': 2.0, 'activation': 'softplus', 'learning_rate': 0.0001, 'weight_decay': 1e-05, 'max_epoch': 200, 'lagrangian_type': <function structured_lagrangian_fn at 0x7b9648ea28c0>}
+
+
+################################################
+DeLaN run: UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  model_dir = /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  ckpt_path = /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+  type = structured
+  hp_preset = lutter_like_256_d3
+################################################
+
+
+################################################
+Dataset: delan_UR3_Load0_5x10^4_under_K84_seed5_dataset.npz
+  npz = /workspace/shared/data/preprocessed/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset/delan_UR3_Load0_5x10^4_under_K84_seed5_dataset.npz
+   dt ≈ 0.013911611423806564
+  dof = 6
+  Train trajectories = 19
+  Val trajectories   = 3
+  Test trajectories  = 5
+  Train samples = 34000
+  Test samples  = 4000
+################################################
+
+2026-01-30 03:43:48.582035: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-01-30 03:43:50.449764: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+################################################
+Training DeLaN | run=UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3 | type=structured | dof=6
+################################################
+Epoch 00001: Time=   4.1s, Loss=9.99e+03, Inv=9.99e+03, For=5.78e+00, Power=1.44e+03
+  [eval] val_mse=1.184e+01  (n=9997)
+Epoch 00002: Time=   5.9s, Loss=4.28e+02, Inv=4.28e+02, For=5.48e+00, Power=1.22e+02
+  [eval] val_mse=4.505e+00  (n=9997)
+Epoch 00003: Time=   6.0s, Loss=1.52e+02, Inv=1.52e+02, For=5.25e+00, Power=3.79e+01
+  [eval] val_mse=2.996e+00  (n=9997)
+Epoch 00004: Time=   6.0s, Loss=8.68e+01, Inv=8.68e+01, For=5.10e+00, Power=1.86e+01
+  [eval] val_mse=2.373e+00  (n=9997)
+Epoch 00005: Time=   6.1s, Loss=5.73e+01, Inv=5.73e+01, For=4.99e+00, Power=1.10e+01
+  [eval] val_mse=1.998e+00  (n=9997)
+Epoch 00006: Time=   6.1s, Loss=4.08e+01, Inv=4.08e+01, For=4.88e+00, Power=7.29e+00
+  [eval] val_mse=1.713e+00  (n=9997)
+Epoch 00007: Time=   6.2s, Loss=3.07e+01, Inv=3.07e+01, For=4.78e+00, Power=5.15e+00
+  [eval] val_mse=1.461e+00  (n=9997)
+Epoch 00008: Time=   6.2s, Loss=2.40e+01, Inv=2.40e+01, For=4.69e+00, Power=3.84e+00
+  [eval] val_mse=1.252e+00  (n=9997)
+Epoch 00009: Time=   6.3s, Loss=1.94e+01, Inv=1.94e+01, For=4.64e+00, Power=2.99e+00
+  [eval] val_mse=1.102e+00  (n=9997)
+Epoch 00010: Time=   6.3s, Loss=1.62e+01, Inv=1.62e+01, For=4.64e+00, Power=2.40e+00
+  [eval] val_mse=1.015e+00  (n=9997)
+Epoch 00011: Time=   6.4s, Loss=1.39e+01, Inv=1.39e+01, For=4.69e+00, Power=1.99e+00
+  [eval] val_mse=9.832e-01  (n=9997)
+Epoch 00012: Time=   6.4s, Loss=1.22e+01, Inv=1.22e+01, For=4.78e+00, Power=1.70e+00
+  [eval] val_mse=9.487e-01  (n=9997)
+Epoch 00013: Time=   6.5s, Loss=1.09e+01, Inv=1.09e+01, For=4.91e+00, Power=1.47e+00
+  [eval] val_mse=9.254e-01  (n=9997)
+Epoch 00014: Time=   6.5s, Loss=9.86e+00, Inv=9.86e+00, For=5.09e+00, Power=1.31e+00
+  [eval] val_mse=9.060e-01  (n=9997)
+Epoch 00015: Time=   6.6s, Loss=9.01e+00, Inv=9.01e+00, For=5.29e+00, Power=1.18e+00
+  [eval] val_mse=8.902e-01  (n=9997)
+Epoch 00016: Time=   6.6s, Loss=8.31e+00, Inv=8.31e+00, For=5.53e+00, Power=1.07e+00
+  [eval] val_mse=8.798e-01  (n=9997)
+Epoch 00017: Time=   6.7s, Loss=7.74e+00, Inv=7.74e+00, For=5.79e+00, Power=9.93e-01
+  [eval] val_mse=8.681e-01  (n=9997)
+Epoch 00018: Time=   6.7s, Loss=7.26e+00, Inv=7.26e+00, For=6.09e+00, Power=9.24e-01
+  [eval] val_mse=8.630e-01  (n=9997)
+Epoch 00019: Time=   6.8s, Loss=6.84e+00, Inv=6.84e+00, For=6.39e+00, Power=8.71e-01
+  [eval] val_mse=8.501e-01  (n=9997)
+Epoch 00020: Time=   6.8s, Loss=6.48e+00, Inv=6.48e+00, For=6.71e+00, Power=8.24e-01
+  [eval] val_mse=8.454e-01  (n=9997)
+Epoch 00021: Time=   6.9s, Loss=6.17e+00, Inv=6.17e+00, For=7.07e+00, Power=7.86e-01
+  [eval] val_mse=8.508e-01  (n=9997)
+Epoch 00022: Time=   6.9s, Loss=5.90e+00, Inv=5.90e+00, For=7.43e+00, Power=7.52e-01
+  [eval] val_mse=8.372e-01  (n=9997)
+Epoch 00023: Time=   7.0s, Loss=5.66e+00, Inv=5.66e+00, For=7.81e+00, Power=7.26e-01
+  [eval] val_mse=8.409e-01  (n=9997)
+Epoch 00024: Time=   7.0s, Loss=5.45e+00, Inv=5.45e+00, For=8.18e+00, Power=7.01e-01
+  [eval] val_mse=8.413e-01  (n=9997)
+Epoch 00025: Time=   7.1s, Loss=5.25e+00, Inv=5.25e+00, For=8.57e+00, Power=6.81e-01
+  [eval] val_mse=8.522e-01  (n=9997)
+Epoch 00026: Time=   7.1s, Loss=5.08e+00, Inv=5.08e+00, For=8.99e+00, Power=6.64e-01
+  [eval] val_mse=8.514e-01  (n=9997)
+Epoch 00027: Time=   7.2s, Loss=4.93e+00, Inv=4.93e+00, For=9.37e+00, Power=6.47e-01
+  [eval] val_mse=8.583e-01  (n=9997)
+Epoch 00028: Time=   7.2s, Loss=4.80e+00, Inv=4.80e+00, For=9.79e+00, Power=6.34e-01
+  [eval] val_mse=8.745e-01  (n=9997)
+Epoch 00029: Time=   7.3s, Loss=4.67e+00, Inv=4.67e+00, For=1.03e+01, Power=6.22e-01
+  [eval] val_mse=8.748e-01  (n=9997)
+Epoch 00030: Time=   7.3s, Loss=4.55e+00, Inv=4.55e+00, For=1.06e+01, Power=6.10e-01
+  [eval] val_mse=8.872e-01  (n=9997)
+Epoch 00031: Time=   7.4s, Loss=4.45e+00, Inv=4.45e+00, For=1.11e+01, Power=6.00e-01
+  [eval] val_mse=8.970e-01  (n=9997)
+Epoch 00032: Time=   7.4s, Loss=4.37e+00, Inv=4.37e+00, For=1.15e+01, Power=5.92e-01
+  [eval] val_mse=9.058e-01  (n=9997)
+  [early_stop] stop at epoch=32 (best_epoch=22, best_val_mse=8.372e-01)
+Saved DeLaN checkpoint: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.jax
+Saved training history: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3__train_history.csv
+
+################################################
+Evaluating DeLaN | run=UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3
+  [val] Torque RMSE = 3.735e-01
+Torque MSE  = 3.462e-01
+Torque RMSE = 5.884e-01
+Per-joint MSE : 7.632e-01 6.351e-01 3.534e-01 6.767e-02 4.108e-02 2.168e-01
+Per-joint RMSE: 8.736e-01 7.970e-01 5.945e-01 2.601e-01 2.027e-01 4.656e-01
+Comp Time per Sample = 4.107e-04s / 2434.7Hz
+Saved metrics TXT: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics_test.txt
+Saved metrics JSON: /workspace/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s4_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics.json
+
+
+#####################################################################################################################################################################################################################################################################
+### 3) SELECT BEST DELAN (by val RMSE)                                                                                                                                                                                                                            ###
+### best_seed=2 val_rmse=0.3363984516265788 test_rmse=0.4089799634810316                                                                                                                                                                                          ###
+### metrics_json=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/models/delan/UR3_Load0_5x10^4_under__best5x10L0__K84__seed5__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/metrics.json ###
+#####################################################################################################################################################################################################################################################################

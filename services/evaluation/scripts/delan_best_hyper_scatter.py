@@ -55,6 +55,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--summary_jsonl", required=True)
     ap.add_argument("--out_dir", required=True)
+    ap.add_argument("--run_tag", type=str, default="", help="optional run tag for logging only")
     args = ap.parse_args()
 
     summary_path = _resolve_shared_path(args.summary_jsonl)
@@ -64,7 +65,7 @@ def main() -> None:
     with open(summary_path, "r", encoding="utf-8") as f:
         rows = [json.loads(line) for line in f if line.strip()]
 
-    print(f"[info] summary_jsonl={summary_path} rows={len(rows)}")
+    print(f"[info] summary_jsonl={summary_path} rows={len(rows)} run_tag={args.run_tag or 'n/a'}")
     print(f"[info] out_dir={args.out_dir} MPLCONFIGDIR={os.environ.get('MPLCONFIGDIR')}")
 
     labels = [str(r.get("hp_preset")) for r in rows]

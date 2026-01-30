@@ -187,12 +187,7 @@ def main() -> None:
     if selected_K:
         selected_K = [k for k in selected_K if k in per_k_joint]
     if not selected_K:
-        if len(available_K) <= 3:
-            selected_K = available_K
-        elif available_K:
-            mid = available_K[len(available_K) // 2]
-            selected_K = [available_K[0], mid, available_K[-1]]
-            selected_K = list(dict.fromkeys(selected_K))
+        selected_K = available_K
 
     if selected_K:
         n_dof = int(per_k_joint[selected_K[0]][0].shape[0])

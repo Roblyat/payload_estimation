@@ -201,7 +201,7 @@ def main() -> None:
         if max_median is not None:
             plt.ylim(0, max_median + 0.25)
         title_feat = f" (feat={args.feature})" if args.feature else ""
-        plt.title(f"LSTM $i_{motor}$ Residual RMSE over Progress by H{title_feat}")
+        plt.title(f"LSTM $i_{{motor}}$ Residual RMSE over Progress by H{title_feat}")
         plt.xlabel("Progress (0 → 1)")
         plt.ylabel("$i_{motor}$ Residual RMSE [A]")
         plt.grid(True, alpha=0.25)
@@ -258,7 +258,7 @@ def main() -> None:
             plt.ylim(0, max_median + 0.25)
 
         title_feat = f" (feat={args.feature})" if args.feature else ""
-        plt.title(f"LSTM $i_{motor}$ Residual RMSE per Joint (median ± IQR) by H{title_feat}")
+        plt.title(f"LSTM $i_{{motor}}$ Residual RMSE per Joint (median ± IQR) by H{title_feat}")
         plt.xlabel("Joint")
         plt.ylabel("Joint $i_{motor}$ Residual RMSE [A]")
         plt.xticks(x, [f"joint{j}" for j in x])

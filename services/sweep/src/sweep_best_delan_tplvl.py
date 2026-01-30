@@ -73,17 +73,28 @@ def main() -> None:
 
     master_log_path = logs_dir / f"{sweep_name}.log"
 
-    runs_csv = str(Path(EVAL_DIR_HOST) / f"summary_delan_best_runs_{ts}.csv")
-    runs_jsonl = str(Path(EVAL_DIR_HOST) / f"summary_delan_best_runs_{ts}.jsonl")
-    folds_csv = str(Path(EVAL_DIR_HOST) / f"summary_delan_best_folds_{ts}.csv")
-    folds_jsonl = str(Path(EVAL_DIR_HOST) / f"summary_delan_best_folds_{ts}.jsonl")
-    hypers_csv = str(Path(EVAL_DIR_HOST) / f"summary_delan_best_hypers_{ts}.csv")
-    hypers_jsonl = str(Path(EVAL_DIR_HOST) / f"summary_delan_best_hypers_{ts}.jsonl")
+    runs_csv = Path(EVAL_DIR_HOST) / f"summary_delan_best_runs_{ts}.csv"
+    runs_jsonl = Path(EVAL_DIR_HOST) / f"summary_delan_best_runs_{ts}.jsonl"
+    folds_csv = Path(EVAL_DIR_HOST) / f"summary_delan_best_folds_{ts}.csv"
+    folds_jsonl = Path(EVAL_DIR_HOST) / f"summary_delan_best_folds_{ts}.jsonl"
+    hypers_csv = Path(EVAL_DIR_HOST) / f"summary_delan_best_hypers_{ts}.csv"
+    hypers_jsonl = Path(EVAL_DIR_HOST) / f"summary_delan_best_hypers_{ts}.jsonl"
     best_model_json = Path(EVAL_DIR_HOST) / f"delan_best_model_{ts}.json"
-    # run-tagged stable copies
+    # run-tagged stable copies (tag-only and tag+ts)
     best_model_json_tag = Path(EVAL_DIR_HOST) / f"delan_best_model_{RUN_TAG}.json"
-    hypers_jsonl_tag = Path(EVAL_DIR_HOST) / f"summary_{RUN_TAG}_delan_best_hypers.jsonl"
-    folds_jsonl_tag = Path(EVAL_DIR_HOST) / f"summary_{RUN_TAG}_delan_best_folds.jsonl"
+    best_model_json_tag_ts = Path(EVAL_DIR_HOST) / f"delan_best_model_{RUN_TAG}_{ts}.json"
+    runs_csv_tag = Path(EVAL_DIR_HOST) / f"summary_delan_best_runs_{RUN_TAG}.csv"
+    runs_csv_tag_ts = Path(EVAL_DIR_HOST) / f"summary_delan_best_runs_{RUN_TAG}_{ts}.csv"
+    runs_jsonl_tag = Path(EVAL_DIR_HOST) / f"summary_delan_best_runs_{RUN_TAG}.jsonl"
+    runs_jsonl_tag_ts = Path(EVAL_DIR_HOST) / f"summary_delan_best_runs_{RUN_TAG}_{ts}.jsonl"
+    folds_csv_tag = Path(EVAL_DIR_HOST) / f"summary_delan_best_folds_{RUN_TAG}.csv"
+    folds_csv_tag_ts = Path(EVAL_DIR_HOST) / f"summary_delan_best_folds_{RUN_TAG}_{ts}.csv"
+    folds_jsonl_tag = Path(EVAL_DIR_HOST) / f"summary_delan_best_folds_{RUN_TAG}.jsonl"
+    folds_jsonl_tag_ts = Path(EVAL_DIR_HOST) / f"summary_delan_best_folds_{RUN_TAG}_{ts}.jsonl"
+    hypers_csv_tag = Path(EVAL_DIR_HOST) / f"summary_delan_best_hypers_{RUN_TAG}.csv"
+    hypers_csv_tag_ts = Path(EVAL_DIR_HOST) / f"summary_delan_best_hypers_{RUN_TAG}_{ts}.csv"
+    hypers_jsonl_tag = Path(EVAL_DIR_HOST) / f"summary_delan_best_hypers_{RUN_TAG}.jsonl"
+    hypers_jsonl_tag_ts = Path(EVAL_DIR_HOST) / f"summary_delan_best_hypers_{RUN_TAG}_{ts}.jsonl"
 
     with master_log_path.open("w", encoding="utf-8") as master_log:
         master_log.write(banner([
@@ -370,23 +381,34 @@ def main() -> None:
             with best_model_json.open("w", encoding="utf-8") as f:
                 json.dump(best_manifest, f, indent=2)
             # also write run-tagged stable copies
-            with best_model_json_tag.open("w", encoding="utf-8") as f:
-                json.dump(best_manifest, f, indent=2)
-            # copy hypers/folds to run-tagged stable copies
-            try:
-                Path(hypers_jsonl).replace(hypers_jsonl_tag)
-            except Exception:
-                import shutil
-                shutil.copyfile(hypers_jsonl, hypers_jsonl_tag)
-            try:
-                Path(folds_jsonl).replace(folds_jsonl_tag)
-            except Exception:
-                import shutil
-                shutil.copyfile(folds_jsonl, folds_jsonl_tag)
+            for p in (best_model_json_tag, best_model_json_tag_ts):
+                with p.open("w", encoding="utf-8") as f:
+                    json.dump(best_manifest, f, indent=2)
+
+        # copy hypers/folds/runs to run-tagged stable copies (always)
+        for src, dsts in [
+            (hypers_jsonl, (hypers_jsonl_tag, hypers_jsonl_tag_ts)),
+            (folds_jsonl, (folds_jsonl_tag, folds_jsonl_tag_ts)),
+            (runs_jsonl, (runs_jsonl_tag, runs_jsonl_tag_ts)),
+            (hypers_csv, (hypers_csv_tag, hypers_csv_tag_ts)),
+            (folds_csv, (folds_csv_tag, folds_csv_tag_ts)),
+            (runs_csv, (runs_csv_tag, runs_csv_tag_ts)),
+        ]:
+            if not Path(src).exists():
+                continue
+            for dst in dsts:
+                try:
+                    Path(src).replace(dst)
+                except Exception:
+                    import shutil
+                    try:
+                        shutil.copyfile(src, dst)
+                    except Exception:
+                        pass
 
         if DELAN_BEST_FOLD_PLOTS:
             out_dir = f"{DELAN_BEST_PLOTS_OUT_DIR}/{DATASET_NAME}__{RUN_TAG}__{ts}/folds"
-            summary_jsonl_container = f"{EVAL_DIR}/summary_delan_best_runs_{ts}.jsonl"
+            summary_jsonl_container = str(runs_jsonl_tag_ts)
             master_log.write("\n" + banner(["DeLaN best fold plots"], char="#") + "\n")
             cmd = compose_exec(
                 SVC_EVAL,
@@ -398,7 +420,7 @@ def main() -> None:
 
         if DELAN_BEST_HP_CURVES:
             out_dir = f"{DELAN_BEST_PLOTS_OUT_DIR}/{DATASET_NAME}__{RUN_TAG}__{ts}/curves"
-            summary_jsonl_container = f"{EVAL_DIR}/summary_delan_best_runs_{ts}.jsonl"
+            summary_jsonl_container = str(runs_jsonl_tag_ts)
             hp_list = ",".join(DELAN_BEST_TORQUE_HP_PRESETS) if DELAN_BEST_TORQUE_HP_PRESETS else ""
             if not hp_list:
                 hp_list = ",".join(DELAN_BEST_HP_PRESETS)
@@ -415,7 +437,7 @@ def main() -> None:
 
         if DELAN_BEST_SCATTER_PLOTS:
             out_dir = f"{DELAN_BEST_PLOTS_OUT_DIR}/{DATASET_NAME}__{RUN_TAG}__{ts}/hypers"
-            summary_jsonl_container = f"{EVAL_DIR}/summary_delan_best_hypers_{ts}.jsonl"
+            summary_jsonl_container = str(hypers_jsonl_tag_ts)
             master_log.write("\n" + banner(["DeLaN best hyper scatter plots"], char="#") + "\n")
             cmd = compose_exec(
                 SVC_EVAL,
@@ -427,7 +449,7 @@ def main() -> None:
 
         if DELAN_BEST_TORQUE_AGGREGATE:
             out_dir = f"{DELAN_BEST_PLOTS_OUT_DIR}/{DATASET_NAME}__{RUN_TAG}__{ts}/torque"
-            summary_jsonl_container = f"{EVAL_DIR}/summary_delan_best_runs_{ts}.jsonl"
+            summary_jsonl_container = str(runs_jsonl_tag_ts)
             hp_list = ",".join(DELAN_BEST_TORQUE_HP_PRESETS) if DELAN_BEST_TORQUE_HP_PRESETS else ""
             hp_arg = f"--hp_presets {hp_list} " if hp_list else ""
             master_log.write("\n" + banner(["DeLaN best torque aggregates"], char="#") + "\n")

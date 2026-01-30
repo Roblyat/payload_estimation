@@ -1,0 +1,141 @@
+######################################################################################################################################################################
+### Sweep1 started: 20260130_025021                                                                                                                                ###
+### sweep_name=sweep1_UR3_Load0_cc_kStoryTest_20260130_025021                                                                                                      ###
+### logs_dir=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021                    ###
+### dataset=UR3_Load0_cc run_tag=kStoryTest                                                                                                                        ###
+### raw_csv=/workspace/shared/data/raw/UR3_Load0_cc.csv                                                                                                            ###
+### col_format=wide derive_qdd=True                                                                                                                                ###
+### traj_amounts=[8, 16, 32, 48, 64, 86, 122] test_fracs=0.2 seeds=[0, 1, 2]                                                                                       ###
+### val_fraction=0.1                                                                                                                                               ###
+### H=[100] feature_modes=['full']                                                                                                                                 ###
+### lowpass_signals=True cutoff_hz=10.0 order=4 lowpass_qdd=False                                                                                                  ###
+### DeLaN: backend=jax type=structured hp_preset=lutter_like_256 epochs=200                                                                                        ###
+### LSTM: epochs_max=120 batch=64 val_split=0.1                                                                                                                    ###
+### metrics_csv=/workspace/shared/evaluation/summary_metrics_sweep_1_20260130_025021.csv                                                                           ###
+### metrics_json=/workspace/shared/evaluation/summary_metrics_sweep_1_20260130_025021.jsonl                                                                        ###
+### delan_summary_csv(host)=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_delan_sweep_1_20260130_025021.csv    ###
+### delan_summary_json(host)=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_delan_sweep_1_20260130_025021.jsonl ###
+### lstm_summary_csv(host)=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_lstm_sweep_1_20260130_025021.csv      ###
+### lstm_summary_json(host)=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_lstm_sweep_1_20260130_025021.jsonl   ###
+######################################################################################################################################################################
+
+##########################################################
+### SUBSWEEP: lowpass_qdd=False  K=8 test_fraction=0.2 ###
+##########################################################
+
+[OK] lowpass_qdd=False K=8 tf=0.2 seed=0  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K8_seed0_20260130_025021.log
+
+[OK] lowpass_qdd=False K=8 tf=0.2 seed=1  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K8_seed1_20260130_025021.log
+
+[OK] lowpass_qdd=False K=8 tf=0.2 seed=2  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K8_seed2_20260130_025021.log
+
+###########################################################
+### SUBSWEEP: lowpass_qdd=False  K=16 test_fraction=0.2 ###
+###########################################################
+
+[OK] lowpass_qdd=False K=16 tf=0.2 seed=0  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K16_seed0_20260130_025021.log
+
+[OK] lowpass_qdd=False K=16 tf=0.2 seed=1  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K16_seed1_20260130_025021.log
+
+[OK] lowpass_qdd=False K=16 tf=0.2 seed=2  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K16_seed2_20260130_025021.log
+
+###########################################################
+### SUBSWEEP: lowpass_qdd=False  K=32 test_fraction=0.2 ###
+###########################################################
+
+[OK] lowpass_qdd=False K=32 tf=0.2 seed=0  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K32_seed0_20260130_025021.log
+
+[OK] lowpass_qdd=False K=32 tf=0.2 seed=1  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K32_seed1_20260130_025021.log
+
+[OK] lowpass_qdd=False K=32 tf=0.2 seed=2  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K32_seed2_20260130_025021.log
+
+###########################################################
+### SUBSWEEP: lowpass_qdd=False  K=48 test_fraction=0.2 ###
+###########################################################
+
+[OK] lowpass_qdd=False K=48 tf=0.2 seed=0  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K48_seed0_20260130_025021.log
+
+[OK] lowpass_qdd=False K=48 tf=0.2 seed=1  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K48_seed1_20260130_025021.log
+
+[OK] lowpass_qdd=False K=48 tf=0.2 seed=2  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K48_seed2_20260130_025021.log
+
+###########################################################
+### SUBSWEEP: lowpass_qdd=False  K=64 test_fraction=0.2 ###
+###########################################################
+
+[OK] lowpass_qdd=False K=64 tf=0.2 seed=0  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K64_seed0_20260130_025021.log
+
+[OK] lowpass_qdd=False K=64 tf=0.2 seed=1  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K64_seed1_20260130_025021.log
+
+[OK] lowpass_qdd=False K=64 tf=0.2 seed=2  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K64_seed2_20260130_025021.log
+
+###########################################################
+### SUBSWEEP: lowpass_qdd=False  K=86 test_fraction=0.2 ###
+###########################################################
+
+[OK] lowpass_qdd=False K=86 tf=0.2 seed=0  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K86_seed0_20260130_025021.log
+
+[OK] lowpass_qdd=False K=86 tf=0.2 seed=1  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K86_seed1_20260130_025021.log
+
+[OK] lowpass_qdd=False K=86 tf=0.2 seed=2  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K86_seed2_20260130_025021.log
+
+############################################################
+### SUBSWEEP: lowpass_qdd=False  K=122 test_fraction=0.2 ###
+############################################################
+
+[OK] lowpass_qdd=False K=122 tf=0.2 seed=0  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K122_seed0_20260130_025021.log
+
+[OK] lowpass_qdd=False K=122 tf=0.2 seed=1  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K122_seed1_20260130_025021.log
+
+[OK] lowpass_qdd=False K=122 tf=0.2 seed=2  log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/sweep1_UR3_Load0_cc_kStoryTest_20260130_025021/run1_K122_seed2_20260130_025021.log
+
+###############################
+### Delan elbow aggregation ###
+###############################
+
+==================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/delan_training_dynamics_aggregate.py --summary_jsonl /workspace/shared/evaluation/summary_delan_sweep_1_20260130_025021.jsonl --out_dir /workspace/shared/evaluation/delan_elbows/UR3_Load0_cc__kStoryTest__20260130_025021 --pad_to_epochs 200 --write_best_overlays' ===
+==================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-pm0hxj6v because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+
+
+#####################################
+### Delan torque RMSE aggregation ###
+#####################################
+
+==============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/delan_torque_rmse_aggregate.py --summary_jsonl /workspace/shared/evaluation/summary_delan_sweep_1_20260130_025021.jsonl --out_dir /workspace/shared/evaluation/delan_torque/UR3_Load0_cc__kStoryTest__20260130_025021 --bins 200 ' ===
+==============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-g3195_60 because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+
+
+#########################################################
+### LSTM training dynamics aggregation (feature=full) ###
+#########################################################
+
+===================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/lstm_training_dynamics_aggregate.py --summary_jsonl /workspace/shared/evaluation/summary_lstm_sweep_1_20260130_025021.jsonl --out_dir /workspace/shared/evaluation/lstm_aggregate/UR3_Load0_cc__kStoryTest__20260130_025021__feat_full --pad_to_epochs 120 --align max --feature full ' ===
+===================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-zqexa1sc because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+
+
+#####################################################
+### LSTM residual RMSE aggregation (feature=full) ###
+#####################################################
+
+==========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/lstm_residual_rmse_aggregate.py --summary_jsonl /workspace/shared/evaluation/summary_lstm_sweep_1_20260130_025021.jsonl --out_dir /workspace/shared/evaluation/lstm_aggregate/UR3_Load0_cc__kStoryTest__20260130_025021__feat_full --bins 200 --feature full ' ===
+==========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-icd7z91p because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+Traceback (most recent call last):
+  File "/workspace/evaluation/scripts/lstm_residual_rmse_aggregate.py", line 272, in <module>
+    main()
+  File "/workspace/evaluation/scripts/lstm_residual_rmse_aggregate.py", line 196, in main
+    plt.title(f"LSTM $i_{motor}$ Residual RMSE over Progress by K{title_h}")
+                         ^^^^^
+NameError: name 'motor' is not defined. Did you mean: 'color'?
+

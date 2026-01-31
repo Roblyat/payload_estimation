@@ -57,6 +57,9 @@ def main() -> None:
         default="",
         help="override summary_metrics_sweep_*.jsonl for DeLaN torque aggregate",
     )
+    ap.add_argument("--only_combined", action="store_true", help="skip residual agg; run combined + delan torque only")
+    ap.add_argument("--skip_residual", action="store_true", help="skip LSTM residual agg")
+    ap.add_argument("--skip_combined", action="store_true", help="skip combined torque agg")
     args = ap.parse_args()
 
     ts = args.ts.strip() or _latest_ts(f"summary_lstm_sweep_{args.sweep_id}_*.jsonl")
@@ -85,32 +88,37 @@ def main() -> None:
     with log_path.open("w", encoding="utf-8") as log_file:
         log_file.write(banner(["kStory plots", f"ts={ts}", f"sweep_id={args.sweep_id}", f"summary={summary}"]) + "\n")
 
+        do_residual = not args.only_combined and not args.skip_residual
+        do_combined = not args.skip_combined
+
         for feat in features:
             feat_out = f"{LSTM_AGGREGATE_OUT_DIR}/{DATASET_NAME}__{RUN_TAG}__{ts}__feat_{feat}"
 
-            cmd = compose_exec(
-                SVC_EVAL,
-                f"python3 {SCRIPT_LSTM_RESIDUAL_AGG} "
-                f"--summary_jsonl {summary} "
-                f"--out_dir {feat_out}/residual "
-                f"--bins {LSTM_AGGREGATE_BINS} "
-                f"--feature {feat} "
-                + (f"--k_values {k_values} " if k_values else "")
-            )
-            run_cmd(cmd, log_file)
+            if do_residual:
+                cmd = compose_exec(
+                    SVC_EVAL,
+                    f"python3 {SCRIPT_LSTM_RESIDUAL_AGG} "
+                    f"--summary_jsonl {summary} "
+                    f"--out_dir {feat_out}/residual "
+                    f"--bins {LSTM_AGGREGATE_BINS} "
+                    f"--feature {feat} "
+                    + (f"--k_values {k_values} " if k_values else "")
+                )
+                run_cmd(cmd, log_file)
 
-            combined_feat = COMBINED_TORQUE_FEATURE or feat
-            comb_out = f"{COMBINED_TORQUE_OUT_DIR}/{DATASET_NAME}__{RUN_TAG}__{ts}__feat_{combined_feat}"
-            cmd = compose_exec(
-                SVC_EVAL,
-                f"python3 {SCRIPT_COMBINED_TORQUE_AGG} "
-                f"--summary_jsonl {summary} "
-                f"--out_dir {comb_out} "
-                f"--bins {COMBINED_TORQUE_BINS} "
-                f"--feature {combined_feat} "
-                + (f"--k_values {k_values} " if k_values else "")
-            )
-            run_cmd(cmd, log_file)
+            if do_combined:
+                combined_feat = COMBINED_TORQUE_FEATURE or feat
+                comb_out = f"{COMBINED_TORQUE_OUT_DIR}/{DATASET_NAME}__{RUN_TAG}__{ts}__feat_{combined_feat}"
+                cmd = compose_exec(
+                    SVC_EVAL,
+                    f"python3 {SCRIPT_COMBINED_TORQUE_AGG} "
+                    f"--summary_jsonl {summary} "
+                    f"--out_dir {comb_out} "
+                    f"--bins {COMBINED_TORQUE_BINS} "
+                    f"--feature {combined_feat} "
+                    + (f"--k_values {k_values} " if k_values else "")
+                )
+                run_cmd(cmd, log_file)
 
         # DeLaN torque aggregate (all Ks by default)
         k_values_d = args.k_values.strip()

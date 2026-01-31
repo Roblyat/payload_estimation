@@ -47,8 +47,7 @@ class SweepConfig:
     # DeLaN best-model sweep
     delan_best_k_max: int = 84
     delan_best_dataset_seeds: List[int] = field(default_factory=lambda: [0, 1, 2, 3, 4])
-    delan_best_hp_presets: List[str] = field(default_factory=lambda: 
-                                         [
+    delan_best_hp_presets: List[str] = field(default_factory=lambda: [
         "lutter_like_128",
         "lutter_like_256",
         "lutter_like_256_d3",
@@ -65,13 +64,15 @@ class SweepConfig:
     delan_best_torque_split: str = "test"
     # best torque hp_presets just for plot alginment. no relation to any algorithm logic
     delan_best_torque_hp_presets: List[str] = field(default_factory=list)
-    delan_best_torque_hp_presets = [
-        "lutter_like_128",
-        "lutter_like_256",
-        "lutter_like_256_d3",
-        "lutter_like_256_lr5e5",
-        "lutter_like_256_wd1e4"
+    delan_best_torque_hp_presets: List[str] = field(
+        default_factory=lambda: [
+            "lutter_like_128",
+            "lutter_like_256",
+            "lutter_like_256_d3",
+            "lutter_like_256_lr5e5",
+            "lutter_like_256_wd1e4",
         ]
+    )
     delan_best_plots_out_dir: str = "/workspace/shared/evaluation/delan_best"
 
     # LSTM hyperparams

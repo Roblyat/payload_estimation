@@ -15,8 +15,8 @@ import glob
 import pandas as pd
 
 
-RAW_DIR = "/workspace/shared/data/raw"
-OUT_CSV = os.path.join(RAW_DIR, "delan_UR3_Load0_combined_26.csv")
+RAW_DIR = "/workspace/shared/data/raw/library/UR10_Load2"
+OUT_CSV = os.path.join(RAW_DIR, "UR10_Load2_combined.csv")
 
 # Column that defines trajectory id in your wide dataset
 ID_COL = "ID"
@@ -39,7 +39,7 @@ def natural_key_dataset_num(path: str) -> int:
 
 
 def main():
-    pattern = os.path.join(RAW_DIR, "UR3_Load0_DataSet*.csv")
+    pattern = os.path.join(RAW_DIR, "UR10_Load2_DataSet*.csv")
     files = sorted(glob.glob(pattern), key=natural_key_dataset_num)
 
     if not files:

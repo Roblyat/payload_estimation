@@ -1,0 +1,235 @@
+#################################################################################################################################################################
+### LSTM best-model sweep started: 20260130_213442                                                                                                            ###
+### sweep_name=lstm_best_UR3_Load0_5x10^4_under_best5x10L0_20260130_213442                                                                                    ###
+### logs_dir=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/lstm_best_UR3_Load0_5x10^4_under_best5x10L0_20260130_213442  ###
+### dataset=UR3_Load0_5x10^4_under run_tag=best5x10L0                                                                                                         ###
+### raw_csv=/workspace/shared/data/raw/UR3_Load0_5x10^4_under.csv                                                                                             ###
+### col_format=wide derive_qdd=True                                                                                                                           ###
+### test_fraction=0.2 val_fraction=0.1                                                                                                                        ###
+### dataset_seeds=[0]                                                                                                                                         ###
+### feature_modes=['full', 'state', 'tau_hat', 'state_tauhat']                                                                                                ###
+### H_list=[50, 100, 150]                                                                                                                                     ###
+### lstm_seeds=[0, 1, 2]                                                                                                                                      ###
+### score_lambda=0.5 score_penalty=10.0                                                                                                                       ###
+### LSTM: epochs=120 batch=64 units=128 dropout=0.2                                                                                                           ###
+### delan_hypers_jsonl=/workspace/shared/evaluation/summary_delan_best_hypers_best5x10L0.jsonl                                                                ###
+### delan_folds_jsonl=/workspace/shared/evaluation/summary_delan_best_folds_best5x10L0.jsonl                                                                  ###
+### delan_model_json=/workspace/shared/evaluation/delan_best_model_best5x10L0.json                                                                            ###
+### runs_csv=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_lstm_best_runs_20260130_213442.csv             ###
+### runs_jsonl=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_lstm_best_runs_20260130_213442.jsonl         ###
+### configs_csv=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_lstm_best_configs_20260130_213442.csv       ###
+### configs_jsonl=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_lstm_best_configs_20260130_213442.jsonl   ###
+### fh_csv=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_lstm_best_fh_20260130_213442.csv                 ###
+### fh_jsonl=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_lstm_best_fh_20260130_213442.jsonl             ###
+### combined_csv=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_lstm_best_combined_20260130_213442.csv     ###
+### combined_jsonl=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/summary_lstm_best_combined_20260130_213442.jsonl ###
+### best_model_json=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/evaluation/lstm_best_model_20260130_213442.json            ###
+#################################################################################################################################################################
+
+[OK] d=0 feat=full H=50 score=0.1839 log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/lstm_best_UR3_Load0_5x10^4_under_best5x10L0_20260130_213442/run_lstm_best_d0_20260130_213442.log
+
+[OK] d=0 feat=full H=100 score=0.1782 log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/lstm_best_UR3_Load0_5x10^4_under_best5x10L0_20260130_213442/run_lstm_best_d0_20260130_213442.log
+
+[OK] d=0 feat=full H=150 score=0.1839 log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/lstm_best_UR3_Load0_5x10^4_under_best5x10L0_20260130_213442/run_lstm_best_d0_20260130_213442.log
+
+[OK] d=0 feat=state H=50 score=0.1897 log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/lstm_best_UR3_Load0_5x10^4_under_best5x10L0_20260130_213442/run_lstm_best_d0_20260130_213442.log
+
+[OK] d=0 feat=state H=100 score=0.1767 log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/lstm_best_UR3_Load0_5x10^4_under_best5x10L0_20260130_213442/run_lstm_best_d0_20260130_213442.log
+
+[OK] d=0 feat=state H=150 score=0.1844 log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/lstm_best_UR3_Load0_5x10^4_under_best5x10L0_20260130_213442/run_lstm_best_d0_20260130_213442.log
+
+[OK] d=0 feat=tau_hat H=50 score=0.3178 log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/lstm_best_UR3_Load0_5x10^4_under_best5x10L0_20260130_213442/run_lstm_best_d0_20260130_213442.log
+
+[OK] d=0 feat=tau_hat H=100 score=0.3095 log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/lstm_best_UR3_Load0_5x10^4_under_best5x10L0_20260130_213442/run_lstm_best_d0_20260130_213442.log
+
+[OK] d=0 feat=tau_hat H=150 score=0.3365 log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/lstm_best_UR3_Load0_5x10^4_under_best5x10L0_20260130_213442/run_lstm_best_d0_20260130_213442.log
+
+[OK] d=0 feat=state_tauhat H=50 score=0.1785 log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/lstm_best_UR3_Load0_5x10^4_under_best5x10L0_20260130_213442/run_lstm_best_d0_20260130_213442.log
+
+[OK] d=0 feat=state_tauhat H=100 score=0.1760 log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/lstm_best_UR3_Load0_5x10^4_under_best5x10L0_20260130_213442/run_lstm_best_d0_20260130_213442.log
+
+[OK] d=0 feat=state_tauhat H=150 score=0.1830 log=/home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/shared/logs/lstm_best_UR3_Load0_5x10^4_under_best5x10L0_20260130_213442/run_lstm_best_d0_20260130_213442.log
+
+#####################################
+### Best LSTM combined evaluation ###
+#####################################
+
+==========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/combined_evaluation.py --residual_npz /workspace/shared/data/processed/UR3_Load0_5x10^4_under__best5x10L0__K84__residual__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.npz --model /workspace/shared/models/lstm/best/UR3_Load0_5x10^4_under__best5x10L0__K84__d0__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3__feat_state_tauhat__lstm_best_s1_H100_ep120_b64_u128_do0p2/residual_lstm.keras --scalers /workspace/shared/models/lstm/best/UR3_Load0_5x10^4_under__best5x10L0__K84__d0__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3__feat_state_tauhat__lstm_best_s1_H100_ep120_b64_u128_do0p2/scalers_H100.npz --out_dir /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_213442/best --H 100 --split test --features state_tauhat --save_pred_npz --K 84 --test_fraction 0.2 --seed 1' ===
+==========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+2026-01-30 21:34:15.944651: I tensorflow/core/util/port.cc:113] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-01-30 21:34:15.971433: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI AVX512_BF16 FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-517ek_vc because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+################################################
+Evaluate & Combine
+ residual_npz = /workspace/shared/data/processed/UR3_Load0_5x10^4_under__best5x10L0__K84__residual__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3/UR3_Load0_5x10^4_under__best5x10L0__K84__residual__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3.npz
+ model        = /workspace/shared/models/lstm/best/UR3_Load0_5x10^4_under__best5x10L0__K84__d0__delan_jax_struct_s2_ep200_hp_lutter_like_256_d3_actsoftplus_b1024_lr1e-4_wd1e-5_w256_d3__feat_state_tauhat__lstm_best_s1_H100_ep120_b64_u128_do0p2/residual_lstm.keras
+ split        = test
+ H            = 100
+ n_traj       = 5
+ n_dof        = 6
+ feature_dim  = 18
+################################################
+2026-01-30 21:34:17.018543: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 21:34:17.023431: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 21:34:17.024267: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 21:34:17.025927: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 21:34:17.026715: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 21:34:17.027448: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 21:34:17.114502: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 21:34:17.115425: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 21:34:17.116185: I external/local_xla/xla/stream_executor/cuda/cuda_executor.cc:998] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero. See more at https://github.com/torvalds/linux/blob/v6.0/Documentation/ABI/testing/sysfs-bus-pci#L344-L355
+2026-01-30 21:34:17.116916: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1928] Created device /job:localhost/replica:0/task:0/device:GPU:0 with 8712 MB memory:  -> device: 0, name: NVIDIA GeForce RTX 4070 Ti, pci bus id: 0000:01:00.0, compute capability: 8.9
+2026-01-30 21:34:17.427026: I external/local_xla/xla/stream_executor/cuda/cuda_dnn.cc:465] Loaded cuDNN version 8906
+  done 5/5
+
+################################################
+Stage-2 Evaluation (test, valid k>=H-1):
+DeLaN torque:   MSE=7.344536e-02  RMSE=2.710080e-01
+  per-joint RMSE: 0.2573 0.4647 0.1988 0.1478 0.2840 0.1285
+Residual LSTM:  MSE=2.753244e-02      RMSE=1.659290e-01
+  per-joint RMSE: 0.1102 0.2976 0.1229 0.0912 0.1903 0.0696
+Combined torque MSE=2.753244e-02     RMSE=1.659290e-01
+  per-joint RMSE: 0.1102 0.2976 0.1229 0.0912 0.1903 0.0696
+################################################
+
+Saved: /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_213442/best/metrics_test_H100.txt
+Saved: /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_213442/best/metrics_test_H100.json
+Saved: /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_213442/best/combined_predictions_test_H100.npz
+Saved: /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_213442/best/residual_gt_vs_pred_test_H100.png
+Saved: /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_213442/best/torque_gt_vs_delan_vs_combined_test_H100.png
+Saved: /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_213442/best/torque_rmse_per_joint_grouped_test_H100.png
+Saved: /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_213442/best/torque_rmse_time_test_H100.png
+
+
+##########################################
+### LSTM best residual plots feat=full ###
+##########################################
+
+========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/lstm_best_residual_rmse_aggregate.py --summary_jsonl /workspace/shared/evaluation/summary_lstm_best_runs_20260130_213442.jsonl --out_dir /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_213442/residual/full --bins 200 --feature full' ===
+========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-iyhbb5c2 because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+
+
+###########################################
+### LSTM best residual plots feat=state ###
+###########################################
+
+==========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/lstm_best_residual_rmse_aggregate.py --summary_jsonl /workspace/shared/evaluation/summary_lstm_best_runs_20260130_213442.jsonl --out_dir /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_213442/residual/state --bins 200 --feature state' ===
+==========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-tciq0uhc because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+
+
+#############################################
+### LSTM best residual plots feat=tau_hat ###
+#############################################
+
+==============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/lstm_best_residual_rmse_aggregate.py --summary_jsonl /workspace/shared/evaluation/summary_lstm_best_runs_20260130_213442.jsonl --out_dir /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_213442/residual/tau_hat --bins 200 --feature tau_hat' ===
+==============================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-tj0hpef8 because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+
+
+##################################################
+### LSTM best residual plots feat=state_tauhat ###
+##################################################
+
+========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/lstm_best_residual_rmse_aggregate.py --summary_jsonl /workspace/shared/evaluation/summary_lstm_best_runs_20260130_213442.jsonl --out_dir /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_213442/residual/state_tauhat --bins 200 --feature state_tauhat' ===
+========================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-5phtyr_7 because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+
+
+#################################################
+### LSTM best combined torque plots feat=full ###
+#################################################
+
+================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/lstm_best_combined_torque_rmse_aggregate.py --summary_jsonl /workspace/shared/evaluation/summary_lstm_best_combined_20260130_213442.jsonl --out_dir /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_213442/combined/full --bins 200 --split test --feature full' ===
+================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-d5nxlft1 because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+
+
+##################################################
+### LSTM best combined torque plots feat=state ###
+##################################################
+
+==================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/lstm_best_combined_torque_rmse_aggregate.py --summary_jsonl /workspace/shared/evaluation/summary_lstm_best_combined_20260130_213442.jsonl --out_dir /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_213442/combined/state --bins 200 --split test --feature state' ===
+==================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-qzpmval0 because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+
+
+####################################################
+### LSTM best combined torque plots feat=tau_hat ###
+####################################################
+
+======================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/lstm_best_combined_torque_rmse_aggregate.py --summary_jsonl /workspace/shared/evaluation/summary_lstm_best_combined_20260130_213442.jsonl --out_dir /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_213442/combined/tau_hat --bins 200 --split test --feature tau_hat' ===
+======================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-oif8e6ws because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+
+
+#########################################################
+### LSTM best combined torque plots feat=state_tauhat ###
+#########################################################
+
+================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/lstm_best_combined_torque_rmse_aggregate.py --summary_jsonl /workspace/shared/evaluation/summary_lstm_best_combined_20260130_213442.jsonl --out_dir /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_213442/combined/state_tauhat --bins 200 --split test --feature state_tauhat' ===
+================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-40evs47k because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+
+
+##################################
+### LSTM best metrics boxplots ###
+##################################
+
+==================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+=== docker compose -p payload_estimation --project-directory /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation --env-file /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/.env -f /home/robat/.localgit/algorithmic_payload_estimation/payload_estimation/docker-compose.yml exec -T evaluation bash -lc 'python3 scripts/lstm_metrics_boxplots.py --lstm_root /workspace/shared/models/lstm/best --out_dir /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_213442/boxplots' ===
+==================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================================
+/workspace/shared/.mplconfig is not a writable directory
+Matplotlib created a temporary cache directory at /tmp/matplotlib-w8omfbbr because there was an issue with the default path (/workspace/shared/.mplconfig); it is highly recommended to set the MPLCONFIGDIR environment variable to a writable directory, in particular to speed up the import of Matplotlib and to better support multiprocessing.
+/workspace/evaluation/scripts/lstm_metrics_boxplots.py:186: MatplotlibDeprecationWarning: The 'labels' parameter of boxplot() has been renamed 'tick_labels' since Matplotlib 3.9; support for the old name will be dropped in 3.11.
+  ax1.boxplot([groups[k] for k in top_lbl], labels=top_disp, showmeans=True)
+/workspace/evaluation/scripts/lstm_metrics_boxplots.py:193: MatplotlibDeprecationWarning: The 'labels' parameter of boxplot() has been renamed 'tick_labels' since Matplotlib 3.9; support for the old name will be dropped in 3.11.
+  ax2.boxplot([groups[k] for k in bot_lbl], labels=bot_disp, showmeans=True)
+/workspace/evaluation/scripts/lstm_metrics_boxplots.py:186: MatplotlibDeprecationWarning: The 'labels' parameter of boxplot() has been renamed 'tick_labels' since Matplotlib 3.9; support for the old name will be dropped in 3.11.
+  ax1.boxplot([groups[k] for k in top_lbl], labels=top_disp, showmeans=True)
+/workspace/evaluation/scripts/lstm_metrics_boxplots.py:193: MatplotlibDeprecationWarning: The 'labels' parameter of boxplot() has been renamed 'tick_labels' since Matplotlib 3.9; support for the old name will be dropped in 3.11.
+  ax2.boxplot([groups[k] for k in bot_lbl], labels=bot_disp, showmeans=True)
+/workspace/evaluation/scripts/lstm_metrics_boxplots.py:205: MatplotlibDeprecationWarning: The 'labels' parameter of boxplot() has been renamed 'tick_labels' since Matplotlib 3.9; support for the old name will be dropped in 3.11.
+  plt.boxplot(data, labels=disp, showmeans=True)
+/workspace/evaluation/scripts/lstm_metrics_boxplots.py:246: MatplotlibDeprecationWarning: The 'labels' parameter of boxplot() has been renamed 'tick_labels' since Matplotlib 3.9; support for the old name will be dropped in 3.11.
+  ax.boxplot(data, labels=disp, showmeans=True)
+/workspace/evaluation/scripts/lstm_metrics_boxplots.py:246: MatplotlibDeprecationWarning: The 'labels' parameter of boxplot() has been renamed 'tick_labels' since Matplotlib 3.9; support for the old name will be dropped in 3.11.
+  ax.boxplot(data, labels=disp, showmeans=True)
+/workspace/evaluation/scripts/lstm_metrics_boxplots.py:246: MatplotlibDeprecationWarning: The 'labels' parameter of boxplot() has been renamed 'tick_labels' since Matplotlib 3.9; support for the old name will be dropped in 3.11.
+  ax.boxplot(data, labels=disp, showmeans=True)
+/workspace/evaluation/scripts/lstm_metrics_boxplots.py:246: MatplotlibDeprecationWarning: The 'labels' parameter of boxplot() has been renamed 'tick_labels' since Matplotlib 3.9; support for the old name will be dropped in 3.11.
+  ax.boxplot(data, labels=disp, showmeans=True)
+/workspace/evaluation/scripts/lstm_metrics_boxplots.py:246: MatplotlibDeprecationWarning: The 'labels' parameter of boxplot() has been renamed 'tick_labels' since Matplotlib 3.9; support for the old name will be dropped in 3.11.
+  ax.boxplot(data, labels=disp, showmeans=True)
+/workspace/evaluation/scripts/lstm_metrics_boxplots.py:246: MatplotlibDeprecationWarning: The 'labels' parameter of boxplot() has been renamed 'tick_labels' since Matplotlib 3.9; support for the old name will be dropped in 3.11.
+  ax.boxplot(data, labels=disp, showmeans=True)
+/workspace/evaluation/scripts/lstm_metrics_boxplots.py:186: MatplotlibDeprecationWarning: The 'labels' parameter of boxplot() has been renamed 'tick_labels' since Matplotlib 3.9; support for the old name will be dropped in 3.11.
+  ax1.boxplot([groups[k] for k in top_lbl], labels=top_disp, showmeans=True)
+/workspace/evaluation/scripts/lstm_metrics_boxplots.py:193: MatplotlibDeprecationWarning: The 'labels' parameter of boxplot() has been renamed 'tick_labels' since Matplotlib 3.9; support for the old name will be dropped in 3.11.
+  ax2.boxplot([groups[k] for k in bot_lbl], labels=bot_disp, showmeans=True)
+[lstm_metrics_boxplots] Saved plots to: /workspace/shared/evaluation/lstm_best/UR3_Load0_5x10^4_under__best5x10L0__20260130_213442/boxplots
+
+
+#########################################
+### LSTM best-model sweep finished OK ###
+#########################################

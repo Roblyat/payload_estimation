@@ -2,15 +2,15 @@
 """
 Build balanced subsets from UR3_Load0_cc.csv (or user-provided CSV).
 
-Outputs (saved to raw dir):
+Outputs (saved to chosen out dir):
   - <basename>_5x10^4_under.csv
   - <basename>_5x10^4_over.csv
   - <basename>_5x10^3_under.csv
   - <basename>_5x10^3_over.csv
-  - <basename>_K86_dist.csv
-  - <basename>_K86_uniform.csv
-  - <basename>_K36_dist.csv
-  - <basename>_K36_uniform.csv
+  - (optional, when --include_k_sets) <basename>_K86_dist.csv
+  - (optional, when --include_k_sets) <basename>_K86_uniform.csv
+  - (optional, when --include_k_sets) <basename>_K36_dist.csv
+  - (optional, when --include_k_sets) <basename>_K36_uniform.csv
 
 Also writes a JSON log with per-trajectory stats and selection details.
 """
@@ -32,8 +32,12 @@ def resolve_raw_dir() -> Path:
     env = os.environ.get("PAYLOAD_ESTIMATION_RAW_DIR")
     if env:
         return Path(env)
+    if os.path.isdir("/workspace/payload_estimation/shared/data/raw"):
+        return Path("/workspace/payload_estimation/shared/data/raw")
     if os.path.isdir("/workspace/shared/data/raw"):
         return Path("/workspace/shared/data/raw")
+    if os.path.isdir("/payload_estimation/shared/data/raw"):
+        return Path("/payload_estimation/shared/data/raw")
     # repo-local fallback
     return Path(__file__).resolve().parents[3] / "shared" / "data" / "raw"
 
@@ -389,6 +393,18 @@ def main() -> None:
         help="Input CSV filename or absolute path.",
     )
     ap.add_argument(
+        "--out_dir",
+        type=str,
+        default=None,
+        help="Directory for outputs/log (default: input_csv parent).",
+    )
+    ap.add_argument(
+        "--raw_dir",
+        type=str,
+        default=None,
+        help="Override auto-detected raw directory (used to resolve relative input_csv/out_dir).",
+    )
+    ap.add_argument(
         "--basename",
         type=str,
         default="UR3_Load0",
@@ -403,12 +419,20 @@ def main() -> None:
         default=0.05,
         help="Allowed deviation (fraction) for sample-target datasets.",
     )
+    ap.add_argument(
+        "--include_k_sets",
+        action="store_true",
+        help="Also generate K86/K36 trajectory-count datasets.",
+    )
     args = ap.parse_args()
 
-    raw_dir = resolve_raw_dir()
+    raw_dir = Path(args.raw_dir) if args.raw_dir else resolve_raw_dir()
     input_csv = resolve_input_csv(args.input_csv, raw_dir)
     if not input_csv.exists():
         raise FileNotFoundError(f"Input CSV not found: {input_csv}")
+
+    out_dir = Path(args.out_dir) if args.out_dir else input_csv.parent
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     df = pd.read_csv(input_csv)
     if args.time_col not in df.columns or args.id_col not in df.columns:
@@ -455,7 +479,7 @@ def main() -> None:
         over_ids = sorted(over_ids, key=lambda tid: order_by_id[tid])
 
         under_info = save_dataset(
-            df, id_col=args.id_col, selected_ids=under_ids, out_path=under_path
+            df, id_col=args.id_col, selected_ids=under_ids, out_path=out_path
         )
         over_info = save_dataset(
             df, id_col=args.id_col, selected_ids=over_ids, out_path=over_path
@@ -489,34 +513,35 @@ def main() -> None:
             f"(range {min_total:,}..{max_total:,})"
         )
 
-    # Trajectory-count datasets (dist/uniform)
-    k_targets = [86, 36]
     k_outputs: list[dict[str, Any]] = []
-    for k in k_targets:
-        for mode in ("dist", "uniform"):
-            ids, bins_sel = select_trajectory_count(
-                bins_list, length_by_id, count=k, mode=mode
-            )
-            ids = sorted(ids, key=lambda tid: order_by_id[tid])
-            out_path = raw_dir / f"{args.basename}_K{k}_{mode}.csv"
-            info = save_dataset(df, id_col=args.id_col, selected_ids=ids, out_path=out_path)
-            k_outputs.append(
-                {
-                    "name": f"{args.basename}_K{k}_{mode}",
-                    "target_trajectories": k,
-                    "mode": mode,
-                    "selected_bins": bins_sel,
-                    "selected_ids": [str(x) for x in ids],
-                    **info,
-                }
-            )
-            print(
-                f"[{args.basename}_K{k}_{mode}] trajectories={len(ids):,} rows={info['rows']:,}"
-            )
+    if args.include_k_sets:
+        # Trajectory-count datasets (dist/uniform)
+        k_targets = [86, 36]
+        for k in k_targets:
+            for mode in ("dist", "uniform"):
+                ids, bins_sel = select_trajectory_count(
+                    bins_list, length_by_id, count=k, mode=mode
+                )
+                ids = sorted(ids, key=lambda tid: order_by_id[tid])
+                out_path = out_dir / f"{args.basename}_K{k}_{mode}.csv"
+                info = save_dataset(df, id_col=args.id_col, selected_ids=ids, out_path=out_path)
+                k_outputs.append(
+                    {
+                        "name": f"{args.basename}_K{k}_{mode}",
+                        "target_trajectories": k,
+                        "mode": mode,
+                        "selected_bins": bins_sel,
+                        "selected_ids": [str(x) for x in ids],
+                        **info,
+                    }
+                )
+                print(
+                    f"[{args.basename}_K{k}_{mode}] trajectories={len(ids):,} rows={info['rows']:,}"
+                )
 
     # Log JSON
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    log_path = raw_dir / f"sweep_datasets_UR3_{stamp}.json"
+    log_path = out_dir / f"sweep_{args.basename}_{stamp}.json"
 
     log_payload = {
         "input_csv": str(input_csv),

@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
 """
-Combine UR3_Load0_DataSet*.csv (wide format) into ONE wide CSV by collecting rows into
-trajectories keyed by (source file, raw ID).
+Combine every `UR*_Load*` dataset folder under `<RAW_DIR>/library/` into its own timestamped
+wide CSV by collecting rows into trajectories keyed by (source file, raw ID).
 
-Important behavior:
+Important behavior (per dataset folder):
   - Raw IDs from different source files are NEVER matched/merged (e.g. each file can have ID=1).
   - Row order *within each trajectory* is preserved exactly as read (no within-trajectory sorting).
   - Trajectories are ordered by timestamp (t1) using each trajectory's FIRST t1 value (as-read).
   - Output trajectories are re-numbered sequentially in the ID column (1..N) in timestamp order.
 
-Output (timestamped):
-  <raw_dir>/delan_UR3_Load0_combined_26_groupby_id_<YYYYmmdd_HHMMSS>.csv
+Output (timestamped, written inside each dataset folder):
+  <RAW_DIR>/library/<URx_Loady>/delan_<URx_Loady>_groupby_id_<YYYYmmdd_HHMMSS>.csv
 
 Usage:
-  python3 payload_estimation/services/preprocess/tests/build_ur3_load0_26_combined_csv_groupby_id_timestamped.py
+  python3 payload_estimation/services/preprocess/dataset_scripts/build_ur3_load0_26_combined_csv_groupby_id_timestamped.py
+  # Optionally set PAYLOAD_ESTIMATION_RAW_DIR to override <RAW_DIR> discovery.
 """
 
 import os
@@ -37,6 +38,9 @@ def resolve_raw_dir() -> str:
 
 RAW_DIR = resolve_raw_dir()
 
+# Where the per-dataset folders live (UR3_Load0, UR10_Load1, ...)
+LIBRARY_DIR = Path(RAW_DIR) / "library"
+
 # Column that defines trajectory id in your wide dataset
 ID_COL = "ID"
 
@@ -59,15 +63,18 @@ def natural_key_dataset_num(path: str) -> int:
     return int(m.group(1)) if m else 10**9
 
 
-def main():
-    pattern = os.path.join(RAW_DIR, "UR3_Load0_DataSet*.csv")
-    files = sorted(glob.glob(pattern), key=natural_key_dataset_num)
+def combine_dataset_dir(dataset_dir: Path):
+    dataset_name = dataset_dir.name
+    pattern = dataset_dir / f"{dataset_name}_DataSet*.csv"
+    files = sorted(glob.glob(str(pattern)), key=natural_key_dataset_num)
     files = [p for p in files if not re.search(r"DataSet22\.csv$", os.path.basename(p))]
 
     if not files:
-        raise FileNotFoundError(f"No files matched pattern: {pattern}")
+        print(f"[SKIP] {dataset_name}: no files matched {pattern}")
+        return
 
-    print("RAW_DIR:", RAW_DIR)
+    print(f"\n=== {dataset_name} ===")
+    print(f"RAW_DIR: {RAW_DIR}")
     print(f"Found {len(files)} files.")
     for f in files:
         print("  -", os.path.basename(f))
@@ -102,7 +109,7 @@ def main():
         )
 
     if not parts_by_traj:
-        raise ValueError("No trajectory data collected (no IDs found).")
+        raise ValueError(f"{dataset_name}: No trajectory data collected (no IDs found).")
 
     # Materialize trajectories in original row order.
     trajectories: dict[tuple[int, object], pd.DataFrame] = {}
@@ -131,17 +138,30 @@ def main():
     df_all = pd.concat(ordered_frames, ignore_index=True)
 
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    out_csv = os.path.join(RAW_DIR, f"delan_UR3_Load0_combined_26_groupby_id_{stamp}.csv")
+    out_csv = dataset_dir / f"delan_{dataset_name}_groupby_id_{stamp}.csv"
 
-    os.makedirs(os.path.dirname(out_csv), exist_ok=True)
+    os.makedirs(dataset_dir, exist_ok=True)
     df_all.to_csv(out_csv, index=False)
 
-    print("\n=== Combined WIDE CSV written (grouped by ID, timestamp-ordered trajectories) ===")
+    print("=== Combined WIDE CSV written (grouped by ID, timestamp-ordered trajectories) ===")
     print("Output:", out_csv)
     print(f"Input rows: {total_rows:,}")
     print(f"Output rows: {len(df_all):,}")
     print(f"Trajectories (unique ID): {df_all[ID_COL].nunique():,}")
     print("Done.")
+
+
+def main():
+    if not LIBRARY_DIR.exists():
+        raise FileNotFoundError(f"Library directory not found: {LIBRARY_DIR}")
+
+    dataset_dirs = [p for p in sorted(LIBRARY_DIR.iterdir()) if p.is_dir() and re.match(r"UR\d+_Load\d+", p.name)]
+
+    if not dataset_dirs:
+        raise FileNotFoundError(f"No dataset folders matching 'UR*_Load*' under {LIBRARY_DIR}")
+
+    for dataset_dir in dataset_dirs:
+        combine_dataset_dir(dataset_dir)
 
 
 if __name__ == "__main__":

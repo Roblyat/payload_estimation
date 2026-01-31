@@ -103,6 +103,7 @@ def _concat_valid(
     tau_gt_valid_all: List[np.ndarray] = []
     tau_delan_valid_all: List[np.ndarray] = []
     tau_rg_valid_all: List[np.ndarray] = []
+    skipped = 0
 
     for tau, tau_hat, tau_rg in zip(tau_list, tau_hat_list, tau_rg_list):
         tau = _coerce_2d(tau, "tau", ctx)
@@ -117,8 +118,16 @@ def _concat_valid(
         tau_hat_valid = tau_hat[sl]
         tau_rg_valid = tau_rg[sl]
 
-        if tau_valid.size == 0:
+        n = min(tau_valid.shape[0], tau_hat_valid.shape[0], tau_rg_valid.shape[0])
+        if n <= 0:
+            skipped += 1
             continue
+        if tau_valid.shape[0] != n:
+            tau_valid = tau_valid[:n]
+        if tau_hat_valid.shape[0] != n:
+            tau_hat_valid = tau_hat_valid[:n]
+        if tau_rg_valid.shape[0] != n:
+            tau_rg_valid = tau_rg_valid[:n]
 
         tau_gt_valid_all.append(tau_valid)
         tau_delan_valid_all.append(tau_hat_valid)
@@ -127,11 +136,14 @@ def _concat_valid(
     if not tau_gt_valid_all:
         return np.empty((0, 0)), np.empty((0, 0)), np.empty((0, 0))
 
-    return (
+    out = (
         np.vstack(tau_gt_valid_all),
         np.vstack(tau_delan_valid_all),
         np.vstack(tau_rg_valid_all),
     )
+    if skipped:
+        print(f"[warn] skipped {skipped} runs due to length mismatch", flush=True)
+    return out
 
 
 def main() -> None:

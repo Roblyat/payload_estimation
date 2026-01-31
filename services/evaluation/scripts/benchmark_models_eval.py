@@ -95,6 +95,17 @@ def per_joint_rmse(y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
     return np.sqrt(np.mean((y_true - y_pred) ** 2, axis=0))
 
 
+def per_joint_rmse_pct(y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
+    """
+    Per-joint RMSE expressed as a percentage of the joint RMS magnitude of the
+    ground-truth signal. Adds tiny epsilon to avoid divide-by-zero.
+    """
+    rmse_abs = per_joint_rmse(y_true, y_pred)
+    denom = np.sqrt(np.mean(y_true ** 2, axis=0))
+    denom = np.maximum(denom, 1e-8)
+    return (rmse_abs / denom) * 100.0
+
+
 def rmse_over_time(y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
     """Per-sample RMSE (avg over joints)."""
     return np.sqrt(np.mean((y_true - y_pred) ** 2, axis=1))
@@ -153,6 +164,7 @@ class BenchmarkResult:
     dt: Optional[float]
     metrics: Dict[str, float]
     per_joint: Dict[str, List[float]]
+    per_joint_pct: Dict[str, List[float]]
     rmse_time: Dict[str, np.ndarray]
     tau_gt_valid: np.ndarray
     tau_delan_valid: np.ndarray
@@ -245,9 +257,9 @@ def save_pair_overlay(results: Dict[str, BenchmarkResult], keys: List[str], out_
         delan_mean = np.mean(res.tau_delan_valid, axis=1)
         comb_mean = np.mean(res.tau_combined_valid, axis=1)
         n = min(max_samples, gt_mean.shape[0])
-        ax.plot(gt_mean[:n], label="GT mean")
-        ax.plot(delan_mean[:n], label="DeLaN mean")
-        ax.plot(comb_mean[:n], label="Combined mean")
+        ax.plot(gt_mean[:n], label="GT")
+        ax.plot(delan_mean[:n], label="DeLaN")
+        ax.plot(comb_mean[:n], label="Combined")
         ax.set_title(res.dataset)
         ax.set_xlabel("Sample")
         ax.set_ylabel("$i_{motor}$ [A]")
@@ -275,13 +287,13 @@ def save_pair_rmse_time(results: Dict[str, BenchmarkResult], keys: List[str], ou
         res = results[k]
         prefix = "UR3" if "UR3" in k else "UR10"
         c_delan, c_comb = colors.get(prefix, ("C0", "C1"))
-        x_delan = np.arange(res.rmse_time["delan"].shape[0])
-        x_comb = np.arange(res.rmse_time["combined"].shape[0])
+        x_delan = np.linspace(0.0, 1.0, res.rmse_time["delan"].shape[0])
+        x_comb = np.linspace(0.0, 1.0, res.rmse_time["combined"].shape[0])
         ax.plot(x_delan, res.rmse_time["delan"], color=c_delan, linewidth=1.2, label=f"{res.dataset} DeLaN")
         ax.plot(x_comb, res.rmse_time["combined"], color=c_comb, linewidth=1.2, label=f"{res.dataset} Combined", linestyle="--")
 
     ax.set_title("RMSE over progress (UR3_Load0 vs UR10_Load0)")
-    ax.set_xlabel("Sample")
+    ax.set_xlabel("Progress")
     ax.set_ylabel("$i_{motor}$ RMSE [A]")
     ax.grid(True, alpha=0.25)
     ax.legend()
@@ -431,6 +443,11 @@ def evaluate_benchmark_model(
         "combined": per_joint_rmse(tau_gt_valid, tau_combined_valid).tolist(),
         "residual": per_joint_rmse(r_gt_valid, r_hat_valid).tolist(),
     }
+    per_joint_pct_metrics = {
+        "delan": per_joint_rmse_pct(tau_gt_valid, tau_delan_valid).tolist(),
+        "combined": per_joint_rmse_pct(tau_gt_valid, tau_combined_valid).tolist(),
+        "residual": per_joint_rmse_pct(r_gt_valid, r_hat_valid).tolist(),
+    }
 
     rmse_time_metrics = {
         "delan": rmse_over_time(tau_gt_valid, tau_delan_valid),
@@ -513,6 +530,7 @@ def evaluate_benchmark_model(
         },
         "metrics": metrics,
         "per_joint_rmse": per_joint_metrics,
+        "per_joint_rmse_pct": per_joint_pct_metrics,
         "rmse_time_lengths": {k: int(v.shape[0]) for k, v in rmse_time_metrics.items()},
     }
 
@@ -540,6 +558,7 @@ def evaluate_benchmark_model(
         dt=dt_val,
         metrics=metrics,
         per_joint=per_joint_metrics,
+        per_joint_pct=per_joint_pct_metrics,
         rmse_time=rmse_time_metrics,
         tau_gt_valid=tau_gt_valid,
         tau_delan_valid=tau_delan_valid,

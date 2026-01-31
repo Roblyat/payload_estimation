@@ -53,6 +53,8 @@ if __name__ == "__main__":
                     help="Fraction of trajectories used for test split.")
     ap.add_argument("--val_fraction", type=float, default=0.1,
                     help="Fraction of trajectories used for validation split.")
+    ap.add_argument("--allow_empty_splits", type=str2bool, default=False,
+                    help="Allow empty train/val/test splits (useful for all-test datasets).")
     ap.add_argument("--seed", type=int, default=0,
                     help="Random seed for trajectory sampling and splitting.")
     ap.add_argument(
@@ -90,6 +92,7 @@ if __name__ == "__main__":
         derive_qdd_from_dq=derive_qdd,
         test_fraction=args.test_fraction,
         val_fraction=args.val_fraction,
+        allow_empty_splits=args.allow_empty_splits,
         random_seed=args.seed,
         trajectory_amount=(None if args.trajectory_amount <= 0 else args.trajectory_amount),
         filter_accel=args.lowpass_signals,
@@ -116,12 +119,12 @@ if __name__ == "__main__":
     print(f"Saved: {dataset_json_path(out_npz)}")
     print(f"Trajectories: train={len(train)} val={len(val)} test={len(test)}")
 
-    if len(train) == 0 or len(test) == 0 or len(val) == 0:
+    if (len(train) == 0 or len(test) == 0 or len(val) == 0) and (not args.allow_empty_splits):
         msg = (
             "ERROR: Split produced an empty subset.\n"
             f"  train={len(train)} val={len(val)} test={len(test)}\n"
             f"  test_fraction={args.test_fraction} val_fraction={args.val_fraction}\n"
-            "Adjust test/val fractions or increase trajectory amount."
+            "Adjust test/val fractions or increase trajectory amount, or pass --allow_empty_splits true."
         )
         print(msg)
         raise SystemExit(1)

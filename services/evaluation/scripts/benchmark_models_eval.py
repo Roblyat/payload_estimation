@@ -97,13 +97,13 @@ def per_joint_rmse(y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
 
 def per_joint_rmse_pct(y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
     """
-    Per-joint RMSE expressed as a percentage of the joint RMS magnitude of the
-    ground-truth signal. Adds tiny epsilon to avoid divide-by-zero.
+    Per-joint RMSE expressed as a fraction of the joint RMS magnitude of the
+    ground-truth signal (0.01 = 1%). Adds tiny epsilon to avoid divide-by-zero.
     """
     rmse_abs = per_joint_rmse(y_true, y_pred)
     denom = np.sqrt(np.mean(y_true ** 2, axis=0))
     denom = np.maximum(denom, 1e-8)
-    return (rmse_abs / denom) * 100.0
+    return rmse_abs / denom
 
 
 def rmse_over_time(y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
@@ -208,6 +208,20 @@ def resolve_local_path(p: str, project_root: Optional[Path]) -> Path:
 
     # Fallback: return the original (will raise later if missing)
     return p_expanded
+
+
+def maybe_swap_to_unseen(residual_npz: Path, unseen_tag: str) -> Path:
+    """
+    If an unseen residual NPZ exists for a 5x10^4 path, prefer it.
+    This avoids evaluating on the 50k training set when a 5k unseen test set
+    is available.
+    """
+    path_str = str(residual_npz)
+    if "5x10^4_under" in path_str and unseen_tag:
+        candidate = Path(path_str.replace("5x10^4_under", unseen_tag))
+        if candidate.exists():
+            return candidate
+    return residual_npz
 
 
 def find_metrics_json(model_dir: Path, split: str) -> Optional[Path]:
@@ -531,6 +545,7 @@ def evaluate_benchmark_model(
         "metrics": metrics,
         "per_joint_rmse": per_joint_metrics,
         "per_joint_rmse_pct": per_joint_pct_metrics,
+        "pct_scale": "fraction",  # 0.01 = 1%
         "rmse_time_lengths": {k: int(v.shape[0]) for k, v in rmse_time_metrics.items()},
     }
 
@@ -574,11 +589,19 @@ def evaluate_benchmark_model(
 # ---------------------------------------------------------------------------
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--bench-root", type=str, default=None, help="Root folder containing benchmark model bundles.")
+    ap.add_argument("--bench-root", type=str, default=None, help="Root folder containing evaluation bundles.")
+    ap.add_argument("--use-eval-root", action=argparse.BooleanOptionalAction, default=True,
+                    help="Default to /shared/evaluation instead of /shared/evaluation/benchmark_models.")
     ap.add_argument("--raw-root", type=str, default=None, help="Optional raw CSV root (unused but logged).")
     ap.add_argument("--split", type=str, default="test", choices=["test", "train"], help="Split to evaluate.")
     ap.add_argument("--batch", type=int, default=256, help="Batch size for LSTM inference.")
     ap.add_argument("--max-plot-samples", type=int, default=800, help="Max samples to show in overlay plots.")
+    ap.add_argument("--unseen-tag", type=str, default="5x10^3_under",
+                    help="Dataset tag used for unseen residuals (e.g., 5x10^3_under).")
+    ap.add_argument("--force-unseen", action="store_true",
+                    help="Fail if unseen residuals are not found for a 5x10^4 path.")
+    ap.add_argument("--include", action="append", default=[],
+                    help="Only process model dirs whose name contains this substring (repeatable).")
     args = ap.parse_args()
 
     def first_existing(paths):
@@ -591,13 +614,10 @@ def main() -> None:
     if args.bench_root:
         bench_root = Path(args.bench_root)
     else:
-        bench_root = first_existing(
-            [
-                _SCRIPT_DIR.parents[i] / "shared" / "evaluation" / "benchmark_models"
-                for i in range(len(_SCRIPT_DIR.parents))
-            ]
-            + ["/workspace/shared/evaluation/benchmark_models"]
-        )
+        default_eval = [ _SCRIPT_DIR.parents[i] / "shared" / "evaluation" for i in range(len(_SCRIPT_DIR.parents)) ]
+        default_bench = [ _SCRIPT_DIR.parents[i] / "shared" / "evaluation" / "benchmark_models" for i in range(len(_SCRIPT_DIR.parents)) ]
+        candidates = (default_eval + ["/workspace/shared/evaluation"]) if args.use_eval_root else (default_bench + ["/workspace/shared/evaluation/benchmark_models"])
+        bench_root = first_existing(candidates)
     if bench_root is None:
         raise FileNotFoundError("Could not locate benchmark_models directory; pass --bench-root explicitly.")
 
@@ -627,6 +647,8 @@ def main() -> None:
     results: Dict[str, BenchmarkResult] = {}
 
     for model_dir in model_dirs:
+        if args.include and not any(tok in model_dir.name for tok in args.include):
+            continue
         dataset_name = model_dir.name.split("__", 1)[0]
         metrics_json = find_metrics_json(model_dir, args.split)
         if not metrics_json:
@@ -644,16 +666,35 @@ def main() -> None:
             lstm_scalers=resolve_local_path(paths_cfg["lstm_scalers"], parent_root),
         )
 
-        # Sanity check that referenced files exist
-        for label, p in [("residual", bp.residual_npz), ("lstm_model", bp.lstm_model), ("lstm_scalers", bp.lstm_scalers)]:
+        # Sanity check that referenced files exist (LSTM artifacts)
+        for label, p in [("lstm_model", bp.lstm_model), ("lstm_scalers", bp.lstm_scalers)]:
             if not p.exists():
                 raise FileNotFoundError(f"{label} path missing for {dataset_name}: {p}")
+
+        # Prefer unseen residuals if available (and allow missing 5x10^4 when unseen exists)
+        residual_npz = maybe_swap_to_unseen(bp.residual_npz, args.unseen_tag)
+        if args.force_unseen and ("5x10^4_under" in str(bp.residual_npz)) and (residual_npz == bp.residual_npz):
+            raise FileNotFoundError(
+                f"Unseen residual NPZ not found for {bp.residual_npz}. "
+                f"Expected tag '{args.unseen_tag}'."
+            )
+        if not residual_npz.exists():
+            raise FileNotFoundError(f"residual path missing for {dataset_name}: {residual_npz}")
+        eval_dataset_name = dataset_name
+        if residual_npz != bp.residual_npz:
+            if "5x10^4_under" in dataset_name and args.unseen_tag:
+                eval_dataset_name = dataset_name.replace("5x10^4_under", args.unseen_tag)
+            bp = BenchmarkPaths(
+                residual_npz=residual_npz,
+                lstm_model=bp.lstm_model,
+                lstm_scalers=bp.lstm_scalers,
+            )
 
         result = evaluate_benchmark_model(
             model_dir,
             metrics_json,
             bp,
-            dataset_name=dataset_name,
+            dataset_name=eval_dataset_name,
             split=args.split,
             batch=args.batch,
             max_plot_samples=args.max_plot_samples,

@@ -26,8 +26,12 @@ class DelanPreprocessPipeline:
             
         self.pivot = WidePivotBuilder(cfg)
         self.builder = TrajectoryDatasetBuilder(cfg, self.pivot)
-        self.splitter = TrajectorySplitter(cfg.test_fraction, cfg.val_fraction, cfg.random_seed,
+        self.splitter = TrajectorySplitter(
+            cfg.test_fraction,
+            cfg.val_fraction,
+            cfg.random_seed,
             trajectory_amount=getattr(cfg, "trajectory_amount", None),
+            allow_empty_splits=getattr(cfg, "allow_empty_splits", False),
         )
         self.writer = NPZDatasetWriter()
 

@@ -45,6 +45,7 @@ class DelanPreprocessConfig:
     test_fraction: float = 0.2
     val_fraction: float = 0.1
     random_seed: int = 0
+    allow_empty_splits: bool = False
 
     # Filtering
     filter_accel: bool = False

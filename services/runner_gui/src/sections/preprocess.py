@@ -30,8 +30,8 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
         )
         test_fraction = st.number_input(
             "Test fraction",
-            min_value=0.05,
-            max_value=0.9,
+            min_value=0.0,
+            max_value=1.0,
             value=0.2,
             step=0.05,
             format="%.2f",
@@ -40,11 +40,16 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
         val_fraction = st.number_input(
             "Val fraction",
             min_value=0.0,
-            max_value=0.9,
+            max_value=1.0,
             value=0.1,
             step=0.05,
             format="%.2f",
             help="Fraction of trajectories used for validation split.",
+        )
+        allow_empty_splits = st.checkbox(
+            "Allow empty splits",
+            value=False,
+            help="Allow train/val/test to be empty (e.g. test_fraction=1, val_fraction=0).",
         )
 
 
@@ -124,6 +129,7 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
                 f"--col_format {col_format} "
                 f"--test_fraction {test_fraction} "
                 f"--val_fraction {val_fraction} "
+                f"--allow_empty_splits {allow_empty_splits} "
                 f"--lowpass_signals {lowpass_signals} "
                 f"--lowpass_cutoff_hz {lowpass_cutoff_hz} "
                 f"--lowpass_order {lowpass_order} "
@@ -162,6 +168,7 @@ def render_preprocess(st, cfg, paths, run, pad_button, log_view):
     st.session_state["feature_mode"] = feature_mode
     st.session_state["test_fraction"] = float(test_fraction)
     st.session_state["val_fraction"] = float(val_fraction)
+    st.session_state["allow_empty_splits"] = bool(allow_empty_splits)
     st.session_state["lowpass_signals"] = bool(lowpass_signals)
     st.session_state["lowpass_cutoff_hz"] = float(lowpass_cutoff_hz)
     st.session_state["lowpass_order"] = int(lowpass_order)

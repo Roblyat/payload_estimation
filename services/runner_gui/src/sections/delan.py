@@ -356,6 +356,12 @@ def render_delan(st, cfg, paths, run, pad_button, log_view):
     res_out = f"{paths.processed}/{residual_name}"
 
     st.session_state["residual_npz"] = res_out
+    force_5x10_4_export = st.checkbox(
+        "Export residuals: force 5x10^4 dataset name",
+        value=False,
+        help="Temporary hack: replace 5x10^3 with 5x10^4 in the dataset path for residual export.",
+    )
+    st.session_state["force_5x10_4_export"] = bool(force_5x10_4_export)
 
     # Buttons on same row
     d_btn1, d_btn2, _spacer = st.columns([1.0, 1.0, 6.0])
@@ -402,11 +408,17 @@ def render_delan(st, cfg, paths, run, pad_button, log_view):
 
     with d_btn2:
         if st.button("Export residuals", use_container_width=True):
+            export_npz_in = npz_in
+            export_ckpt = ckpt
+            if force_5x10_4_export and ("5x10^3" in export_npz_in):
+                export_npz_in = export_npz_in.replace("5x10^3", "5x10^4")
+            if force_5x10_4_export and ("5x10^3" in export_ckpt):
+                export_ckpt = export_ckpt.replace("5x10^3", "5x10^4")
             run(
                 f"{cfg.COMPOSE} exec -T {delan_service} bash -lc "
                 f"\"python3 {export_script} "
-                f"--npz_in {npz_in} "
-                f"--ckpt {ckpt} "
+                f"--npz_in {export_npz_in} "
+                f"--ckpt {export_ckpt} "
                 f"--out {res_out}"
                 f"\""
             )

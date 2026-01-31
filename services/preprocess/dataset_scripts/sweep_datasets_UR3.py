@@ -472,14 +472,14 @@ def main() -> None:
         )
 
         base_tag = "5x10^4" if target == 50_000 else "5x10^3"
-        under_path = raw_dir / f"{args.basename}_{base_tag}_under.csv"
-        over_path = raw_dir / f"{args.basename}_{base_tag}_over.csv"
+        under_path = out_dir / f"{args.basename}_{base_tag}_under.csv"
+        over_path = out_dir / f"{args.basename}_{base_tag}_over.csv"
 
         under_ids = sorted(under_ids, key=lambda tid: order_by_id[tid])
         over_ids = sorted(over_ids, key=lambda tid: order_by_id[tid])
 
         under_info = save_dataset(
-            df, id_col=args.id_col, selected_ids=under_ids, out_path=out_path
+            df, id_col=args.id_col, selected_ids=under_ids, out_path=under_path
         )
         over_info = save_dataset(
             df, id_col=args.id_col, selected_ids=over_ids, out_path=over_path
